@@ -17,7 +17,7 @@ double integr(int np, double *w, double *p);
 main()
 {
 
-  int np[2] = {2, 2};
+  int np[2] = {12, 12};
 
   double *z1,*w1,*p1;
   double *z2,*w2,*p2;
@@ -33,8 +33,8 @@ main()
   double sum = 0.0;
   
       // get zeros and weights
-  zwgl(z1,w1, np[0]);
-  zwgl(z2,w2, np[1]);
+  zwgll(z1,w1, np[0]);
+  zwgll(z2,w2, np[1]);
 
   cout<<"Gauss Weights and zeros in zeta 1 direction are:"<<endl;
   for(int i=0; i<np[0]; i++)
@@ -92,13 +92,13 @@ void *func(int np, double *z2, double *p, double zeta1, int r, int c)
 {  
   double x1 = 0.0;
   double x2 = 1.0;
-  double x3 = 0.0;
-  double x4 = 1.0;
+  double x3 = 1.0;
+  double x4 = 0.0;
 
   double y1 = 0.0;
   double y2 = 0.0;
-  double y3 = 2.0;
-  double y4 = 2.0;
+  double y3 = 1.0;
+  double y4 = 1.0;
 
   
   
@@ -107,7 +107,7 @@ void *func(int np, double *z2, double *p, double zeta1, int r, int c)
      {
        double zeta2 = z2[i];
 
-       double detJ = x1*y2*(1.0/8.0)-x2*y1*(1.0/8.0)-x1*y3*(1.0/8.0)+x3*y1*(1.0/8.0)+x2*y4*(1.0/8.0)-x4*y2*(1.0/8.0)-x3*y4*(1.0/8.0)+x4*y3*(1.0/8.0)-x1*y2*zeta2*(1.0/8.0)+x1*y3*zeta1*(1.0/8.0)+x2*y1*zeta2*(1.0/8.0)-x3*y1*zeta1*(1.0/8.0)-x1*y4*zeta1*(1.0/8.0)-x2*y3*zeta1*(1.0/8.0)+x3*y2*zeta1*(1.0/8.0)+x4*y1*zeta1*(1.0/8.0)+x1*y4*zeta2*(1.0/8.0)-x2*y3*zeta2*(1.0/8.0)+x2*y4*zeta1*(1.0/8.0)+x3*y2*zeta2*(1.0/8.0)-x4*y1*zeta2*(1.0/8.0)-x4*y2*zeta1*(1.0/8.0)-x3*y4*zeta2*(1.0/8.0)+x4*y3*zeta2*(1.0/8.0);
+       double detJ = x1*y2*(1.0/8.0)-x2*y1*(1.0/8.0)-x1*y4*(1.0/8.0)+x2*y3*(1.0/8.0)-x3*y2*(1.0/8.0)+x4*y1*(1.0/8.0)+x3*y4*(1.0/8.0)-x4*y3*(1.0/8.0)-x1*y2*zeta2*(1.0/8.0)-x1*y3*zeta1*(1.0/8.0)+x2*y1*zeta2*(1.0/8.0)+x3*y1*zeta1*(1.0/8.0)+x1*y3*zeta2*(1.0/8.0)+x1*y4*zeta1*(1.0/8.0)+x2*y3*zeta1*(1.0/8.0)-x3*y1*zeta2*(1.0/8.0)-x3*y2*zeta1*(1.0/8.0)-x4*y1*zeta1*(1.0/8.0)-x2*y4*zeta1*(1.0/8.0)+x4*y2*zeta1*(1.0/8.0)-x2*y4*zeta2*(1.0/8.0)+x4*y2*zeta2*(1.0/8.0)+x3*y4*zeta2*(1.0/8.0)-x4*y3*zeta2*(1.0/8.0);
        
        if(r==1 && c==1)
 	 {

@@ -1,5 +1,5 @@
 #Compiler and Linker
-CC          := g++
+CC          := mpicc
 
 #The Target Binary Program
 TARGET      := DGPLS
@@ -15,7 +15,7 @@ DEPEXT      := d
 OBJEXT      := o
 
 #Flags, Libraries and Includes
-CFLAGS      := -fopenmp -Wall -O3 -g
+CFLAGS      := -fopenmp -Wall -O3
 LIB         := -fopenmp -lm
 INC         := -I$(INCDIR) -I/usr/local/include
 INCDEP      := -I$(INCDIR)
@@ -51,7 +51,7 @@ cleaner: clean
 #Link
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(TARGETDIR)
-	$(CC) $^ -o $(TARGETDIR)/$(TARGET) 
+	$(CC) $^ -o $(TARGETDIR)/$(TARGET) $(LIB)
 
 #Compile
 $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)

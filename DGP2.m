@@ -22,16 +22,33 @@ J = [dxdz1, dxdz2; dydz1, dydz2];
 detJ = det(J);
 
 %%%%Test functions for P1 Legendre Polynomials%%%
-B = [1, zeta1, zeta2, zeta1*zeta2];
+B = [1, zeta1, zeta2, zeta1*zeta2, (3*zeta1^2-1)/2,(3*zeta2^2-1)/2, (3*zeta1^2-1)*zeta2/2, (3*zeta2^2-1)*zeta1/2 ((3*zeta1^2-1)/2)*(3*zeta2^2-1)/2];
 
 %%%Mass Matrix%%%
-M = sym('M%d%d', [4 4]);
-for i=1:4
-   for j=1:4
+M = sym('M%d%d', [9 9]);
+for i=1:9
+   for j=1:9
        M(i,j) = B(i)*B(j);
    end
 end
 
-M
-ccode(detJ)
 
+ccode(M)
+
+subsM = zeros(9);
+z1 = -1;
+z2 = -1;
+for i=1:9
+   for j=1:9
+       subsM(i,j) = subs(M(i,j),[zeta1,zeta2],[z1,z2]);
+   end
+end
+
+subsM
+
+subsB = zeros(1,9);
+for i=1:9
+    subsB(1,i)=subs(B(i),[zeta1,zeta2],[z1,z2]);
+end
+
+subsB
