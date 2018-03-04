@@ -4,8 +4,8 @@
 
 void basis1D(double z, double *basis)
 {
-    // Upto P = 2 at the moment
-    double barray[3] = {1, z, 0.5*(3.0*z*z - 1.0)};
+    // Upto P = 3 at the moment
+    double barray[4] = {1, z, 0.5*(3.0*z*z - 1.0), 0.5*(5*pow(z,3.0)-3.0*z)};
     
     int i;
 

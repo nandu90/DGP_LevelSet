@@ -40,8 +40,8 @@ void massmatrix()
     
     int Bi, Bj;
     
-    int npz1 = polyorder + 12;
-    int npz2 = polyorder + 12;
+    int npz1 = polyorder + 2;
+    int npz2 = polyorder + 2;
     
     // Get the Gauss Quadrature zeros and weights
     
@@ -60,10 +60,7 @@ void massmatrix()
 
     double *basis;
     allocator1(&basis, (int)pow(polyorder+1,2.0));
-    
-    
-
-   
+      
     
     for(i=0; i<xelem; i++)
     {
@@ -93,11 +90,13 @@ void massmatrix()
 	}
     }
 
+    //Check
     for(Bi=0; Bi<(int)pow(polyorder+1,2.0); Bi++)
     {
 	for(Bj=0; Bj<(int)pow(polyorder+1,2.0); Bj++)
 	{
-	    if(Bi == Bj)printf("%.6f       ",mass[2][2][Bi][Bj]);
+	    //if(mass[2][2][Bi][Bj] < 1e-8) mass[2][2][Bi][Bj]=0.0;
+	    if(Bi == Bj)printf("%.6f ",mass[2][2][Bi][Bj]);
 	}
 	printf("\n");
     }

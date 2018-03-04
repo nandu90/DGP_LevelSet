@@ -20,9 +20,7 @@ void partition()
 	}
     }
 
-  int eperproc;
   int m,n;
-  int totale = gxelem*gyelem;
   if(nprocs > 1)
     {
        //////////Processor division
@@ -84,7 +82,7 @@ void partition()
 
 
       /////Element division
-      eperproc = (int)floor((totale)/nprocs);
+      
       n = (int)floor(gyelem/np);
       m = (int)floor(gxelem/mp);
     

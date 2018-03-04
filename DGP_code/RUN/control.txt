@@ -1,6 +1,6 @@
 /******************Input Section*******************//
 Max_Iterations 20000 //5141 2808
-Basis_Order 2
+Basis_Order 3
 Start_step 0
 xlen 1
 ylen 1
