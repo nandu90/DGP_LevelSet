@@ -195,6 +195,14 @@ void partition()
 	}
 	}*/
 
+  //------------------------------------------------------------------------//
+  //Add halo cells around each partition
+  xelem=xelem+4; //Include 2 ghost cells on each side
+  yelem=yelem+4; //Include 2 ghost cells on each side
+  xnode=xelem+1; //
+  ynode=yelem+1; //
+  //------------------------------------------------------------------------//
+
   if(myrank == master)
     {
       printf("Processor matrix generated = %d X %d\n", procm, procn);

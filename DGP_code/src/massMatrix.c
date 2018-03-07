@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "DGPFunc.h"
 
-double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2)
+double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, double **x, double **y)
 {
     double x1, x2, x3, x4;
     double y1, y2, y3, y4;
@@ -33,7 +33,7 @@ double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2)
 }
 
 
-void massmatrix()
+void massmatrix(double **x, double **y, double ****mass)
 {
     int i,j,k,l;
     double detJ;
@@ -74,7 +74,7 @@ void massmatrix()
 		    // Get the 2D Basis vector
 		    basis2D(z1g[k], z2g[l], basis);
 		    // Get the value of determinant
-		    detJ = mappingJacobianDeterminant(i,j, z1g[k], z2g[l]);
+		    detJ = mappingJacobianDeterminant(i,j, z1g[k], z2g[l], x, y);
 		    
 		    //Loop over the Basis matrix
 		    for(Bi=0; Bi<(int)pow(polyorder+1,2.0); Bi++)
@@ -91,12 +91,13 @@ void massmatrix()
     }
 
     //Check
+    printf("The mass matrix is\n");
     for(Bi=0; Bi<(int)pow(polyorder+1,2.0); Bi++)
     {
 	for(Bj=0; Bj<(int)pow(polyorder+1,2.0); Bj++)
 	{
 	    //if(mass[2][2][Bi][Bj] < 1e-8) mass[2][2][Bi][Bj]=0.0;
-	    if(Bi == Bj)printf("%.6f ",mass[2][2][Bi][Bj]);
+	    printf("%.6f ",mass[2][2][Bi][Bj]);
 	}
 	printf("\n");
     }

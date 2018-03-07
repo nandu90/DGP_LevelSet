@@ -1,13 +1,19 @@
-/******************Input Section*******************//
-Max_Iterations 20000 //5141 2808
-Basis_Order 3
-Start_step 0
+/******************Basis Functions*****************/
+Basis_Order 1
+
+/******************Grid related Inputs*******************//
+
 xlen 1
 ylen 1
-zlen 0                     // Set = 0 for 2-D
 xelem 1
 yelem 1
-zelem 1                    // Set = 1 for 2-D
+
+/***************Gauss Quadrature********************/
+Gauss_Quadrature_Type Gauss-Lobatto-Legendre
+//Gauss_Quadrature_Type Gauss-Legendre
+
+/*****************Old Inputs*********************/
+Start_step 0
 Kinematic_viscosity 10e-5
 Tolerance_x 1e-2
 Tolerance_p 1e-2

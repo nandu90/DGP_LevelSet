@@ -24,5 +24,9 @@ void deallocator4(double *****, int, int, int, int);
 //2d arrays
 void iallocator2(int ***, int, int);
 void ideallocator2(int ***, int, int);
+
+//3d arrays
+void iallocator3(int ****, int, int, int);
+void ideallocator3(int ****, int, int, int);
 /**********************************/
 #endif

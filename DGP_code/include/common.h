@@ -34,36 +34,93 @@
 #include <stdbool.h>
 #include <dirent.h>
 
-//MPI relevant variables
-//MPI_STATUS status;
+//------------------------------------------------------------------------//
 
-int debug;
-int myrank;
+//All input variables to be read are collected in a separate file
+//The input file is included in common.h so that you don't have to call both files - just common.h"
+#include "input.h"
+//------------------------------------------------------------------------//
+
+//------------------------------------------------------------------------//
+//MPI Relevant variables
 int master;
 int nprocs;
+int myrank;
+
+//------------------------------------------------------------------------//
+
+//------------------------------------------------------------------------//
+//Mesh related variables
+int xelem; //Total elem in x
+int yelem; //Total elem in y
+int xnode; //Total nodes in x
+int ynode; //Total nodes in y
+
 int procm, procn; //Processor matrix m X n
 int elemm, elemn; //Mode of number of elements on each processor
-int **iBC;        //Determines if a particular cell is a boundary or interior cell
+
+int gxnode;
+int gynode;
+
+//------------------------------------------------------------------------//
+
+
+//------------------------------------------------------------------------//
+//MPI communication related variables
 int bhailog[4];
 double **sendptr;
 double **recvptr;
 int **io_info;
-int polyorder;    //Order of the basis functions
 
 struct bhaiarray
 {
-  double *sendrbuf;
-  double *recvrbuf;
-  
-  double *sendlbuf;
-  double *recvlbuf;
-
-  double *sendubuf;
-  double *recvubuf;
-  
-  double *senddbuf;
-  double *recvdbuf;
+    double *sendrbuf;
+    double *recvrbuf;
+    
+    double *sendlbuf;
+    double *recvlbuf;
+    
+    double *sendubuf;
+    double *recvubuf;
+    
+    double *senddbuf;
+    double *recvdbuf;
 }bhai;
+
+
+//------------------------------------------------------------------------//
+
+//------------------------------------------------------------------------//
+//Element struct. Only the struct is defined here. Everything is allocated inside
+//the main program so as to avoid allocating large arrays in common block
+struct elemsclr
+{
+    double ***xgauss;
+    double ***ygauss;
+    double ***u;
+    double ***v;
+    double ***phi;
+    double ****mass;
+    int **iBC;
+    /*double ***p;
+    double ***rho;
+    double ***mu;*/
+};
+
+
+//------------------------------------------------------------------------//
+
+//------------------------------------------------------------------------//
+//DGP related Variables
+double **zeta;
+double **weights;
+int tgauss;       //Total Gauss Quadrature points in the element
+
+//------------------------------------------------------------------------//
+
+
+
+/*int debug;
 
 ///Global Variable declaration (so that we do not have to pass around information between functions)
 double nu;
@@ -71,40 +128,8 @@ double cfl;
 double tol;
 int itermax;
 
-//Local nodes and elements//
-int xelem; //Total elem in x
-int yelem; //Total elem in y
-int zelem; //Total elem in z
-int xnode; //Total nodes in x
-int ynode; //Total nodes in y
-int znode; //Total nodes in z
-/////////////////////////////
-//Global nodes and elements//
-int gxelem; //Total elem in x
-int gyelem; //Total elem in y
-int gzelem; //Total elem in z
-int gxnode;
-int gynode;
-int gznode;
-/////////////////////////////
-
-double xlen;
-double ylen;
-double zlen;
-
-double **x;
-double **y;
-double **xc;
-double **yc;
-double **vol;
-double ****area;
-double ****mass;
 
     
-///Variables for bubble
-double rb_in;
-double xb_in;
-double yb_in;
 int advect_steps;
 double advect_deltat;
 int solnread;
@@ -137,22 +162,14 @@ int vf_control;
 int time_control;
 double max_cfl;
 int redist_method;
-int case_tog;
+int case_tog;*/
 
 
 
 
 
 
-struct elemsclr
-{
-  double ***p;
-  double ***u;
-  double ***v;
-  double ***phi;
-  double ***rho;
-  double ***mu;
-};
+
 
 
 
