@@ -88,6 +88,18 @@ void allocator4(double *****p, int x, int y, int z, int w)
 
 }
 
+
+void iallocator1(int **p, int x)
+{
+  *p = (int *)malloc(x * sizeof(int));
+}
+
+void ideallocator1(int **p, int x)
+{
+  free(*p);
+}
+
+
 void iallocator2(int ***p, int x, int y)
 {
   int i,j;

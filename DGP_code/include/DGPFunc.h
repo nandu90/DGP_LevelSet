@@ -9,5 +9,5 @@ void basis2D(double, double, double *);
 
 void massmatrix(double **, double **, double ****);
 
-void mappingFunc(double **, double **, double ***, double ***);
+void mappingFunc(double *, double []);
 #endif

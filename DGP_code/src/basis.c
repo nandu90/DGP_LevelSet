@@ -41,41 +41,22 @@ void basis2D(double z1, double z2, double *basis)
 }
 
 
-void mappingFunc(double **x, double **y, double ***xgauss, double ***ygauss)
+void mappingFunc(double *scalar, double sc_vertex[])
 {
-    int i,j,k;
+    int i;
 
     double N1, N2, N3, N4;
-    double x1, x2, x3, x4;
-    double y1, y2, y3, y4;
     //------------------------------------------------------------------------//
     //Loop over quadrature points
     for(i=0; i<tgauss; i++)
     {
 	N1 = (1.0-zeta[i][0])*(1.0-zeta[i][1])/4.0;
 	N2 = (1.0+zeta[i][0])*(1.0-zeta[i][1])/4.0;
-	N3 = (1.0+zeta[i][0])*(1.0+zeta[i][1])/4.0;
-	N4 = (1.0-zeta[i][0])*(1.0+zeta[i][1])/4.0;
+	N3 = (1.0-zeta[i][0])*(1.0+zeta[i][1])/4.0;
+	N4 = (1.0+zeta[i][0])*(1.0+zeta[i][1])/4.0;
+	
 
-	//Loop over the elements
-	for(j=0; j<xelem; j++)
-	{
-	    for(k=0; k<yelem; k++)
-	    {
-		x1 = x[j][k];
-		x2 = x[j+1][k];
-		x3 = x[j+1][k+1];
-		x4 = x[j][k+1];
-
-		y1 = y[j][k];
-		y2 = y[j+1][k];
-		y3 = y[j+1][k+1];
-		y4 = y[j][k+1];
-		       
-		xgauss[j][k][i] = x1*N1+x2*N2+x3*N3+x4*N4;
-		ygauss[j][k][i] = y1*N1+y2*N2+y3*N3+y4*N4;
-	    }
-	}
+	scalar[i] = N1*sc_vertex[0] + N2*sc_vertex[1] + N3*sc_vertex[2] + N4*sc_vertex[3];
     }
 	    
 }

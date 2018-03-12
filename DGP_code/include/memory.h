@@ -21,6 +21,10 @@ void deallocator4(double *****, int, int, int, int);
 /*************************************/
 
 /*********Integer arrays***********/
+//1d arrays
+void iallocator1(int **, int);
+void ideallocator1(int **, int);
+
 //2d arrays
 void iallocator2(int ***, int, int);
 void ideallocator2(int ***, int, int);

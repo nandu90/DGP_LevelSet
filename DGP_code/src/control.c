@@ -234,7 +234,7 @@ void control()
 		    {
 			bub_conv_scheme=2;
 		    }
-		}
+		    }*/
 		
 		if(strcmp(word,"x-boundary") == 0)
 		{
@@ -269,7 +269,7 @@ void control()
 			y_bound=3;
 		    }
 		}
-		if(strcmp(word,"Solver_type") == 0)
+		/*if(strcmp(word,"Solver_type") == 0)
 		{
 		    word = strtok(NULL, delim);
 		    if(strcmp(word,"steady-state\n") == 0)

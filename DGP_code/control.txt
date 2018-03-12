@@ -1,25 +1,40 @@
 /******************Basis Functions*****************/
-Basis_Order 1
+Basis_Order 2
 
 /******************Grid related Inputs*******************//
 
 xlen 1
 ylen 1
-xelem 1
-yelem 1
+xelem 10
+yelem 10
 
 /***************Gauss Quadrature********************/
-Gauss_Quadrature_Type Gauss-Lobatto-Legendre
-//Gauss_Quadrature_Type Gauss-Legendre
+//Gauss_Quadrature_Type Gauss-Lobatto-Legendre
+Gauss_Quadrature_Type Gauss-Legendre
+
+/***************Initial Conditions******************/
+Bubble_radius 0.2
+x_pos_of_bubble 0.5
+y_pos_of_bubble 0.5
+
+
+/****************Boundary Conditions**************/
+//x-boundary no-slip
+//x-boundary slip
+x-boundary periodic
+
+//y-boundary no-slip
+y-boundary slip
+//y-boundary periodic
+
+
 
 /*****************Old Inputs*********************/
 Start_step 0
 Kinematic_viscosity 10e-5
 Tolerance_x 1e-2
 Tolerance_p 1e-2
-Bubble_radius 0.5
-x_pos_of_bubble 1.5
-y_pos_of_bubble 1.5
+
 advect_steps 100
 bub_advect_scheme book
 //bub_advect_scheme HJ-WENO !Do not use this for now. BC are not adapted to this scheme
@@ -55,13 +70,7 @@ Re-distance_method 1               #0 - off; 1 - hyperbolic; 2 - fastmarch; 3 - 
 
 
 /*************Boundary Conditions*****************/
-//x-boundary no-slip
-x-boundary slip
-//x-boundary periodic
 
-y-boundary no-slip
-//y-boundary slip
-//y-boundary periodic
 
 /*********Time Control*********/
 //Time_control CFL-based

@@ -16,7 +16,7 @@ OBJEXT      := o
 
 #Flags, Libraries and Includes
 CFLAGS      := -fopenmp -Wall -O3
-LIB         := -fopenmp -lm
+LIB         := -fopenmp -lm -llapack
 INC         := -I$(INCDIR) -I/usr/local/include
 INCDEP      := -I$(INCDIR)
 

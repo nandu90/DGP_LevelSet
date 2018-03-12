@@ -10,7 +10,7 @@ Created: 2018-03-04
 
 void gridread(double **x, double **y)
 {
-  int i,j;
+    int i,j;
     double deltax=xlen/(gxelem);
     double deltay=ylen/(gyelem);
     double firstx = (myrank%procm)*elemm*deltax;
@@ -22,19 +22,21 @@ void gridread(double **x, double **y)
         {
             x[i][j] = firstx + (i-2)*deltax;
             y[i][j] = firsty + (j-2)*deltay;
+	    //printf("%d %d %.2f %.2f\n",i,j,x[i][j],y[i][j]); 
         }
     }
-    
+
     //Generate ghost nodes
     //Add cells on both sides of x
     for(j=1; j < ynode-1; j++)
     {
 	for(i=1; i>=0;i--)
 	{
-	  x[i][j]=2*x[i+1][j]-x[i+2][j];
-	  y[i][j]=2*y[i+1][j]-y[i+2][j];
-	  x[xnode-1-i][j] = 2*x[xnode-2-i][j]-x[xnode-3-i][j];
-	  y[xnode-1-i][j] = 2*y[xnode-2-i][j]-y[xnode-3-i][j];
+	  x[i][j]=2.0*x[i+1][j]-x[i+2][j];
+	  y[i][j]=2.0*y[i+1][j]-y[i+2][j];
+	  x[xnode-1-i][j] = 2.0*x[xnode-2-i][j]-x[xnode-3-i][j];
+	  y[xnode-1-i][j] = 2.0*y[xnode-2-i][j]-y[xnode-3-i][j];
+	  //printf("%d %d %.2f %.2f\n",i,j,x[i][j],y[i][j]);
 	}
     }
     
@@ -42,30 +44,30 @@ void gridread(double **x, double **y)
     {
       for(j=1; j>=0; j--)
 	{
-	  x[i][j]=2*x[i][1+j]-x[i][2+j];
-	  y[i][j]=2*y[i][1+j]-y[i][2+j];
+	  x[i][j]=2.0*x[i][1+j]-x[i][2+j];
+	  y[i][j]=2.0*y[i][1+j]-y[i][2+j];
 	  x[i][ynode-1-j] = 2*x[i][ynode-2-j]-x[i][ynode-3-j];
 	  y[i][ynode-1-j] = 2*y[i][ynode-2-j]-y[i][ynode-3-j];
 	}
     }
     //Not required but assign proper coordinates to corner ghost nodes
-    x[0][0] = 2*x[0][1]-x[0][2];
-    y[0][0] = 2*y[0][1]-y[0][2];
-    x[0][ynode-1] = 2*x[0][ynode-2]-x[0][ynode-3];
-    y[0][ynode-1] = 2*y[0][ynode-2]-y[0][ynode-3];
-    x[xnode-1][0] = 2*x[xnode-2][0]-x[xnode-3][0];
-    y[xnode-1][0] = 2*y[xnode-2][0]-y[xnode-3][0];
-    x[xnode-1][ynode-1] =  2*x[xnode-2][ynode-1]-x[xnode-3][ynode-1];
-    y[xnode-1][ynode-1] =  2*y[xnode-2][ynode-1]-y[xnode-3][ynode-1];
+    x[0][0] = 2.0*x[0][1]-x[0][2];
+    y[0][0] = 2.0*y[0][1]-y[0][2];
+    x[0][ynode-1] = 2.0*x[0][ynode-2]-x[0][ynode-3];
+    y[0][ynode-1] = 2.0*y[0][ynode-2]-y[0][ynode-3];
+    x[xnode-1][0] = 2.0*x[xnode-2][0]-x[xnode-3][0];
+    y[xnode-1][0] = 2.0*y[xnode-2][0]-y[xnode-3][0];
+    x[xnode-1][ynode-1] =  2.0*x[xnode-2][ynode-1]-x[xnode-3][ynode-1];
+    y[xnode-1][ynode-1] =  2.0*y[xnode-2][ynode-1]-y[xnode-3][ynode-1];
+    
     /*for(i=0;i<xnode;i++)
     {
         for(j=0;j<ynode;j++)
         {
-            <<y[i][j]<<" ";
+            printf("%d %d %.2f %.2f\n",i,j,x[i][j],y[i][j]);
         }
-        <<endl;
-    }*/
-
+    }
+    exit(1);*/
 
     //------------------------------------------------------------------------//
     //I don't think i require the following anymore. If needed just uncomment

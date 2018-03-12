@@ -13,13 +13,13 @@ double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, doub
     
     x1 = x[i][j];
     x2 = x[i+1][j];
-    x3 = x[i+1][j+1];
-    x4 = x[i][j+1];
+    x3 = x[i][j+1];
+    x4 = x[i+1][j+1];
     
     y1 = y[i][j];
     y2 = y[i+1][j];
-    y3 = y[i+1][j+1];
-    y4 = y[i][j+1];
+    y3 = y[i][j+1];
+    y4 = y[i+1][j+1];
 
     dxdz1 = x1*(zeta2-1.0)*(1.0/4.0)-x2*(zeta2-1.0)*(1.0/4.0)+x3*(zeta2+1.0)*(1.0/4.0)-x4*(zeta2+1.0)*(1.0/4.0);
     dxdz2 = x1*(zeta1-1.0)*(1.0/4.0)-x2*(zeta1+1.0)*(1.0/4.0)+x3*(zeta1+1.0)*(1.0/4.0)-x4*(zeta1-1.0)*(1.0/4.0);
@@ -40,8 +40,8 @@ void massmatrix(double **x, double **y, double ****mass)
     
     int Bi, Bj;
     
-    int npz1 = polyorder + 2;
-    int npz2 = polyorder + 2;
+    int npz1 = xgpts;
+    int npz2 = ygpts;
     
     // Get the Gauss Quadrature zeros and weights
     
@@ -53,13 +53,21 @@ void massmatrix(double **x, double **y, double ****mass)
     allocator1(&w1g, npz1);
     allocator1(&w2g, npz2);
     
-    //Get the Gauss-Lobatto-Legendre Quadrature points(Two points at the end + polyorder)
-    zwgll(z1g,w1g,npz1);
-    zwgll(z2g,w2g,npz2);
+   
+    if(quadtype == 1) //Gauss-Legendre-Lobatto
+    {
+	zwgll(z1g,w1g,npz1);
+	zwgll(z2g,w2g,npz2);
+    }
+    else if(quadtype == 2) //Gauss-Legendre
+    {
+	zwgl(z1g,w1g,npz1);
+	zwgl(z2g,w2g,npz2);
+    }
     //
 
     double *basis;
-    allocator1(&basis, (int)pow(polyorder+1,2.0));
+    allocator1(&basis, tgauss);
       
     
     for(i=0; i<xelem; i++)
@@ -91,7 +99,7 @@ void massmatrix(double **x, double **y, double ****mass)
     }
 
     //Check
-    printf("The mass matrix is\n");
+    /*printf("The mass matrix is\n");
     for(Bi=0; Bi<(int)pow(polyorder+1,2.0); Bi++)
     {
 	for(Bj=0; Bj<(int)pow(polyorder+1,2.0); Bj++)
@@ -100,9 +108,9 @@ void massmatrix(double **x, double **y, double ****mass)
 	    printf("%.6f ",mass[2][2][Bi][Bj]);
 	}
 	printf("\n");
-    }
+	}*/
     
-    deallocator1(&basis, (int)pow(polyorder+1,2.0));
+    deallocator1(&basis, (int)pow(tgauss,2.0));
     deallocator1(&z1g, npz1);
     deallocator1(&z2g, npz2);
     deallocator1(&w1g, npz1);

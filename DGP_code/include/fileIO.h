@@ -5,5 +5,7 @@
 
 void control();
 
+void output_xml(struct elemsclr, int, double **, double **);
+
 #endif
 

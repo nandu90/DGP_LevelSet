@@ -95,8 +95,6 @@ struct bhaiarray
 //the main program so as to avoid allocating large arrays in common block
 struct elemsclr
 {
-    double ***xgauss;
-    double ***ygauss;
     double ***u;
     double ***v;
     double ***phi;
@@ -115,6 +113,8 @@ struct elemsclr
 double **zeta;
 double **weights;
 int tgauss;       //Total Gauss Quadrature points in the element
+int xgpts;        //Number of Gauss points in x
+int ygpts;        //Number of Gauss Points in y
 
 //------------------------------------------------------------------------//
 
@@ -154,8 +154,6 @@ double gy;
 int sf_toggle;
 int flow_solve;
 int p_solver;
-int x_bound;
-int y_bound;
 int advect_solve;
 int sol_type;
 int vf_control;

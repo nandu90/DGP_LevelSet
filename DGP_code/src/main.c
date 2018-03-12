@@ -22,6 +22,7 @@ Notes:
 #include "mesh.h"
 #include "DGPFunc.h"
 #include "icbc.h"
+#include "commu.h"
 /*#include "partition.h"
 #include "grid.h"
 #include "commu.h"
@@ -78,6 +79,9 @@ int main(int argc, char **argv)
     //Initialize mesh arrays. Done here now instead of common block
     double **x;
     double **y;
+    printf("The nodes are: %d %d\n",xnode,ynode);
+    printf("The elements are: %d %d\n",xelem,yelem);
+    
     allocator2(&x,xnode,ynode);
     allocator2(&y,xnode,ynode);
 
@@ -98,13 +102,22 @@ int main(int argc, char **argv)
     //Initialize element data
     struct elemsclr elem;
 
-    tgauss = (int)pow(polyorder+2,2.0);
+    if(quadtype == 1)
+    {
+	xgpts=polyorder+2;
+	ygpts=polyorder+2;
+    }
+    else if(quadtype == 2)
+    {
+	xgpts = polyorder+1;
+	ygpts = polyorder+1;
+    }
+    tgauss = xgpts*ygpts;
+    
     allocator3(&elem.u,xelem,yelem,tgauss);
     allocator3(&elem.v,xelem,yelem,tgauss);
     allocator3(&elem.phi,xelem,yelem,tgauss);
     allocator4(&elem.mass,xelem,yelem,tgauss,tgauss);
-    allocator3(&elem.xgauss,xelem,yelem,tgauss);
-    allocator3(&elem.ygauss,xelem,yelem,tgauss);
     iallocator2(&elem.iBC,xelem,yelem);
 
     //Uncomment when you need them
@@ -117,21 +130,28 @@ int main(int argc, char **argv)
     //For Gauss-Lobatto-Legendre Quadrature we need two points at the end + polyorder
     double *zeta1, *zeta2;
     double *weight1, *weight2;
-    allocator1(&zeta1, polyorder+2);
-    allocator1(&zeta2, polyorder+2);
-    allocator1(&weight1, polyorder+2);
-    allocator1(&weight2, polyorder+2);
-    //Get the Gauss quadrature points and weights
-    zwgll(zeta1,weight1,polyorder+2);
-    zwgll(zeta2,weight2,polyorder+2);
+    allocator1(&zeta1, xgpts);
+    allocator1(&zeta2, ygpts);
+    allocator1(&weight1, xgpts);
+    allocator1(&weight2, ygpts);
+    if(quadtype == 1) //Gauss-Legendre-Lobatto
+    {
+	zwgll(zeta1,weight1,xgpts);
+	zwgll(zeta2,weight2,ygpts);
+    }
+    else if(quadtype == 2) //Gauss-Legendre
+    {
+        zwgl(zeta1,weight1,xgpts);
+	zwgl(zeta2,weight2,ygpts);
+    }
 
     //Arrange quadrature points in a easy to access array
     allocator2(&zeta, tgauss,2);
     allocator2(&weights, tgauss,2);
     k=0;
-    for(j=0; j<polyorder+2; j++)
+    for(j=0; j<ygpts; j++)
     {
-	for(i=0; i<polyorder+2; i++)
+	for(i=0; i<xgpts; i++)
 	{
 	    zeta[k][0] = zeta1[i];
 	    zeta[k][1] = zeta2[j];
@@ -141,10 +161,13 @@ int main(int argc, char **argv)
 	}
     }
 
-    printf("The quadrature points and weights are:\n");
-    for(i=0; i<tgauss; i++)
+    if(myrank == master)
     {
-	printf("%d %.6f %.6f %.6f %.6f\n",i,zeta[i][0],zeta[i][1],weights[i][0],weights[i][1]);
+	printf("The quadrature points and weights are:\n");
+	for(i=0; i<tgauss; i++)
+	{
+	    printf("%d %.6f %.6f %.6f %.6f\n",i,zeta[i][0],zeta[i][1],weights[i][0],weights[i][1]);
+	}
     }
     
     //Get the mass matrix
@@ -152,26 +175,29 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
 
 
+
+    //------------------------------------------------------------------------//
+    //Set up Communicator arrays
+    genibc(elem.iBC);
+    sendptr = (double **) malloc(4 * sizeof(double *));
+    recvptr = (double **) malloc(4 * sizeof(double *));
+    setupcommu();
+    /*for(i=0; i<yelem; i++)
+    {
+      if(myrank == master)printf("%d %.4f\n",i,bhai.sendrbuf[i]);
+      }*/
+    //------------------------------------------------------------------------//
+
     
     //------------------------------------------------------------------------//
     //Initialize solution vectors
     //Arrange quadratures in an array for easy access
     
-    //Call the mapping function to populate the element gauss quadrature point.
-    // Why map this everytime. Store in memory to avoid function call overheads
-    mappingFunc(x,y,elem.xgauss,elem.ygauss);
-    initialize(elem); 
+    initialize(elem, x, y); 
     //------------------------------------------------------------------------//
 
     
-    /*genibc();
-    sendptr = (double **) malloc(4 * sizeof(double *));
-    recvptr = (double **) malloc(4 * sizeof(double *));
-    setupcommu();
-    for(i=0; i<yelem; i++)
-    {
-      if(myrank == master)printf("%d %.4f\n",i,bhai.sendrbuf[i]);
-      }*/
+    
     
     
     
@@ -184,18 +210,16 @@ int main(int argc, char **argv)
     //Gauss quadrature
     deallocator2(&zeta, tgauss,2);
     deallocator2(&weights, tgauss,2);
-    deallocator1(&zeta1, polyorder+2);
-    deallocator1(&zeta2, polyorder+2);
-    deallocator1(&weight1, polyorder+2);
-    deallocator1(&weight2, polyorder+2);
+    deallocator1(&zeta1, xgpts);
+    deallocator1(&zeta2, ygpts);
+    deallocator1(&weight1, xgpts);
+    deallocator1(&weight2, ygpts);
     //Element
     deallocator3(&elem.u,xelem,yelem,tgauss);
     deallocator3(&elem.v,xelem,yelem,tgauss);
     deallocator3(&elem.phi,xelem,yelem,tgauss);
     deallocator4(&elem.mass,xelem,yelem,tgauss,tgauss);
     ideallocator2(&elem.iBC,xelem,yelem);
-    deallocator3(&elem.xgauss,xelem,yelem,tgauss);
-    deallocator3(&elem.ygauss,xelem,yelem,tgauss);
 
     //Uncomment when you need them
     /*deallocator3(&elem.p,xelem,yelem,zelem);
@@ -214,13 +238,16 @@ int main(int argc, char **argv)
 
     //IO array
     ideallocator2(&io_info,nprocs,4);
+
+    //Communication Arrays
+    destroycommu();
+    free(sendptr);
+    free(recvptr);
     //------------------------------------------------------------------------//
 
     
-/*destroy commu();
-    free(sendptr);
-    free(recvptr);
-    */
+    
+    
     double time2 = MPI_Wtime();
     double secs = time2-time1;
     if(myrank == master)

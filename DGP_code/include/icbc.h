@@ -8,8 +8,14 @@ Created: 2018-03-04
 #ifndef ICBC_H
 #define ICBC_H
 
-void initializeLS(struct elemsclr);
+void initialize(struct elemsclr, double **, double **);
 
-void initialize(struct elemsclr);
+void initializevel(struct elemsclr, double **, double **);
 
+void initializeLS(struct elemsclr, double **, double **);
+
+
+//------------------------------------------------------------------------//
+//Boundary Conditions
+void level_setBC(double ***, int **);
 #endif
