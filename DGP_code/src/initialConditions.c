@@ -44,7 +44,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 
     //Allocate solution vector
     double *ls;
-    allocator1(&ls, pow(polyorder+1,2));
+    allocator1(&ls, tgauss);
     
 
     
@@ -54,19 +54,19 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     //Depending on the polyorder determine how many points you need to construct the soln
     //This will be same as the number of basis function(which is equal to number of coefficients)
     double **zs;
-    allocator2(&zs, pow(polyorder+1,2), 2);
+    allocator2(&zs, tgauss, 2);
     //Populate the coordinates
-    getSolnNaturalCoord(zs);
+    //getSolnNaturalCoord(zs);
 
     //Allocate the Vandermonde matrix
     double **vand;
-    allocator2(&vand, pow(polyorder+1,2), pow(polyorder+1,2));
+    allocator2(&vand, tgauss, pow(polyorder+1,2));
 
     //Loop over the solution (not quadrature) points
-    for(k=0; k<pow(polyorder+1,2); k++)
+    for(k=0; k<tgauss; k++)
     {
 	//Get the basis vector
-	basis2D(zs[k][0], zs[k][1], basis);
+	basis2D(zeta[k][0], zeta[k][1], basis);
 	//Fill up row of the Vandermonde matrix
 	for(l=0; l<pow(polyorder+1,2); l++)
 	{
@@ -76,7 +76,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 
     //Allocate coordinate matrix corresponding to zs - solution points
     double **xs;
-    allocator2(&xs, pow(polyorder+1,2), 2);
+    allocator2(&xs, tgauss, 2);
     
         
     for (i=2; i<xelem-2; i++)
@@ -84,34 +84,52 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
         for (j=2; j<yelem-2; j++)
         {
 	    //Assign coordinate value to solution points
-	    getvertices(xs,zs, x, y, i, j);
+	    getvertices(xs, x, y, i, j);
 	    //------------------------------------------------------------------------//
 	    //check
 	    printf("The coordinates are:\n");
-	    for(k=0; k<pow(polyorder+1,2); k++)
+	    for(k=0; k<tgauss; k++)
 	    {
-		printf("%.2f %.2f    ", xs[k][0], xs[k][1]);
-		printf("%.2f %.2f\n", zs[k][0], zs[k][1]);
+		printf("%.4f %.4f    ", xs[k][0], xs[k][1]);
+		printf("%.4f %.4f\n", zeta[k][0], zeta[k][1]);
 	    }
 	    printf("\n\n");
 	    //------------------------------------------------------------------------//
 
 		
 	    //Get the LS value at the solution points
-	    for(k=0; k<pow(polyorder+1,2); k++)
+	    for(k=0; k<tgauss; k++)
 	    {
 		ls[k] = sqrt(pow(xb_in - xs[k][0],2.0) + pow(yb_in - xs[k][1],2.0)) - rb_in;
 	    }
 	    //Solve the system to get the coefficients
-	    solveSystem(vand, ls);
+	    solveSystem(vand, ls, elem.phi[i][j]);
+
+	    //------------------------------------------------------------------------//
+	    //Reconstruct the solution - check
+	    printf("\nReconstructed soln at gauss pts is\n");
+	    for(k=0; k<tgauss; k++)
+	    {
+		ls[k] = 0.0;
+		basis2D(zeta[k][0], zeta[k][1], basis);
+		for(l=0; l<pow(polyorder+1,2); l++)
+		{
+		    ls[k] += basis[l]*elem.phi[i][j][l];
+		}
+
+		printf("%.4f\n",ls[k]);
+	    }
+	    exit(1);
+	    //------------------------------------------------------------------------//
+
 	}
     }
     
     deallocator1(&basis,pow(polyorder+1,2));
-    deallocator2(&zs,pow(polyorder+1,2),2);
-    deallocator2(&vand,pow(polyorder+1,2), pow(polyorder+1,2));
-    deallocator2(&xs,pow(polyorder+1,2),2);
-    deallocator1(&ls,pow(polyorder+1,2));
+    deallocator2(&zs,tgauss,2);
+    deallocator2(&vand,tgauss, pow(polyorder+1,2));
+    deallocator2(&xs,tgauss,2);
+    deallocator1(&ls,tgauss);
 }
 
 void initialize(struct elemsclr elem, double **x, double **y)

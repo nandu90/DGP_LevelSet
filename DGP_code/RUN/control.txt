@@ -9,8 +9,8 @@ xelem 10
 yelem 10
 
 /***************Gauss Quadrature********************/
-//Gauss_Quadrature_Type Gauss-Lobatto-Legendre
-Gauss_Quadrature_Type Gauss-Legendre
+Gauss_Quadrature_Type Gauss-Lobatto-Legendre
+//Gauss_Quadrature_Type Gauss-Legendre
 
 /***************Initial Conditions******************/
 Bubble_radius 0.2

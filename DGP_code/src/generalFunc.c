@@ -50,7 +50,7 @@ char* concat(char s1[], char s2[])
 }
 
 
-void getvertices(double **xs,double **zs, double **x, double **y, int i, int j)
+void getvertices(double **xs, double **x, double **y, int i, int j)
 {
     int k;
     double xvertex[4];
@@ -79,12 +79,12 @@ void getvertices(double **xs,double **zs, double **x, double **y, int i, int j)
     double N1, N2, N3, N4;
     
     //Populate the coordinate vector
-    for(k=0; k<pow(polyorder+1,2); k++)
+    for(k=0; k<tgauss; k++)
     {
-	N1 = (1.0-zs[k][0])*(1.0-zs[k][1])/4.0;
-	N2 = (1.0+zs[k][0])*(1.0-zs[k][1])/4.0;
-	N3 = (1.0-zs[k][0])*(1.0+zs[k][1])/4.0;
-	N4 = (1.0+zs[k][0])*(1.0+zs[k][1])/4.0;
+	N1 = (1.0-zeta[k][0])*(1.0-zeta[k][1])/4.0;
+	N2 = (1.0+zeta[k][0])*(1.0-zeta[k][1])/4.0;
+	N3 = (1.0-zeta[k][0])*(1.0+zeta[k][1])/4.0;
+	N4 = (1.0+zeta[k][0])*(1.0+zeta[k][1])/4.0;
 	
 	
 	xs[k][0] = N1*xvertex[0] + N2*xvertex[1] + N3*xvertex[2] + N4*xvertex[3];

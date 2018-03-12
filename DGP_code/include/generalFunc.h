@@ -10,7 +10,7 @@ double max(double, double);
 
 double min(double, double);
 
-void getvertices(double **, double **, double **, double **, int, int);
+void getvertices(double **, double **, double **, int, int);
 
 void getSolnNaturalCoord(double **);
 #endif
