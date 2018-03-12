@@ -10,7 +10,7 @@ Created: 2018-03-04
 
 void initialize(struct elemsclr, double **, double **);
 
-void initializevel(struct elemsclr, double **, double **);
+void initializeVel(struct elemsclr, double **, double **);
 
 void initializeLS(struct elemsclr, double **, double **);
 

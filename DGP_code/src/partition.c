@@ -205,6 +205,6 @@ void partition()
 
   if(myrank == master)
     {
-      printf("Processor matrix generated = %d X %d\n", procm, procn);
+      printf("Processor matrix generated = %d X %d\n\n", procm, procn);
     }
 }

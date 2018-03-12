@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     //Read control file
     //All processors may read the control file
     control();
-    if(myrank == master)printf("Read the input file\n");
+    if(myrank == master)printf("Read the input file\n\n");
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
@@ -79,8 +79,6 @@ int main(int argc, char **argv)
     //Initialize mesh arrays. Done here now instead of common block
     double **x;
     double **y;
-    printf("The nodes are: %d %d\n",xnode,ynode);
-    printf("The elements are: %d %d\n",xelem,yelem);
     
     allocator2(&x,xnode,ynode);
     allocator2(&y,xnode,ynode);
@@ -102,6 +100,8 @@ int main(int argc, char **argv)
     //Initialize element data
     struct elemsclr elem;
 
+    ncoeff = (int)pow(polyorder+1,2.0); //Number of coefficients = number of basis
+    
     if(quadtype == 1)
     {
 	xgpts=polyorder+2;
@@ -114,9 +114,9 @@ int main(int argc, char **argv)
     }
     tgauss = xgpts*ygpts;
     
-    allocator3(&elem.u,xelem,yelem,tgauss);
-    allocator3(&elem.v,xelem,yelem,tgauss);
-    allocator3(&elem.phi,xelem,yelem,tgauss);
+    allocator3(&elem.u,xelem,yelem,ncoeff);
+    allocator3(&elem.v,xelem,yelem,ncoeff);
+    allocator3(&elem.phi,xelem,yelem,ncoeff);
     allocator4(&elem.mass,xelem,yelem,tgauss,tgauss);
     iallocator2(&elem.iBC,xelem,yelem);
 
@@ -166,8 +166,9 @@ int main(int argc, char **argv)
 	printf("The quadrature points and weights are:\n");
 	for(i=0; i<tgauss; i++)
 	{
-	    printf("%d %.6f %.6f %.6f %.6f\n",i,zeta[i][0],zeta[i][1],weights[i][0],weights[i][1]);
+	    printf("%d  %.6f  %.6f  %.6f  %.6f\n",i,zeta[i][0],zeta[i][1],weights[i][0],weights[i][1]);
 	}
+	printf("\n");
     }
     
     //Get the mass matrix
@@ -215,9 +216,9 @@ int main(int argc, char **argv)
     deallocator1(&weight1, xgpts);
     deallocator1(&weight2, ygpts);
     //Element
-    deallocator3(&elem.u,xelem,yelem,tgauss);
-    deallocator3(&elem.v,xelem,yelem,tgauss);
-    deallocator3(&elem.phi,xelem,yelem,tgauss);
+    deallocator3(&elem.u,xelem,yelem,ncoeff);
+    deallocator3(&elem.v,xelem,yelem,ncoeff);
+    deallocator3(&elem.phi,xelem,yelem,ncoeff);
     deallocator4(&elem.mass,xelem,yelem,tgauss,tgauss);
     ideallocator2(&elem.iBC,xelem,yelem);
 

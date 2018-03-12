@@ -10,7 +10,6 @@ double max(double, double);
 
 double min(double, double);
 
-void getvertices(double **, double **, double **, int, int);
+void naturalToCartesian(double **, double **, double **, int, int);
 
-void getSolnNaturalCoord(double **);
 #endif
