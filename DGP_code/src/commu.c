@@ -10,15 +10,25 @@ Created: 2018-03-07
 
 void genibc(int **iBC)
 {
+    
   /*This routine works only on ghost elements on each processor
     Convention: 
-    if interior element iBC = 0 (IBC has been initalized to 0, so need to do this here)
-    if interior boundary element iBC = 1 - Responsible for communication
-    if domain boundary element iBC  = 2
+    if iBC = 0 ==> interior element
+    if iBC = 1 ==> interior boundary, only responsible for communication
+    if iBC = 2 ==> domain boundary. BC needs to be implemented here
   */
 
+    int i,j;
+    
+    //------------------------------------------------------------------------//
+    //Initialize periodic array to zero
+    for(i=0; i<4; i++)
+    {
+	per[i] = 0;
+    }
+    //------------------------------------------------------------------------//
+
   //First consider all ghost elements to be 1
-  int i,j;
   for(j=0; j<yelem; j++)
     {
       for(i=1; i>=0; i--)
@@ -70,6 +80,7 @@ void genibc(int **iBC)
       else //If BC is periodic
 	{
 	  d_bhai = myrank + (procn-1)*procm;
+	  per[3] = 1;
 	}
     }
 
@@ -90,6 +101,7 @@ void genibc(int **iBC)
       else
 	{
 	  u_bhai = myrank % procm;
+	  per[1] = 1;
 	}
     }
 
@@ -110,6 +122,7 @@ void genibc(int **iBC)
       else
 	{
 	  l_bhai = myrank + procm - 1;
+	  per[2] = 1;
 	}
     }
 
@@ -130,6 +143,7 @@ void genibc(int **iBC)
       else
 	{
 	  r_bhai = myrank - procm + 1;
+	  per[0] = 1;
 	}
     }
 
@@ -144,14 +158,16 @@ void genibc(int **iBC)
 
   for(i=0; i<4; i++)
     {
-      if(bhailog[i] < 0 || bhailog[i] == myrank)
+	if(bhailog[i] < 0 || bhailog[i] == myrank)
 	{
 	  bhailog[i] = -1;  //If no neighbour mark thatt placeholder as -1
 	}
     }
 
   
-  //printf("Bhai log of proc %d are: %d %d %d %d\n",myrank,bhailog[0],bhailog[1],bhailog[2],bhailog[3]);
+  //printf("Bhai log of proc %d are: %d %d %d %d\nPeriodic array is %d %d %d %d\n\n",myrank,bhailog[0],bhailog[1],bhailog[2],bhailog[3],per[0],per[1],per[2],per[3]);
+
+  
 }
 
 /*void commu(double ***var)
@@ -425,7 +441,11 @@ void commu2(double ***var)
 
     MPI_Status status;
     MPI_Request request;
+    int tag;
     //if(myrank == master && debug == 1)printf("here starting sendrecv operations\n");
+    //------------------------------------------------------------------------//
+    //First only let the interior boundaries be communicated
+    //If you try to do everything at once, contention occurs
       for(k=0; k<4; k++)
 	{
 	  if(k==0)recvk = 2;
@@ -434,18 +454,48 @@ void commu2(double ***var)
 	  if(k==3)recvk = 1;
 	   
 	  
-	  if(bhailog[recvk] >= 0)
-	    {		
-	      MPI_Recv(recvptr[recvk],size[recvk], MPI_DOUBLE,bhailog[recvk],bhailog[recvk],MPI_COMM_WORLD,&status);	      
-	    }
-
-	  if(bhailog[k] >= 0)
+	  if(bhailog[recvk] >= 0 && per[recvk] == 0)// && bhailog[k] != myrank)
 	    {
 		
-	      MPI_Isend(sendptr[k], size[k], MPI_DOUBLE, bhailog[k], myrank, MPI_COMM_WORLD,&request);	      
+		tag = bhailog[recvk];
+		
+		MPI_Recv(recvptr[recvk],size[recvk], MPI_DOUBLE,bhailog[recvk],tag,MPI_COMM_WORLD,&status);	      
+	    }
+
+	    if(bhailog[k] >= 0 && per[k] == 0)// && bhailog[recvk] != myrank)
+	    {
+		tag = myrank;
+		
+	      MPI_Isend(sendptr[k], size[k], MPI_DOUBLE, bhailog[k], tag, MPI_COMM_WORLD,&request);	      
 	      MPI_Wait(&request, &status);
 	    }
 	}
+      //Now Communicate the periodic boundaries (if any)
+      for(k=0; k<4; k++)
+      {
+	  if(k==0)recvk = 2;
+	  if(k==1)recvk = 3;
+	  if(k==2)recvk = 0;
+	  if(k==3)recvk = 1;
+	   
+	  
+	  if(bhailog[recvk] >= 0 && per[recvk] == 1)// && bhailog[k] != myrank)
+	    {
+		
+		tag = bhailog[recvk];
+		
+		MPI_Recv(recvptr[recvk],size[recvk], MPI_DOUBLE,bhailog[recvk],tag,MPI_COMM_WORLD,&status);	      
+	    }
+
+	    if(bhailog[k] >= 0 && per[k] == 1)// && bhailog[recvk] != myrank)
+	    {
+		tag = myrank;
+		
+	      MPI_Isend(sendptr[k], size[k], MPI_DOUBLE, bhailog[k], tag, MPI_COMM_WORLD,&request);	      
+	      MPI_Wait(&request, &status);
+	    }
+      }
+      //------------------------------------------------------------------------//
 
 
       //Unpack contents

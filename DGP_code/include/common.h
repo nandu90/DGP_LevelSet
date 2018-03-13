@@ -68,6 +68,7 @@ int gynode;
 //------------------------------------------------------------------------//
 //MPI communication related variables
 int bhailog[4];
+int per[4];         //Complements bhailog and tells which side is periodic
 double **sendptr;
 double **recvptr;
 int **io_info;

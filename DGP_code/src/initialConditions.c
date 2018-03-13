@@ -44,9 +44,9 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 
     
     
-    for (i=2; i<xelem-2; i++)
+    for (i=0; i<xelem; i++)
     {
-        for (j=2; j<yelem-2; j++)
+        for (j=0; j<yelem; j++)
         {
 	    //Get the vel values at the Cartesian Quadrature points
 	    for(k=0; k<tgauss; k++)
@@ -95,9 +95,9 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     allocator2(&xs, tgauss, 2);
     
         
-    for (i=2; i<xelem-2; i++)
+    for (i=0; i<xelem; i++)
     {
-        for (j=2; j<yelem-2; j++)
+        for (j=0; j<yelem; j++)
         {
 	    //Convert natural coordinates at quadrature points to Cartesian
 	    naturalToCartesian(xs, x, y, i, j);

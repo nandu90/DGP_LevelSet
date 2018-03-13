@@ -14,12 +14,8 @@ Created: 2018-03-08
 void level_setBC(double ***scalar, int **iBC)
 {
     int i,j,k;
-
-    if(myrank == master)
-    {
-	printf("%d %d\n", x_bound, y_bound);
-	//exit(1);
-    }
+    
+    
     
   //------------------------------------------------------------------------//
   //Left and right walls
@@ -35,15 +31,19 @@ void level_setBC(double ***scalar, int **iBC)
 	    }
 	}
     }
-    else if(x_bound == 3)
+    else if(x_bound == 3) //Periodic BC are mostly handled in commu2
     {
-        for( j=0; j<yelem; j++)
-        {
-	    //Loop over quadrature points
-	    for(k=0; k<ncoeff; k++)
+	if(bhailog[0] < 0 && per[0] == 1) //Means processor is periodic with itself
+	{
+	    //printf("%d went here\n",myrank);
+	    for( j=0; j<yelem; j++)
 	    {
-		if(iBC[1][j] == 2)scalar[1][j][k] = scalar[xelem-3][j][k];
-		if(iBC[xelem-2][j] == 2)scalar[xelem-2][j][k] = scalar[2][j][k];
+		//Loop over quadrature points
+		for(k=0; k<ncoeff; k++)
+		{
+		    scalar[1][j][k] = scalar[xelem-3][j][k];
+		    scalar[xelem-2][j][k] = scalar[2][j][k];
+		}
 	    }
 	}
     }
@@ -61,17 +61,21 @@ void level_setBC(double ***scalar, int **iBC)
 	    }
 	} 
     }
-    else if(y_bound == 3)
+    else if(y_bound == 3) //Periodic BC are mostly handled in commu2
     {
-        for( i=0; i<xelem; i++)
-        {
-	    //Loop over quadrature points
-	    for(k=0; k<ncoeff; k++)
+	if(bhailog[1] < 0 && per[1] == 1) //Means processor is periodic with itself
+	{
+	    //printf("%d went here2\n",myrank);
+	    for( i=0; i<xelem; i++)
 	    {
-		if(iBC[i][0] == 2)scalar[i][0][k] = scalar[i][yelem-2][k];
-		if(iBC[i][yelem-1] == 2)scalar[i][yelem-1][k] = scalar[i][1][k];
+		//Loop over quadrature points
+		for(k=0; k<ncoeff; k++)
+		{
+		    scalar[i][0][k] = scalar[i][yelem-2][k];
+		    scalar[i][yelem-1][k] = scalar[i][1][k];
+		}
 	    }
-        }
+	}
     }
 }
 
