@@ -14,8 +14,8 @@ Gauss_Quadrature_Type Gauss-Legendre
 
 /***************Initial Conditions******************/
 Bubble_radius 0.2
-x_pos_of_bubble 0.5
-y_pos_of_bubble 0.5
+x_pos_of_bubble 0.6
+y_pos_of_bubble 0.6
 
 
 /****************Boundary Conditions**************/
@@ -23,8 +23,8 @@ y_pos_of_bubble 0.5
 //x-boundary slip
 x-boundary periodic
 
-//y-boundary no-slip
-y-boundary slip
+y-boundary no-slip
+//y-boundary slip
 //y-boundary periodic
 
 

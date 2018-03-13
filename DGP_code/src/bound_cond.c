@@ -15,6 +15,12 @@ void level_setBC(double ***scalar, int **iBC)
 {
     int i,j,k;
 
+    if(myrank == master)
+    {
+	printf("%d %d\n", x_bound, y_bound);
+	//exit(1);
+    }
+    
   //------------------------------------------------------------------------//
   //Left and right walls
     if(x_bound == 1 || x_bound == 2)
