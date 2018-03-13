@@ -11,6 +11,7 @@ Created: 2018-03-04
 #include "DGPFunc.h"
 #include "memory.h"
 #include "solvers.h"
+#include "commu.h"
 
 void initializeVel(struct elemsclr elem, double **x, double **y)
 {
@@ -142,6 +143,9 @@ void initialize(struct elemsclr elem, double **x, double **y)
     initializeVel(elem, x, y);
     //Apply BC
 
+    //Communicate
+    commu2(elem.u);
+    commu2(elem.v);
     //------------------------------------------------------------------------//
 
     
@@ -150,6 +154,8 @@ void initialize(struct elemsclr elem, double **x, double **y)
     initializeLS(elem, x, y);
     //Apply BC
     level_setBC(elem.phi, elem.iBC);
+    //Communicate
+    commu2(elem.phi);
     //------------------------------------------------------------------------//
 
 }

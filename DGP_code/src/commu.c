@@ -318,55 +318,54 @@ void commu2(double ***var)
   //    Starting from the right side of mesh, ghost cell strips are numbered in an anticlockwise number
    
     int i,j,k,strip, ng;
-  int index;
-  int imin[4][2], imax[4][2];  //Here 4 refers to the number of ghost cell strips
-  int jmin[4][2], jmax[4][2];
-  int size[4];
-  imin[0][0] = xelem-3;
-  imax[0][0] = xelem-3;
-  jmin[0][0] = 0;
-  jmax[0][0] = yelem-1;
-  imin[0][1] = xelem-1;
-  imax[0][1] = xelem-1;
-  jmin[0][1] = 0;
-  jmax[0][1] = yelem-1;
-  size[0] = 2*yelem;
+    int index;
+    int imin[4][2], imax[4][2];  //Here 4 refers to the number of ghost cell strips
+    int jmin[4][2], jmax[4][2];
+    int size[4];
+    imin[0][0] = xelem-3;
+    imax[0][0] = xelem-3;
+    jmin[0][0] = 0;
+    jmax[0][0] = yelem-1;
+    imin[0][1] = xelem-1;
+    imax[0][1] = xelem-1;
+    jmin[0][1] = 0;
+    jmax[0][1] = yelem-1;
+    size[0] = 2*yelem*ncoeff;
+    
+    imin[1][0] = 0;
+    imax[1][0] = xelem-1;
+    jmin[1][0] = yelem-3;
+    jmax[1][0] = yelem-3;
+    imin[1][1] = 0;
+    imax[1][1] = xelem-1;
+    jmin[1][1] = yelem-1;
+    jmax[1][1] = yelem-1;
+    size[1] = 2*xelem*ncoeff;
+    
+    imin[2][0] = 2;
+    imax[2][0] = 2;
+    jmin[2][0] = 0;
+    jmax[2][0] = yelem-1;
+    imin[2][1] = 0;
+    imax[2][1] = 0;
+    jmin[2][1] = 0;
+    jmax[2][1] = yelem-1;
+    size[2] = 2*yelem*ncoeff;
+    
+    imin[3][0] = 0;
+    imax[3][0] = xelem-1;
+    jmin[3][0] = 2;
+    jmax[3][0] = 2;
+    imin[3][1] = 0;
+    imax[3][1] = xelem-1;
+    jmin[3][1] = 0;
+    jmax[3][1] = 0;
+    size[3] = 2*xelem*ncoeff;
 
-  imin[1][0] = 0;
-  imax[1][0] = xelem-1;
-  jmin[1][0] = yelem-3;
-  jmax[1][0] = yelem-3;
-  imin[1][1] = 0;
-  imax[1][1] = xelem-1;
-  jmin[1][1] = yelem-1;
-  jmax[1][1] = yelem-1;
-  size[1] = 2*xelem;
+      
 
-  imin[2][0] = 2;
-  imax[2][0] = 2;
-  jmin[2][0] = 0;
-  jmax[2][0] = yelem-1;
-  imin[2][1] = 0;
-  imax[2][1] = 0;
-  jmin[2][1] = 0;
-  jmax[2][1] = yelem-1;
-  size[2] = 2*yelem;
-
-  imin[3][0] = 0;
-  imax[3][0] = xelem-1;
-  jmin[3][0] = 2;
-  jmax[3][0] = 2;
-  imin[3][1] = 0;
-  imax[3][1] = xelem-1;
-  jmin[3][1] = 0;
-  jmax[3][1] = 0;
-  size[3] = 2*xelem;
-
-  
- 
-
-  int recvk;
-
+    int recvk;
+    
   //Package contents
     for(k=0; k<4; k++) //Loop over ghost cell strips starting from right and then anticlockwise
     {
@@ -402,9 +401,9 @@ void commu2(double ***var)
 		  for(j=jmin[k][0]+(strip*smuly); j<=jmax[k][0]+(strip*smuly); j++) //loop over j index of ghost node. e.g. for right strip jmin = 0 and jmax = yelem-1
 		    {
 			//Loop over the quadrature points
-			for(ng=0; ng<tgauss; ng++)
+			for(ng=0; ng<ncoeff; ng++)
 			{
-			    sendptr[k][index] = var[i][j][k]; //fill up the send ptr array
+			    sendptr[k][index] = var[i][j][ng]; //fill up the send ptr array
 			    index++;
 			}
 		    }
@@ -416,6 +415,11 @@ void commu2(double ***var)
 
        
     }
+
+    
+    
+   
+     
 
     //if(myrank == 1 && debug == 1)printf("contents are pakeaged\n");
 
@@ -431,17 +435,14 @@ void commu2(double ***var)
 	   
 	  
 	  if(bhailog[recvk] >= 0)
-	    {
-	      //if(myrank==0 && debug ==1)printf("here recving from %d by %d\n",bhailog[recvk],myrank);
-	      MPI_Recv(recvptr[recvk],size[recvk], MPI_DOUBLE,bhailog[recvk],bhailog[recvk],MPI_COMM_WORLD,&status);
-	      
+	    {		
+	      MPI_Recv(recvptr[recvk],size[recvk], MPI_DOUBLE,bhailog[recvk],bhailog[recvk],MPI_COMM_WORLD,&status);	      
 	    }
 
 	  if(bhailog[k] >= 0)
 	    {
-	      //if(bhailog[k]==0 && debug == 1)printf("here sending from %d to %d\n",myrank,bhailog[k]);
-	      MPI_Isend(sendptr[k], size[k], MPI_DOUBLE, bhailog[k], myrank, MPI_COMM_WORLD,&request);
-	      
+		
+	      MPI_Isend(sendptr[k], size[k], MPI_DOUBLE, bhailog[k], myrank, MPI_COMM_WORLD,&request);	      
 	      MPI_Wait(&request, &status);
 	    }
 	}
@@ -484,9 +485,9 @@ void commu2(double ***var)
 		      for(j=jmin[recvk][1]+(strip*rmuly); j<=jmax[recvk][1]+(strip*rmuly); j++)
 		      {
 			  //Loop over quadrature points
-			  for(ng=0; ng<tgauss; ng++)
+			  for(ng=0; ng<ncoeff; ng++)
 			  {
-			      var[i][j][k] = recvptr[recvk][index];
+			      var[i][j][ng] = recvptr[recvk][index];
 			      index++;
 			  }
 		      }
@@ -512,29 +513,29 @@ void setupcommu()
    */
     if(bhailog[0] >= 0)
     {
-	allocator1(&bhai.sendrbuf,2*yelem*tgauss);
-	allocator1(&bhai.recvrbuf,2*yelem*tgauss);
+	allocator1(&bhai.sendrbuf,2*yelem*ncoeff);
+	allocator1(&bhai.recvrbuf,2*yelem*ncoeff);
 	sendptr[0] = bhai.sendrbuf;
 	recvptr[0] = bhai.recvrbuf;
     }
     if(bhailog[1] >= 0)
     {
-	allocator1(&bhai.sendubuf,2*xelem*tgauss);
-	allocator1(&bhai.recvubuf,2*xelem*tgauss);
+	allocator1(&bhai.sendubuf,2*xelem*ncoeff);
+	allocator1(&bhai.recvubuf,2*xelem*ncoeff);
 	sendptr[1] = bhai.sendubuf;
 	recvptr[1] = bhai.recvubuf;
     }
     if(bhailog[2] >= 0)
     {
-	allocator1(&bhai.sendlbuf,2*yelem*tgauss);
-	allocator1(&bhai.recvlbuf,2*yelem*tgauss);
+	allocator1(&bhai.sendlbuf,2*yelem*ncoeff);
+	allocator1(&bhai.recvlbuf,2*yelem*ncoeff);
 	sendptr[2] = bhai.sendlbuf;
 	recvptr[2] = bhai.recvlbuf;
     }
     if(bhailog[3] >= 0)
     {
-	allocator1(&bhai.senddbuf,2*xelem*tgauss);
-	allocator1(&bhai.recvdbuf,2*xelem*tgauss);
+	allocator1(&bhai.senddbuf,2*xelem*ncoeff);
+	allocator1(&bhai.recvdbuf,2*xelem*ncoeff);
 	sendptr[3] = bhai.senddbuf;
 	recvptr[3] = bhai.recvdbuf;
     }
@@ -550,23 +551,23 @@ void destroycommu()
   
   if(bhailog[0] >= 0)
     {
-      deallocator1(&bhai.sendrbuf,2*yelem*tgauss);
-      deallocator1(&bhai.recvrbuf,2*yelem*tgauss);
+      deallocator1(&bhai.sendrbuf,2*yelem*ncoeff);
+      deallocator1(&bhai.recvrbuf,2*yelem*ncoeff);
     }
   if(bhailog[1] >= 0)
     {
-      deallocator1(&bhai.sendubuf,2*xelem*tgauss);
-      deallocator1(&bhai.recvubuf,2*xelem*tgauss);
+      deallocator1(&bhai.sendubuf,2*xelem*ncoeff);
+      deallocator1(&bhai.recvubuf,2*xelem*ncoeff);
     }
   if(bhailog[2] >= 0)
     {
-      deallocator1(&bhai.sendlbuf,2*yelem*tgauss);
-      deallocator1(&bhai.recvlbuf,2*yelem*tgauss);
+      deallocator1(&bhai.sendlbuf,2*yelem*ncoeff);
+      deallocator1(&bhai.recvlbuf,2*yelem*ncoeff);
     }
   if(bhailog[3] >= 0)
     {
-      deallocator1(&bhai.senddbuf,2*xelem*tgauss);
-      deallocator1(&bhai.recvdbuf,2*xelem*tgauss);
+      deallocator1(&bhai.senddbuf,2*xelem*ncoeff);
+      deallocator1(&bhai.recvdbuf,2*xelem*ncoeff);
     }
 }
 

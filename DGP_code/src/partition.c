@@ -178,6 +178,11 @@ void partition()
       yelem = gyelem;
       procm = 1;
       procn = 1;
+
+      io_info[0][0] = 1;
+      io_info[0][1] = xelem;
+      io_info[0][2] = 1;
+      io_info[0][3] = yelem;
     }
 
   int i;

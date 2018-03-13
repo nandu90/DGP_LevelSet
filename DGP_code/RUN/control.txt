@@ -5,8 +5,8 @@ Basis_Order 2
 
 xlen 1
 ylen 1
-xelem 10
-yelem 10
+xelem 100
+yelem 100
 
 /***************Gauss Quadrature********************/
 //Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE

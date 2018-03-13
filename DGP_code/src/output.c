@@ -7,10 +7,13 @@ Created: 2018-03-10
 #include "common.h"
 #include "fileIO.h"
 #include "generalFunc.h"
+#include "DGPFunc.h"
+#include "memory.h"
 
-void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
+void output_xml(struct elemsclr elem, int iter , double **x, double **y)
 {
-    int i,j,k;
+    int i,j,k,l;
+    
     char* dirpath;
     dirpath = concat(getexepath(), "/output/");
     char buf_dir[12];
@@ -26,7 +29,54 @@ void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
 	mkdir(dirpath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
     free(dirpath);
-    
+
+    //------------------------------------------------------------------------//
+    //Reconstruct solution for all elements at the nodes
+    double ***recphi, ***recu, ***recv;
+    allocator3(&recphi, xelem, yelem, 4);
+    allocator3(&recu, xelem, yelem, 4);
+    allocator3(&recv, xelem, yelem, 4);
+
+    double **zs;
+    allocator2(&zs, 4, 2);
+
+    double *basis;
+    allocator1(&basis, ncoeff);
+
+    zs[0][0] = -1.0;
+    zs[0][1] = -1.0;
+
+    zs[1][0] = 1.0;
+    zs[1][1] = -1.0;
+
+    zs[2][0] = -1.0;
+    zs[2][1] = 1.0;
+
+    zs[3][0] = 1.0;
+    zs[3][1] = 1.0;
+
+    for(i=0; i<xelem; i++)
+    {
+	for(j=0; j<yelem; j++)
+	{
+	    for(k=0; k<4; k++)
+	    {
+		recphi[i][j][k] = 0.0;
+		recu[i][j][k] = 0.0;
+		recv[i][j][k] = 0.0;
+
+		basis2D(zs[k][0], zs[k][1], basis);
+		for(l=0; l<ncoeff; l++)
+		{
+		    recphi[i][j][k] += basis[l]*elem.phi[i][j][l];
+		    recu[i][j][k] += basis[l]*elem.u[i][j][l];
+		    recv[i][j][k] += basis[l]*elem.v[i][j][l];
+		}
+	    }
+	}
+    }
+    //------------------------------------------------------------------------//
+
 
     FILE *out;
     FILE *out1;
@@ -52,9 +102,9 @@ void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
 	fprintf(out1,"<PDataArray NumberOfComponents=\"1\" format=\"ascii\" type =\"Float32\" Name=\"phi\"/>\n");
 	fprintf(out1,"<PDataArray NumberOfComponents=\"1\" format=\"ascii\" type =\"Float32\" Name=\"u\"/>\n");
 	fprintf(out1,"<PDataArray NumberOfComponents=\"1\" format=\"ascii\" type =\"Float32\" Name=\"v\"/>\n");
-	fprintf(out1,"<PDataArray NumberOfComponents=\"1\" format=\"ascii\" type =\"Float32\" Name=\"mu\"/>\n");
+	/*fprintf(out1,"<PDataArray NumberOfComponents=\"1\" format=\"ascii\" type =\"Float32\" Name=\"mu\"/>\n");
 	fprintf(out1,"<PDataArray NumberOfComponents=\"1\" format=\"ascii\" type =\"Float32\" Name=\"rho\"/>\n");
-	fprintf(out1,"<PDataArray NumberOfComponents=\"1\" format=\"ascii\" type =\"Float32\" Name=\"p\"/>\n");
+	fprintf(out1,"<PDataArray NumberOfComponents=\"1\" format=\"ascii\" type =\"Float32\" Name=\"p\"/>\n");*/
 	fprintf(out1,"</PPointData>\n");
 	for(i=0;i<nprocs; i++)
 	{
@@ -108,7 +158,7 @@ void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
     {
 	for(i=2; i<xnode-2; i++)
 	{
-	    double phinode=0.25*(sclr.phi[i][j][0]+sclr.phi[i-1][j][0]+sclr.phi[i-1][j-1][0]+sclr.phi[i][j-1][0]);
+	    double phinode=0.25*(recphi[i][j][0] + recphi[i-1][j][1] + recphi[i-1][j-1][3] + recphi[i][j-1][2]);
 	    fprintf(out,"%.6f\n",phinode);
 	}
     }
@@ -120,7 +170,7 @@ void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
 	for(i=2; i<xnode-2; i++)
 	{
 	    
-	    double unode=0.5*(sclr.u[i-1][j][0]+sclr.u[i-1][j-1][0]);
+	    double unode=0.25*(recu[i][j][0] + recu[i-1][j][1] + recu[i-1][j-1][3] + recu[i][j-1][2]);
 	    fprintf(out,"%.6f\n",unode);
 	}
     }
@@ -132,7 +182,7 @@ void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
 	for(i=2; i<xnode-2; i++)
 	{
 	    
-	    double vnode=0.5*(sclr.v[i-1][j][0]+sclr.v[i-1][j-1][0]);
+	    double vnode=0.25*(recv[i][j][0] + recv[i-1][j][1] + recv[i-1][j-1][3] + recv[i][j-1][2]);
 	    fprintf(out,"%.6f\n",vnode);
 	}
     }
@@ -143,7 +193,7 @@ void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
     {
 	for(i=2; i<xnode-2; i++)
 	{
-	    double munode=0.25*(sclr.mu[i][j][0]+sclr.mu[i-1][j][0]+sclr.mu[i-1][j-1][0]+sclr.mu[i][j-1][0]);
+	    double munode=0.25*(elem.mu[i][j][0]+elem.mu[i-1][j][0]+elem.mu[i-1][j-1][0]+elem.mu[i][j-1][0]);
 	    fprintf(out,"%.6f\n",munode);
 	    
 	}
@@ -156,7 +206,7 @@ void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
 	for(i=2; i<xnode-2; i++)
 	{
 	    
-	    double rhonode=0.25*(sclr.rho[i][j][0]+sclr.rho[i-1][j][0]+sclr.rho[i-1][j-1][0]+sclr.rho[i][j-1][0]);
+	    double rhonode=0.25*(elem.rho[i][j][0]+elem.rho[i-1][j][0]+elem.rho[i-1][j-1][0]+elem.rho[i][j-1][0]);
 	    fprintf(out,"%.6f\n",rhonode);
 	}
     }
@@ -168,7 +218,7 @@ void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
 	for(i=2; i<xnode-2; i++)
 	{
 	    
-	    double pnode=0.25*(sclr.p[i][j][0]+sclr.p[i-1][j][0]+sclr.p[i-1][j-1][0]+sclr.p[i][j-1][0]);
+	    double pnode=0.25*(elem.p[i][j][0]+elem.p[i-1][j][0]+elem.p[i-1][j-1][0]+elem.p[i][j-1][0]);
 	    fprintf(out,"%.6f\n",pnode);
 	}
     }
@@ -180,5 +230,11 @@ void output_xml(struct elemsclr sclr,int iter , double **x, double **y)
     fprintf(out,"</VTKFile>\n");
     fclose(out);
     //}
+
+    deallocator3(&recphi, xelem, yelem, 4);
+    deallocator3(&recu, xelem, yelem, 4);
+    deallocator3(&recv, xelem, yelem, 4);
+    deallocator2(&zs, 4, 2);
+    deallocator1(&basis, ncoeff);
 }
 

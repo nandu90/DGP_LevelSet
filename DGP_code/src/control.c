@@ -327,19 +327,26 @@ void control()
 	free(line);
     }
 
+  MPI_Bcast(&polyorder,1,MPI_INT,master,MPI_COMM_WORLD);
+  
   MPI_Bcast(&xlen,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   MPI_Bcast(&ylen,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   
   MPI_Bcast(&gxelem,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&gyelem,1,MPI_INT,master,MPI_COMM_WORLD);
   
-	/*MPI_Bcast(&itermax,1,MPI_INT,master,MPI_COMM_WORLD);
-	  MPI_Bcast(&nu,1,MPI_DOUBLE,master,MPI_COMM_WORLD);*/
-	
   MPI_Bcast(&rb_in,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   MPI_Bcast(&xb_in,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   MPI_Bcast(&yb_in,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	
+
+  MPI_Bcast(&quadtype,1,MPI_INT,master,MPI_COMM_WORLD);
+
+  MPI_Bcast(&x_bound,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&y_bound,1,MPI_INT,master,MPI_COMM_WORLD);
+      
+  /*MPI_Bcast(&itermax,1,MPI_INT,master,MPI_COMM_WORLD);
+	  MPI_Bcast(&nu,1,MPI_DOUBLE,master,MPI_COMM_WORLD);*/
+  
 	/*MPI_Bcast(&advect_steps,1,MPI_INT,master,MPI_COMM_WORLD);
 	MPI_Bcast(&advect_deltat,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
 	
@@ -373,8 +380,7 @@ void control()
 	MPI_Bcast(&gy,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
 	
 	MPI_Bcast(&bub_conv_scheme,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&x_bound,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&y_bound,1,MPI_INT,master,MPI_COMM_WORLD);
+	
 	MPI_Bcast(&sol_type,1,MPI_INT,master,MPI_COMM_WORLD);
 	MPI_Bcast(&time_control,1,MPI_INT,master,MPI_COMM_WORLD);
 	MPI_Bcast(&case_tog,1,MPI_INT,master,MPI_COMM_WORLD);*/
