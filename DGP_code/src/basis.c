@@ -2,10 +2,53 @@
 #include "DGPFunc.h"
 #include "memory.h"
 
+void basisDiff2D(double zdiff, double z, double *basis, int order)
+{
+    int i,j,k;
+    
+    double *Bdiff, *B;
+    allocator1(&Bdiff, polyorder+1);
+    allocator1(&B, polyorder+1);
+
+    basis1D(z, B);
+    basisdiff1D(zdiff, Bdiff);
+
+    //Now get the outer product of the above two to get the differential
+    k=0;
+    for(i=0; i<polyorder+1; i++)
+    {
+	for(j=0; j<polyorder+1; j++)
+	{
+	    if(order == 1)
+	    { 
+		basis[k++] = B[i]*Bdiff[j];
+	    }
+	    else if(order == 2)
+	    {
+		basis[k++] = B[j]*Bdiff[i];
+	    }
+	}
+    }
+
+    deallocator1(&Bdiff, polyorder+1);
+    deallocator1(&B, polyorder+1);
+}
+
+void basisdiff1D(double z, double *b)
+{
+    double barray[4] = {0.0, 1.0, 3.0*z, 0.5*(15.0*z*z - 3.0)};
+
+    int i;
+
+    for(i=0; i<polyorder+1; i++)
+    {
+	b[i] = barray[i];
+    }
+}
 void basis1D(double z, double *basis)
 {
     // Upto P = 3 at the moment
-    double barray[4] = {1, z, 0.5*(3.0*z*z - 1.0), 0.5*(5*pow(z,3.0)-3.0*z)};
+    double barray[4] = {1.0, z, 0.5*(3.0*z*z - 1.0), 0.5*(5*pow(z,3.0)-3.0*z)};
     
     int i;
 

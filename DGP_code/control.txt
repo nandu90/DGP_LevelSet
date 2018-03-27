@@ -1,5 +1,5 @@
 /******************Basis Functions*****************/
-Basis_Order 2
+Basis_Order 1
 
 /******************Grid related Inputs*******************//
 

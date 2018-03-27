@@ -23,6 +23,7 @@ Notes:
 #include "DGPFunc.h"
 #include "icbc.h"
 #include "commu.h"
+#include "rhs.h"
 /*#include "partition.h"
 #include "grid.h"
 #include "commu.h"
@@ -199,7 +200,13 @@ int main(int argc, char **argv)
 
     
     
-    
+    //------------------------------------------------------------------------//
+    //Time loop will start here
+    double ***integral;
+    allocator3(&integral, xelem, yelem, ncoeff);
+    domainIntegral(x, y, elem, integral);
+    //------------------------------------------------------------------------//
+
     
     
     
@@ -223,7 +230,7 @@ int main(int argc, char **argv)
     deallocator3(&elem.u,xelem,yelem,ncoeff);
     deallocator3(&elem.v,xelem,yelem,ncoeff);
     deallocator3(&elem.phi,xelem,yelem,ncoeff);
-    deallocator4(&elem.mass,xelem,yelem,tgauss,tgauss);
+    deallocator4(&elem.mass,xelem,yelem,tgauss,tgauss); //Should this be ncoeff? - Yes it should be
     ideallocator2(&elem.iBC,xelem,yelem);
 
     //Uncomment when you need them
