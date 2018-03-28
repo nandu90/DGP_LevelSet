@@ -3,12 +3,17 @@
 Author: nsaini
 Created: 2018-03-26
 
+Notes:
+ - Communication should not be required here
+ - The domain integrals are calculated for the interior elements only
+ - x,y coordinates are not required for this routine and you can choose not to pass them
+   Passed over here only to perform some checks
+
 ***************************************************************************/
 
 
 #include "common.h"
 #include "memory.h"
-#include "commu.h"
 #include "polylib.h"
 #include "DGPFunc.h"
 #include "rhs.h"
