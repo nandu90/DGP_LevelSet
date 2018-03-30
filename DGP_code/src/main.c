@@ -202,9 +202,9 @@ int main(int argc, char **argv)
     
     //------------------------------------------------------------------------//
     //Time loop will start here
-    double ***integral;
-    allocator3(&integral, xelem, yelem, ncoeff);
-    domainIntegral(x, y, elem, integral);
+    double ***rhs;
+    allocator3(&rhs, xelem, yelem, ncoeff);
+    getRHS(elem, x, y, rhs);
     //------------------------------------------------------------------------//
 
     
@@ -255,6 +255,9 @@ int main(int argc, char **argv)
     destroycommu();
     free(sendptr);
     free(recvptr);
+
+    //Time loop arrays
+    deallocator3(&rhs, xelem, yelem, ncoeff);
     //------------------------------------------------------------------------//
 
     
