@@ -12,5 +12,10 @@ void getRHS(struct elemsclr, double **, double **, double ***);
 
 void domainIntegral(double **, double **, struct elemsclr, double ***);
 
-void getFluxes(double ***, double ***, struct elemsclr);
+void fluxes(double ***, double ***, struct elemsclr);
+
+void upwind(double ***, double ***, double ***, int, int);
+
+void boundaryIntegral(double ***, double ***, double ***);
+
 #endif
