@@ -14,4 +14,6 @@ void dgesv_ (int *, int *, double *, int *, int *, double *, int *, int *);
 
 void dgels_ (char *, int *, int *, int *, double *, int *, double *, int *, double *, int *, int *);
 
+void euler(double ***, double ****, double ***, double);
+
 #endif

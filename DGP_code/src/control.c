@@ -59,11 +59,7 @@ void control()
 		    word = strtok(NULL,delim);
 		    gyelem = atoi(word);
 		}
-		/*if(strcmp(word,"Max_Iterations") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    itermax = atoi(word);
-		}
+		/*
 		if(strcmp(word,"Kinematic_viscosity") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -106,13 +102,9 @@ void control()
 		{
 		    word = strtok(NULL,delim);
 		    advect_steps = atoi(word);
-		}
-		if(strcmp(word,"advect_deltat") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    advect_deltat = atof(word);
-		}
-		if(strcmp(word,"Solution_read") == 0)
+		    }*/
+		
+		/*if(strcmp(word,"Solution_read") == 0)
 		{
 		    word = strtok(NULL,delim);
 		    solnread = atoi(word);
@@ -206,13 +198,9 @@ void control()
 		{
 		    word = strtok(NULL,delim);
 		    redist_method = atoi(word);
-		}
-		if(strcmp(word,"max_CFL") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    max_cfl = atof(word);
-		}
-		if(strcmp(word,"gx") == 0)
+		    }*/
+		
+		/*if(strcmp(word,"gx") == 0)
 		{
 		    word = strtok(NULL,delim);
 		    gx = atof(word);
@@ -280,6 +268,16 @@ void control()
 		    {
 			sol_type=1;
 		    }
+		    }*/
+		if(strcmp(word,"advect_deltat") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    advect_deltat = atof(word);
+		}
+		if(strcmp(word,"max_CFL") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    max_cfl = atof(word);
 		}
 		if(strcmp(word,"Time_control") == 0)
 		{
@@ -293,7 +291,17 @@ void control()
 			time_control=2;
 		    }
 		}
-		if(strcmp(word,"Case") == 0)
+		if(strcmp(word,"Max_Iterations") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    itermax = atoi(word);
+		}
+		if(strcmp(word,"Start_step") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    startstep= atoi(word);
+		}
+		/*if(strcmp(word,"Case") == 0)
 		{
 		    word = strtok(NULL, delim);
 		    if(strcmp(word,"vortex\n") == 0)
@@ -343,12 +351,19 @@ void control()
 
   MPI_Bcast(&x_bound,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&y_bound,1,MPI_INT,master,MPI_COMM_WORLD);
-      
-  /*MPI_Bcast(&itermax,1,MPI_INT,master,MPI_COMM_WORLD);
-	  MPI_Bcast(&nu,1,MPI_DOUBLE,master,MPI_COMM_WORLD);*/
+
+  MPI_Bcast(&advect_deltat,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&time_control,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&max_cfl,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+
+  MPI_Bcast(&startstep,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&itermax,1,MPI_INT,master,MPI_COMM_WORLD);
+
   
-	/*MPI_Bcast(&advect_steps,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&advect_deltat,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+/*MPI_Bcast(&nu,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  
+	MPI_Bcast(&advect_steps,1,MPI_INT,master,MPI_COMM_WORLD);
+	
 	
 	MPI_Bcast(&solnread,1,MPI_INT,master,MPI_COMM_WORLD);
 	
@@ -367,7 +382,7 @@ void control()
 	MPI_Bcast(&re_loops,1,MPI_INT,master,MPI_COMM_WORLD);
 	
 	MPI_Bcast(&print_gap,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&startstep,1,MPI_INT,master,MPI_COMM_WORLD);
+	
 	MPI_Bcast(&sf_toggle,1,MPI_INT,master,MPI_COMM_WORLD);
 	MPI_Bcast(&flow_solve,1,MPI_INT,master,MPI_COMM_WORLD);
 	MPI_Bcast(&p_solver,1,MPI_INT,master,MPI_COMM_WORLD);
@@ -375,14 +390,14 @@ void control()
 	MPI_Bcast(&vf_control,1,MPI_INT,master,MPI_COMM_WORLD);
 	MPI_Bcast(&redist_method,1,MPI_INT,master,MPI_COMM_WORLD);
 	
-	MPI_Bcast(&max_cfl,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+	
 	MPI_Bcast(&gx,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
 	MPI_Bcast(&gy,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
 	
 	MPI_Bcast(&bub_conv_scheme,1,MPI_INT,master,MPI_COMM_WORLD);
 	
 	MPI_Bcast(&sol_type,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&time_control,1,MPI_INT,master,MPI_COMM_WORLD);
+	
 	MPI_Bcast(&case_tog,1,MPI_INT,master,MPI_COMM_WORLD);*/
 	
 

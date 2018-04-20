@@ -24,6 +24,7 @@ Notes:
 #include "icbc.h"
 #include "commu.h"
 #include "rhs.h"
+#include "solvers.h"
 /*#include "partition.h"
 #include "grid.h"
 #include "commu.h"
@@ -201,22 +202,74 @@ int main(int argc, char **argv)
     
     
     //------------------------------------------------------------------------//
-    //Time loop will start here
+    //Preliminaries before time loop
+    double deltat = 0.0;
+    double time = deltat*startstep;
+    if(time_control == 2)
+    {
+	deltat = advect_deltat;
+    }
+    else
+    {
+	if(myrank == master)
+	{
+	    printf("Time control is not constant time.\nExiting...");
+	    exit(1);
+	}
+    }
     double ***rhs;
     allocator3(&rhs, xelem, yelem, ncoeff);
-    getRHS(elem, x, y, rhs);
+
+    int iter = startstep;
+
+    FILE *out;
+    if(myrank == master)
+    {
+	out = fopen("sim_out.txt","w");
+	if(out == NULL)
+	{
+	    printf("Error opening sim_out.txt!\n");
+	    exit(0);
+	}
+    }
+
+    
+    //Print out the paraview output if startstep == 0 i.e., initial conditions
+    if(startstep == 0)
+    {
+	output_xml(elem,startstep,x,y);
+    }
+
+    //Time loop
+    for(iter = startstep; iter < itermax; iter++)
+    {
+	time += deltat;
+	
+	if(myrank == master)
+	{
+	    printf("Step: %d Time: %.4f\n",iter+1, time);
+	    fprintf(out,"Step: %d Time: %.4f\n",iter+1, time);
+	}
+
+	//Get the Right hand side
+	getRHS(elem, x, y, rhs);
+
+	//Forward Euler
+	euler(elem.phi, elem.mass, rhs, deltat);
+
+	//Apply boundary conditions
+	level_setBC(elem.phi, elem.iBC);
+	
+	//Print out the paraview output
+	output_xml(elem,iter+1,x,y);
+    }
+    
+    
     //------------------------------------------------------------------------//
 
     
     
     
-    //------------------------------------------------------------------------//
-    //Print out the paraview outputs
-    output_xml(elem, 0, x, y);
-    //------------------------------------------------------------------------//
-
-
-
     //------------------------------------------------------------------------//
     //deallocate all arrays - in the reverse order they were allocated
     //Gauss quadrature
@@ -268,8 +321,8 @@ int main(int argc, char **argv)
     if(myrank == master)
     {
 	printf("Total run time: %.6f secs\n",secs);
-/*fprintf(out,"Total run time: %.6f secs\n",secs);
-  fclose(out);*/
+	fprintf(out,"Total run time: %.6f secs\n",secs);
+	fclose(out);
     }
     
     if(myrank == master)

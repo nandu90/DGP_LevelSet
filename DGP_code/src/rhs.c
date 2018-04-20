@@ -9,6 +9,7 @@ Created: 2018-03-29
 #include "rhs.h"
 #include "DGPFunc.h"
 #include "memory.h"
+#include "commu.h"
 
 void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs)
 {
@@ -34,6 +35,26 @@ void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs)
 
     boundaryIntegral(boundIntegral, rflux, tflux);
     //------------------------------------------------------------------------//
+
+
+    //------------------------------------------------------------------------//
+    //Finally construct the RHS vector
+    int ielem, jelem, icoeff;
+    for(ielem = 0; ielem <xelem; ielem++)
+    {
+	for(jelem = 0; jelem < yelem; jelem++)
+	{
+	    for(icoeff = 0; icoeff < ncoeff; icoeff++)
+	    {
+		rhs[ielem][jelem][icoeff] = domIntegral[ielem][jelem][icoeff] - boundIntegral[ielem][jelem][icoeff];
+	    }
+	}
+    }
+
+    //Communciate the RHS info
+    commu2(rhs);
+    //------------------------------------------------------------------------//
+
 
     
     //------------------------------------------------------------------------//

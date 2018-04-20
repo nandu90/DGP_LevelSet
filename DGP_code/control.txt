@@ -5,8 +5,8 @@ Basis_Order 1
 
 xlen 1
 ylen 1
-xelem 100
-yelem 100
+xelem 10
+yelem 10
 
 /***************Gauss Quadrature********************/
 //Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE
@@ -27,6 +27,16 @@ y-boundary no-slip
 //y-boundary slip
 //y-boundary periodic
 
+
+/*****************Time Control*******************/
+//Time_control CFL-based
+max_CFL 0.01
+Time_control constant_time
+advect_deltat 0.0001
+
+/***************Simulation Control**************/
+Start_step 0
+Max_Iterations 1
 
 
 /*****************Old Inputs*********************/
@@ -69,14 +79,7 @@ Void_fraction_control 1
 Re-distance_method 1               #0 - off; 1 - hyperbolic; 2 - fastmarch; 3 - direct
 
 
-/*************Boundary Conditions*****************/
 
-
-/*********Time Control*********/
-//Time_control CFL-based
-max_CFL 0.01
-Time_control constant_time
-advect_deltat 0.01
 
 /******Buoyancy Force Accelerations******/
 /**Give sign according to gravity direction**/
