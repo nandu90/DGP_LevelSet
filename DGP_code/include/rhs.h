@@ -14,8 +14,8 @@ void domainIntegral(double **, double **, struct elemsclr, double ***);
 
 void fluxes(double ***, double ***, struct elemsclr);
 
-void upwind(double ***, double ***, double ***, int, int);
+void upwind(double ****, double ****, double ***, int, int);
 
-void boundaryIntegral(double ***, double ***, double ***);
+void boundaryIntegral(double ***, double ***, double ***, double **, double **);
 
 #endif

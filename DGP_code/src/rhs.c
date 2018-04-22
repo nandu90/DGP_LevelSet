@@ -33,7 +33,7 @@ void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs)
     double ***boundIntegral;
     allocator3(&boundIntegral, xelem, yelem, ncoeff);
 
-    boundaryIntegral(boundIntegral, rflux, tflux);
+    boundaryIntegral(boundIntegral, rflux, tflux, x, y);
     //------------------------------------------------------------------------//
 
 
@@ -47,6 +47,8 @@ void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs)
 	    for(icoeff = 0; icoeff < ncoeff; icoeff++)
 	    {
 		rhs[ielem][jelem][icoeff] = domIntegral[ielem][jelem][icoeff] - boundIntegral[ielem][jelem][icoeff];
+
+		rhs[ielem][jelem][icoeff] = - boundIntegral[ielem][jelem][icoeff];
 	    }
 	}
     }

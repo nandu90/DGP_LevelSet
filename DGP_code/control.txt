@@ -3,25 +3,25 @@ Basis_Order 1
 
 /******************Grid related Inputs*******************//
 
-xlen 1
-ylen 1
-xelem 10
-yelem 10
+xlen 150
+ylen 50
+xelem 150
+yelem 50
 
 /***************Gauss Quadrature********************/
 //Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE
 Gauss_Quadrature_Type Gauss-Legendre
 
 /***************Initial Conditions******************/
-Bubble_radius 0.2
-x_pos_of_bubble 0.6
-y_pos_of_bubble 0.6
+Bubble_radius 10
+x_pos_of_bubble 75
+y_pos_of_bubble 25
 
 
 /****************Boundary Conditions**************/
-//x-boundary no-slip
+x-boundary no-slip
 //x-boundary slip
-x-boundary periodic
+//x-boundary periodic
 
 y-boundary no-slip
 //y-boundary slip
@@ -32,11 +32,11 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.0001
+advect_deltat 0.1
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 1
+Max_Iterations 100
 
 
 /*****************Old Inputs*********************/

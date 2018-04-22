@@ -13,5 +13,7 @@ void mappingFunc(double *, double []);
 
 void basisDiff2D( double, double, double *, int);
 
-void basisdiff1D(double, double *); 
+void basisdiff1D(double, double *);
+
+double lineJacobian(int, int, double, double **, int);
 #endif

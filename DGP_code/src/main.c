@@ -143,8 +143,24 @@ int main(int argc, char **argv)
     }
     else if(quadtype == 2) //Gauss-Legendre
     {
-        zwgl(zeta1,weight1,xgpts);
-	zwgl(zeta2,weight2,ygpts);
+        if(xgpts == 1)
+	{
+	    zeta1[0] = 0.0;
+	    weight1[0] = 1.0;
+	}
+	else
+	{
+	    zwgl(zeta1,weight1,xgpts);
+	}
+	if(ygpts == 1)
+	{
+	    zeta2[0] = 0.0;
+	    weight2[0] = 1.0;
+	}
+	else
+	{
+	    zwgl(zeta2,weight2,ygpts);
+	}
     }
 
     //Arrange quadrature points in a easy to access array

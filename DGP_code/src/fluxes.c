@@ -37,8 +37,24 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
     allocator1(&wx, xgpts);
     allocator1(&wy, ygpts);
     //Get the quadrature points and weights
-    zwgl(zx,wx,xgpts);
-    zwgl(zy,wy,ygpts);
+    if(xgpts == 1)
+    {
+	zx[0] = 0.0;
+	wx[0] = 1.0;
+    }
+    else
+    {
+	zwgl(zx,wx,xgpts);
+    }
+    if(ygpts == 1)
+    {
+	zy[0] = 0.0;
+	wy[0] = 1.0;
+    }
+    else
+    {
+	zwgl(zy,wy,ygpts);
+    }
 
     double *basisx, *basisy;
     allocator1(&basisx, ncoeff);
@@ -49,13 +65,13 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
 
     //------------------------------------------------------------------------//
     //
-    double ***recRflux, ***recTflux;      //Reconstructed fluxes at the right and top faces
-    double ***recRu,  ***recTu;            //Reconstructed wall normal velocities at the right and top face
+    double ****recRflux, ****recTflux;      //Reconstructed fluxes at the right and top faces
+    double ****recRu,  ****recTu;            //Reconstructed wall normal velocities at the right and top face
 
-    allocator3(&recRflux, xelem, yelem, ygpts);
-    allocator3(&recTflux, xelem, yelem, xgpts);
-    allocator3(&recRu, xelem, yelem, ygpts);
-    allocator3(&recTu, xelem, yelem, xgpts);
+    allocator4(&recRflux, xelem, yelem, ygpts,2);
+    allocator4(&recTflux, xelem, yelem, xgpts,2);
+    allocator4(&recRu, xelem, yelem, ygpts,2);
+    allocator4(&recTu, xelem, yelem, xgpts,2);
     //------------------------------------------------------------------------//
 
 
@@ -67,7 +83,7 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
     {
 	for(jelem=0; jelem<yelem; jelem++)
 	{
-	    //Loop over the Gauss Quadrature points on the right face
+	    //Loop over the Gauss Quadrature points on the right AND LEFT FACES
 	    for(iygauss=0; iygauss < ygpts; iygauss++)
 	    {
 		//Get the basis
@@ -85,12 +101,34 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
 		    recv += basisy[icoeff]*elem.v[ielem][jelem][icoeff];
 		}
 
-		recRflux[ielem][jelem][iygauss] = recphi;
+		recRflux[ielem][jelem][iygauss][0] = recphi*recu;
 		//Will have to have face normals here if the mesh is not cartesian - BE CAREFUL
-		recRu[ielem][jelem][iygauss] = recu;		    
+		recRu[ielem][jelem][iygauss][0] = recu;
+
+		//------------------------------------------------------------------------//
+		//Now the left face
+		//Get the basis
+		basis2D(-1.0, zy[iygauss], basisy);
+
+		//Get the flux vector
+		//Reconstruct the solution at the quadrature point
+		recphi = 0.0;
+		recu = 0.0;
+		recv = 0.0;
+		for(icoeff = 0; icoeff<ncoeff; icoeff++)
+		{
+		    recphi += basisy[icoeff]*elem.phi[ielem][jelem][icoeff];
+		    recu += basisy[icoeff]*elem.u[ielem][jelem][icoeff];
+		    recv += basisy[icoeff]*elem.v[ielem][jelem][icoeff];
+		}
+
+		recRflux[ielem][jelem][iygauss][1] = recphi*recu;
+		//Will have to have face normals here if the mesh is not cartesian - BE CAREFUL
+		recRu[ielem][jelem][iygauss][1] = recu;
+		
 	    }
 
-	    //Loop over the Gauss Quadrature points on the top face
+	    //Loop over the Gauss Quadrature points on the top face AND BOTTOM FACES
 	    for(ixgauss=0; ixgauss<xgpts; ixgauss++)
 	    {
 		//Get the basis
@@ -108,13 +146,35 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
 		    recv += basisx[icoeff]*elem.v[ielem][jelem][icoeff];
 		}
 
-		recTflux[ielem][jelem][ixgauss] = recphi;
+		recTflux[ielem][jelem][ixgauss][0] = recphi*recv;
 		//Will have to have face normals here if the mesh is not cartesian - BE CAREFUL
-		recTu[ielem][jelem][ixgauss] = recv;
+		recTu[ielem][jelem][ixgauss][0] = recv;
+
+		//------------------------------------------------------------------------//
+		//Now the bottom face
+		//Get the basis
+		basis2D(zx[ixgauss], -1.0, basisx);
+		
+		//Get the flux vector
+		//Reconstruct the solution at the quadrature point
+		recphi = 0.0;
+		recu = 0.0;
+		recv = 0.0;
+		for(icoeff = 0; icoeff<ncoeff; icoeff++)
+		{
+		    recphi += basisx[icoeff]*elem.phi[ielem][jelem][icoeff];
+		    recu += basisx[icoeff]*elem.u[ielem][jelem][icoeff];
+		    recv += basisx[icoeff]*elem.v[ielem][jelem][icoeff];
+		}
+
+		recTflux[ielem][jelem][ixgauss][1] = recphi*recv;
+		//Will have to have face normals here if the mesh is not cartesian - BE CAREFUL
+		recTu[ielem][jelem][ixgauss][1] = recv;
 	    }
 	}
     }
     //------------------------------------------------------------------------//
+
 
     //------------------------------------------------------------------------//
     //The flux scheme is implemented now
@@ -129,10 +189,10 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
 
     //------------------------------------------------------------------------//
     //Deallocators
-    deallocator3(&recRflux, xelem, yelem, ygpts);
-    deallocator3(&recTflux, xelem, yelem, xgpts);
-    deallocator3(&recRu, xelem, yelem, ygpts);
-    deallocator3(&recTu, xelem, yelem, xgpts);
+    deallocator4(&recRflux, xelem, yelem, ygpts,2);
+    deallocator4(&recTflux, xelem, yelem, xgpts,2);
+    deallocator4(&recRu, xelem, yelem, ygpts,2);
+    deallocator4(&recTu, xelem, yelem, xgpts,2);
     //------------------------------------------------------------------------//
 
     
@@ -140,7 +200,7 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
     
 }
 
-void upwind(double ***recflux, double ***recu, double ***flux, int ngauss, int dircode)
+void upwind(double ****recflux, double ****recu, double ***flux, int ngauss, int dircode)
 {
     //------------------------------------------------------------------------//
     //Temporary variables
@@ -184,18 +244,18 @@ void upwind(double ***recflux, double ***recu, double ***flux, int ngauss, int d
     
     //------------------------------------------------------------------------//
     //Loop through elements
-    for(ielem=0; ielem < xelem-1; ielem++)
+    for(ielem=1; ielem < xelem-1; ielem++)
     {
-	for(jelem=0; jelem < yelem-1; jelem++)
+	for(jelem=1; jelem < yelem-1; jelem++)
 	{
 	    //Loop over Gauss Quadrature points
 	    for(igauss=0; igauss<ngauss; igauss++)
 	    {
-		minusU = recu[ielem][jelem][igauss];
-		plusU = recu[ielem+xinc][jelem+yinc][igauss];
+		minusU = recu[ielem][jelem][igauss][0];
+		plusU = recu[ielem+xinc][jelem+yinc][igauss][1];
 
-		minusFlux = recflux[ielem][jelem][igauss];
-		plusFlux = recflux[ielem+xinc][jelem+yinc][igauss];
+		minusFlux = recflux[ielem][jelem][igauss][0];
+		plusFlux = recflux[ielem+xinc][jelem+yinc][igauss][1];
 
 		//Upwinding
 		if(minusU >= 0.0)
@@ -225,7 +285,7 @@ void upwind(double ***recflux, double ***recu, double ***flux, int ngauss, int d
 }
 
 
-void boundaryIntegral(double ***integral, double ***rflux, double ***tflux)
+void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, double **x, double **y)
 {
     //------------------------------------------------------------------------//
     /*
@@ -253,12 +313,30 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux)
     allocator1(&wx, xgpts);
     allocator1(&wy, ygpts);
     //Get the quadrature points and weights
-    zwgl(zx,wx,xgpts);
-    zwgl(zy,wy,ygpts);
+    if(xgpts == 1)
+    {
+	zx[0] = 0.0;
+	wx[0] = 1.0;
+    }
+    else
+    {
+	zwgl(zx,wx,xgpts);
+    }
+    if(ygpts == 1)
+    {
+	zy[0] = 0.0;
+	wy[0] = 1.0;
+    }
+    else
+    {
+	zwgl(zy,wy,ygpts);
+    }
 
     double *basisx, *basisy;
     allocator1(&basisx, ncoeff);
-    allocator1(&basisy, ncoeff);    
+    allocator1(&basisy, ncoeff);
+
+    double detJ;
     //------------------------------------------------------------------------//
 
 
@@ -273,11 +351,13 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux)
 	    {
 		//Get the basis
 		basis2D(1.0, zy[iygauss], basisy);
-
+		//Get the value of determinant
+		detJ = lineJacobian(ielem, jelem, zy[iygauss], y, 2);
+		
 		//Sum to the integral
 		for(icoeff = 0; icoeff<ncoeff; icoeff++)
 		{
-		    rintegral[ielem][jelem][icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss];
+		    rintegral[ielem][jelem][icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss]*detJ;
 		}
 	    }
 
@@ -286,11 +366,13 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux)
 	    {
 		//Get the basis
 		basis2D(zx[ixgauss], 1.0, basisx);
-
+		//Get the value of determinant
+		detJ = lineJacobian(ielem, jelem, zx[ixgauss], x, 1);
+		
 		//Sum to the integral
 		for(icoeff=0; icoeff<ncoeff; icoeff++)
 		{
-		    tintegral[ielem][jelem][icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss];
+		    tintegral[ielem][jelem][icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss]*detJ;
 		}
 	    }
 	}
@@ -306,7 +388,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux)
 	{
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
-		integral[ielem][jelem][icoeff] = rintegral[ielem][jelem][icoeff] - rintegral[ielem-1][jelem][icoeff];
+		integral[ielem][jelem][icoeff] += rintegral[ielem][jelem][icoeff] - rintegral[ielem-1][jelem][icoeff];
 
 		integral[ielem][jelem][icoeff] += tintegral[ielem][jelem][icoeff] - tintegral[ielem][jelem-1][icoeff];
 	    }
@@ -314,6 +396,38 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux)
     }
     //------------------------------------------------------------------------//
 
+    //------------------------------------------------------------------------//
+    //Check
+    for(ielem = 2; ielem<xelem-2; ielem++)
+    {
+	for(jelem =2; jelem<yelem-2; jelem++)
+	{
+	    printf("%d %d ", ielem, jelem);
+	    for(iygauss=0; iygauss<ygpts; iygauss++)
+	    {
+		//if((integral[ielem][jelem][icoeff]) < 0.0)exit(1);
+		printf("%.4f %.4f %.4f ", rflux[ielem][jelem][iygauss], rflux[ielem-1][jelem][iygauss], rflux[ielem][jelem][iygauss]- rflux[ielem-1][jelem][iygauss]);
+	    }
+	    printf("\n");
+	}
+    }
+
+    for(ielem = 2; ielem<xelem-2; ielem++)
+    {
+	for(jelem =2; jelem<yelem-2; jelem++)
+	{
+	    printf("%d %d ", ielem, jelem);
+	    for(icoeff=0; icoeff<ncoeff; icoeff++)
+	    {
+		//if((integral[ielem][jelem][icoeff]) < 0.0)exit(1);
+		printf("%.4f ",integral[ielem][jelem][icoeff]);
+	    }
+	    printf("\n");
+	}
+    }
+    exit(1);
+    //------------------------------------------------------------------------//
+    
     //------------------------------------------------------------------------//
     //Deallocators
     deallocator3(&rintegral, xelem, yelem, ncoeff);
