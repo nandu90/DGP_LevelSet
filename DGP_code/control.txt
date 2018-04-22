@@ -32,11 +32,11 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.05
+advect_deltat 0.01
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 100
+Max_Iterations 500
 
 
 /*****************Old Inputs*********************/

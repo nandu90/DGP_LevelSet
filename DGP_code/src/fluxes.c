@@ -339,41 +339,77 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
     double detJ;
     //------------------------------------------------------------------------//
 
+    double *rightInt;
+    double *leftInt;
+    double *topInt;
+    double *bottomInt;
+
+    allocator1(&rightInt, ncoeff);
+    allocator1(&leftInt, ncoeff);
+    allocator1(&topInt, ncoeff);
+    allocator1(&bottomInt, ncoeff);
 
     //------------------------------------------------------------------------//
     //Loop over the elements
-    for(ielem = 0; ielem<xelem; ielem++)
+    for(ielem = 2; ielem<xelem-2; ielem++)
     {
-	for(jelem = 0; jelem<yelem; jelem++)
+	for(jelem = 2; jelem<yelem-2; jelem++)
 	{
-	    //Loop over the quadrature points on the right face
-	    for(iygauss = 0; iygauss<ygpts; iygauss++)
+	    for(icoeff=0; icoeff < ncoeff; icoeff++)
 	    {
-		//Get the basis
-		basis2D(1.0, zy[iygauss], basisy);
-		//Get the value of determinant
-		detJ = lineJacobian(ielem, jelem, zy[iygauss], y, 2);
-		
-		//Sum to the integral
-		for(icoeff = 0; icoeff<ncoeff; icoeff++)
-		{
-		    rintegral[ielem][jelem][icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss]*detJ;
-		}
+		rightInt[icoeff] = 0.0;
+		leftInt[icoeff] = 0.0;
+		topInt[icoeff] = 0.0;
+		bottomInt[icoeff] = 0.0;
 	    }
 
-	    //Loop over the quadrature points in the top face
-	    for(ixgauss=0; ixgauss<xgpts; ixgauss++)
+	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
-		//Get the basis
-		basis2D(zx[ixgauss], 1.0, basisx);
-		//Get the value of determinant
-		detJ = lineJacobian(ielem, jelem, zx[ixgauss], x, 1);
-		
-		//Sum to the integral
-		for(icoeff=0; icoeff<ncoeff; icoeff++)
+		//Loop over the quadrature points on the right face
+		for(iygauss = 0; iygauss<ygpts; iygauss++)
 		{
-		    tintegral[ielem][jelem][icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss]*detJ;
+		    //Get the basis
+		    basis2D(1.0, zy[iygauss], basisy);
+		    //Get the value of determinant
+		    detJ = lineJacobian(ielem, jelem, zy[iygauss], y, 2);
+		    
+		    
+		    rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss]*detJ;
+		    
 		}
+
+		//Loop over the quadrature points on the left face
+		for(iygauss = 0; iygauss<ygpts; iygauss++)
+		{
+		    //Get the basis
+		    basis2D(-1.0, zy[iygauss], basisy);
+		    //Get the value of determinant
+		    detJ = lineJacobian(ielem, jelem, zy[iygauss], y, 2);
+		    
+		    
+		    leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss]*detJ;
+		}
+		
+		
+		
+		/*//Loop over the quadrature points in the top face
+		for(ixgauss=0; ixgauss<xgpts; ixgauss++)
+		{
+		    //Get the basis
+		    basis2D(zx[ixgauss], 1.0, basisx);
+		    //Get the value of determinant
+		    detJ = lineJacobian(ielem, jelem, zx[ixgauss], x, 1);
+		    
+		    //Sum to the integral
+		    
+		    tintegral[ielem][jelem][icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss]*detJ;
+		    
+		    }*/
+	    }
+
+	    for(icoeff=0; icoeff<ncoeff; icoeff++)
+	    {
+		rintegral[ielem][jelem][icoeff] =  rightInt[icoeff] - leftInt[icoeff];
 	    }
 	}
     }
@@ -388,9 +424,9 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 	{
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
-		integral[ielem][jelem][icoeff] += rintegral[ielem][jelem][icoeff] - rintegral[ielem-1][jelem][icoeff];
+		integral[ielem][jelem][icoeff] = rintegral[ielem][jelem][icoeff];// - rintegral[ielem-1][jelem][icoeff];
 
-		integral[ielem][jelem][icoeff] += tintegral[ielem][jelem][icoeff] - tintegral[ielem][jelem-1][icoeff];
+		//integral[ielem][jelem][icoeff] += tintegral[ielem][jelem][icoeff] - tintegral[ielem][jelem-1][icoeff];
 	    }
 	}
     }
@@ -438,6 +474,10 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
     deallocator1(&wy, ygpts);
     deallocator1(&basisx, ncoeff);
     deallocator1(&basisy, ncoeff);
+    deallocator1(&rightInt, ncoeff);
+    deallocator1(&leftInt, ncoeff);
+    deallocator1(&topInt, ncoeff);
+    deallocator1(&bottomInt, ncoeff);
     //------------------------------------------------------------------------//
 
     
