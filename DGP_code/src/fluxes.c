@@ -398,7 +398,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 
     //------------------------------------------------------------------------//
     //Check
-    for(ielem = 2; ielem<xelem-2; ielem++)
+    /*for(ielem = 2; ielem<xelem-2; ielem++)
     {
 	for(jelem =2; jelem<yelem-2; jelem++)
 	{
@@ -425,7 +425,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 	    printf("\n");
 	}
     }
-    exit(1);
+    exit(1);*/
     //------------------------------------------------------------------------//
     
     //------------------------------------------------------------------------//
