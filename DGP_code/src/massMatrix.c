@@ -146,16 +146,28 @@ void massmatrix(double **x, double **y, double ****mass)
     }
 
     //Check
-    /*printf("The mass matrix is\n");
-    for(Bi=0; Bi<(int)pow(polyorder+1,2.0); Bi++)
+    /*/printf("The mass matrix is\n");
+    for(i=2; i<xelem-2; i++)
     {
-	for(Bj=0; Bj<(int)pow(polyorder+1,2.0); Bj++)
+	for(j=2; j<yelem-2; j++)
 	{
-	    //if(mass[2][2][Bi][Bj] < 1e-8) mass[2][2][Bi][Bj]=0.0;
-	    printf("%.6f ",mass[2][2][Bi][Bj]);
+	    printf("%d %d ",i,j);
+	    for(Bi=0; Bi<(int)pow(polyorder+1,2.0); Bi++)
+	    {
+		for(Bj=0; Bj<(int)pow(polyorder+1,2.0); Bj++)
+		{
+		    if(Bi == Bj)
+		    {
+			printf("%.6f ",mass[2][2][Bi][Bj]);
+		    }
+		}
+		
+	    }
+	    printf("\n");
 	}
-	printf("\n");
-	}*/
+    }
+
+    exit(1);*/
     
     deallocator1(&basis, (int)pow(tgauss,2.0));
     deallocator1(&z1g, npz1);

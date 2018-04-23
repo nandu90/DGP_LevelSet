@@ -237,6 +237,7 @@ int main(int argc, char **argv)
     allocator3(&rhs, xelem, yelem, ncoeff);
 
     int iter = startstep;
+    int print_count = 1;
 
     FILE *out;
     if(myrank == master)
@@ -256,6 +257,7 @@ int main(int argc, char **argv)
 	output_xml(elem,startstep,x,y);
     }
 
+    
     //Time loop
     for(iter = startstep; iter < itermax; iter++)
     {
@@ -277,7 +279,15 @@ int main(int argc, char **argv)
 	level_setBC(elem.phi, elem.iBC);
 	
 	//Print out the paraview output
-	output_xml(elem,iter+1,x,y);
+	print_count++;
+        if(print_count == 1)
+        {
+            output_xml(elem,iter+1,x,y);
+        }
+        if(print_count == print_gap)
+        {
+            print_count = 0;
+        }
     }
     
     

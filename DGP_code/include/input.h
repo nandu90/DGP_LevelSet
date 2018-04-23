@@ -56,6 +56,7 @@ int time_control;
 //Solution Control
 int startstep;
 int itermax;
+int print_gap;
 //------------------------------------------------------------------------//
 
 

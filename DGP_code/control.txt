@@ -1,5 +1,5 @@
 /******************Basis Functions*****************/
-Basis_Order 0
+Basis_Order 1
 
 /******************Grid related Inputs*******************//
 
@@ -19,9 +19,9 @@ y_pos_of_bubble 25
 
 
 /****************Boundary Conditions**************/
-x-boundary no-slip
+//x-boundary no-slip
 //x-boundary slip
-//x-boundary periodic
+x-boundary periodic
 
 y-boundary no-slip
 //y-boundary slip
@@ -32,11 +32,12 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.01
+advect_deltat 0.05
 
 /***************Simulation Control**************/
 Start_step 0
 Max_Iterations 500
+print_gap 50
 
 
 /*****************Old Inputs*********************/
@@ -64,8 +65,6 @@ Surface_tension_coefficient 1.0
 Re_distance_timestep 0.005
 Re_distance_loops 15
 
-/******************Printing******************/
-print_gap 200
 
 
 /***************Other Control Parameters**************/

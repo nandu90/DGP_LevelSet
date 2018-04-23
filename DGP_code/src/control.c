@@ -98,6 +98,11 @@ void control()
 			quadtype=2;
 		    }
 		}
+		if(strcmp(word,"print_gap") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    print_gap = atoi(word);
+		}
 		/*if(strcmp(word,"advect_steps") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -159,11 +164,7 @@ void control()
 		    word = strtok(NULL,delim);
 		    re_loops = atoi(word);
 		}
-		if(strcmp(word,"print_gap") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    print_gap = atoi(word);
-		}
+		
 		if(strcmp(word,"Start_step") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -359,6 +360,7 @@ void control()
   MPI_Bcast(&startstep,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&itermax,1,MPI_INT,master,MPI_COMM_WORLD);
 
+  MPI_Bcast(&print_gap,1,MPI_INT,master,MPI_COMM_WORLD);
   
 /*MPI_Bcast(&nu,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   
@@ -381,7 +383,7 @@ void control()
 	MPI_Bcast(&re_time,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
 	MPI_Bcast(&re_loops,1,MPI_INT,master,MPI_COMM_WORLD);
 	
-	MPI_Bcast(&print_gap,1,MPI_INT,master,MPI_COMM_WORLD);
+	
 	
 	MPI_Bcast(&sf_toggle,1,MPI_INT,master,MPI_COMM_WORLD);
 	MPI_Bcast(&flow_solve,1,MPI_INT,master,MPI_COMM_WORLD);

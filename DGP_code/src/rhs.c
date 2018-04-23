@@ -48,7 +48,7 @@ void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs)
 	    {
 		rhs[ielem][jelem][icoeff] = domIntegral[ielem][jelem][icoeff] - boundIntegral[ielem][jelem][icoeff];
 
-		//rhs[ielem][jelem][icoeff] = - boundIntegral[ielem][jelem][icoeff];
+		//rhs[ielem][jelem][icoeff] = -boundIntegral[ielem][jelem][icoeff];
 	    }
 	}
     }

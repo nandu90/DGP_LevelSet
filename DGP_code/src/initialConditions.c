@@ -51,7 +51,7 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 	    //Get the vel values at the Cartesian Quadrature points
 	    for(k=0; k<tgauss; k++)
 	    {
-		us[k] = 1.0;
+		us[k] = -1.0;
 		vs[k] = 0.0;
 	    }
 	    //Solve the system to get the coefficients
@@ -105,7 +105,15 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 	    //Get the LS value at the Cartesian Quadrature points
 	    for(k=0; k<tgauss; k++)
 	    {
-		ls[k] = sqrt(pow(xb_in - xs[k][0],2.0) + pow(yb_in - xs[k][1],2.0)) - rb_in;
+		//ls[k] = sqrt(pow(xb_in - xs[k][0],2.0) + pow(yb_in - xs[k][1],2.0)) - rb_in;
+
+		//------------------------------------------------------------------------//
+		//2-D Gaussian hump
+		double sigmax = 25.0;
+		double sigmay = 25.0;
+		double term1 = 0.5*pow((xs[k][0] - xb_in)/sigmax,2.0);
+		double term2 = 0.5*pow((xs[k][1] - yb_in)/sigmay,2.0);
+		ls[k] = 1.0*exp(-(term1 + term2));
 	    }
 	    //Solve the system to get the coefficients
 	    solveSystem(vand, ls, elem.phi[i][j]);
