@@ -33,6 +33,7 @@ y-boundary no-slip
 max_CFL 0.01
 Time_control constant_time
 advect_deltat 0.05
+RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0

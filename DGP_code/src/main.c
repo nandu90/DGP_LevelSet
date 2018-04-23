@@ -233,8 +233,7 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
     }
-    double ***rhs;
-    allocator3(&rhs, xelem, yelem, ncoeff);
+   
 
     int iter = startstep;
     int print_count = 1;
@@ -257,6 +256,8 @@ int main(int argc, char **argv)
 	output_xml(elem,startstep,x,y);
     }
 
+    double ***rhs;
+    allocator3(&rhs, xelem, yelem, ncoeff);
     
     //Time loop
     for(iter = startstep; iter < itermax; iter++)
@@ -269,14 +270,8 @@ int main(int argc, char **argv)
 	    fprintf(out,"Step: %d Time: %.4f\n",iter+1, time);
 	}
 
-	//Get the Right hand side
-	getRHS(elem, x, y, rhs);
-
-	//Forward Euler
-	euler(elem.phi, elem.mass, rhs, deltat);
-
-	//Apply boundary conditions
-	level_setBC(elem.phi, elem.iBC);
+	//Time Integration
+	Runge_Kutta(elem, x, y,deltat,rhs);
 	
 	//Print out the paraview output
 	print_count++;
@@ -335,7 +330,7 @@ int main(int argc, char **argv)
     free(sendptr);
     free(recvptr);
 
-    //Time loop arrays
+    //Time arrays
     deallocator3(&rhs, xelem, yelem, ncoeff);
     //------------------------------------------------------------------------//
 

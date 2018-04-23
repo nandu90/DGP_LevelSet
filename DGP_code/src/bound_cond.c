@@ -8,7 +8,7 @@ Created: 2018-03-08
 
 #include "common.h"
 #include "icbc.h"
-
+#include "commu.h"
 
 
 void level_setBC(double ***scalar, int **iBC)
@@ -77,6 +77,9 @@ void level_setBC(double ***scalar, int **iBC)
 	    }
 	}
     }
+
+    //Finally do the communication
+    commu2(scalar);
 }
 
 
