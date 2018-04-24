@@ -5,8 +5,8 @@ Basis_Order 1
 
 xlen 150
 ylen 50
-xelem 150
-yelem 50
+xelem 75
+yelem 25
 
 /***************Gauss Quadrature********************/
 //Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE
@@ -32,13 +32,13 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.05
+advect_deltat 0.5
 RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 500
-print_gap 50
+Max_Iterations 1500
+print_gap 10
 
 
 /*****************Old Inputs*********************/

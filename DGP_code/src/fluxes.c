@@ -351,9 +351,9 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 
     //------------------------------------------------------------------------//
     //Loop over the elements
-    for(ielem = 2; ielem<xelem-2; ielem++)
+    for(ielem = 1; ielem<xelem-1; ielem++)
     {
-	for(jelem = 2; jelem<yelem-2; jelem++)
+	for(jelem = 1; jelem<yelem-1; jelem++)
 	{
 	    for(icoeff=0; icoeff < ncoeff; icoeff++)
 	    {
@@ -372,9 +372,11 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		    basis2D(1.0, zy[iygauss], basisy);
 		    //Get the value of determinant
 		    detJ = lineJacobian(ielem, jelem, zy[iygauss], y, 2);
+		    //detJ = mappingJacobianDeterminant(ielem,jelem, 1.0, zy[iygauss], x, y);
+
+		    //detJ = 1.0;
 		    
-		    
-		    rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss]*detJ;
+		    rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss];//*detJ;
 		    
 		}
 
@@ -385,14 +387,16 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		    basis2D(-1.0, zy[iygauss], basisy);
 		    //Get the value of determinant
 		    detJ = lineJacobian(ielem, jelem, zy[iygauss], y, 2);
+		    //detJ = mappingJacobianDeterminant(ielem,jelem, -1.0, zy[iygauss], x, y);
+
+		    //detJ = 1.0;
 		    
-		    
-		    leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss]*detJ;
+		    leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss];//*detJ;
 		}
 		
 		
 		
-		/*//Loop over the quadrature points in the top face
+		//Loop over the quadrature points in the top face
 		for(ixgauss=0; ixgauss<xgpts; ixgauss++)
 		{
 		    //Get the basis
@@ -400,16 +404,29 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		    //Get the value of determinant
 		    detJ = lineJacobian(ielem, jelem, zx[ixgauss], x, 1);
 		    
-		    //Sum to the integral
+		    //Sum to the integral		    
+		    topInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss];//*detJ;
 		    
-		    tintegral[ielem][jelem][icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss]*detJ;
+		}
+
+		//Loop over the quadrature points in the bottom face
+		for(ixgauss=0; ixgauss<xgpts; ixgauss++)
+		{
+		    //Get the basis
+		    basis2D(zx[ixgauss], -1.0, basisx);
+		    //Get the value of determinant
+		    detJ = lineJacobian(ielem, jelem, zx[ixgauss], x, 1);
 		    
-		    }*/
+		    //Sum to the integral		    
+		    bottomInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem-1][ixgauss];//*detJ;
+		    
+		}
 	    }
 
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
 		rintegral[ielem][jelem][icoeff] =  rightInt[icoeff] - leftInt[icoeff];
+		tintegral[ielem][jelem][icoeff] = topInt[icoeff] - bottomInt[icoeff];
 	    }
 	}
     }
@@ -424,9 +441,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 	{
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
-		integral[ielem][jelem][icoeff] = rintegral[ielem][jelem][icoeff];// - rintegral[ielem-1][jelem][icoeff];
-
-		//integral[ielem][jelem][icoeff] += tintegral[ielem][jelem][icoeff] - tintegral[ielem][jelem-1][icoeff];
+		integral[ielem][jelem][icoeff] = rintegral[ielem][jelem][icoeff] + tintegral[ielem][jelem][icoeff];
 	    }
 	}
     }

@@ -51,7 +51,7 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 	    //Get the vel values at the Cartesian Quadrature points
 	    for(k=0; k<tgauss; k++)
 	    {
-		us[k] = -1.0;
+		us[k] = 1.0;
 		vs[k] = 0.0;
 	    }
 	    //Solve the system to get the coefficients
