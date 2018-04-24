@@ -1,12 +1,12 @@
 /******************Basis Functions*****************/
-Basis_Order 1
+Basis_Order 2
 
 /******************Grid related Inputs*******************//
 
-xlen 100
-ylen 100
-xelem 100
-yelem 100
+xlen 150
+ylen 50
+xelem 75
+yelem 25
 
 /***************Gauss Quadrature********************/
 //Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE
@@ -19,9 +19,9 @@ y_pos_of_bubble 25
 
 
 /****************Boundary Conditions**************/
-x-boundary no-slip
+//x-boundary no-slip
 //x-boundary slip
-//x-boundary periodic
+x-boundary periodic
 
 y-boundary no-slip
 //y-boundary slip
@@ -37,13 +37,12 @@ RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 100
+Max_Iterations 1200
 print_gap 10
 
 /***************Particular CASES***************/
 //Case Gaussian_Wave
-//Case Circle
-Case zalesak
+Case Circle
 
 /*****************Old Inputs*********************/
 Start_step 0

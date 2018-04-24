@@ -307,30 +307,30 @@ void control()
 		    word = strtok(NULL,delim);
 		    startstep= atoi(word);
 		}
-		/*if(strcmp(word,"Case") == 0)
+		if(strcmp(word,"Case") == 0)
 		{
 		    word = strtok(NULL, delim);
-		    if(strcmp(word,"vortex\n") == 0)
+		    if(strcmp(word,"Gaussian_Wave\n") == 0)
 		    {
 			case_tog=1;
 		    }
-		    else if(strcmp(word,"bubble_rise\n") == 0)
+		    else if(strcmp(word,"Circle\n") == 0)
 		    {
 			case_tog=2;
 		    }
-		    else if(strcmp(word,"bubble_break\n") == 0)
+		    else if(strcmp(word,"zalesak\n") == 0)
 		    {
 			case_tog=3;
-		 }
-		    else if(strcmp(word,"zalesak\n") == 0)
+		    }
+		    /*else if(strcmp(word,"zalesak\n") == 0)
 		    {
 			case_tog=4;
 		    }
 		    else if(strcmp(word,"homework\n") == 0)
 		    {
 			case_tog=5;
-		    }
-		    }*/
+			}*/
+		}
 		word = strtok(NULL,delim);
 	    }
 	    
@@ -367,6 +367,8 @@ void control()
 
   MPI_Bcast(&print_gap,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&RKstages,1,MPI_INT,master,MPI_COMM_WORLD);
+
+  MPI_Bcast(&case_tog,1,MPI_INT,master,MPI_COMM_WORLD);
   
 /*MPI_Bcast(&nu,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   
@@ -406,7 +408,7 @@ void control()
 	
 	MPI_Bcast(&sol_type,1,MPI_INT,master,MPI_COMM_WORLD);
 	
-	MPI_Bcast(&case_tog,1,MPI_INT,master,MPI_COMM_WORLD);*/
+	*/
 	
 
   
