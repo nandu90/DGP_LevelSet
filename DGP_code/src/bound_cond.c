@@ -26,8 +26,8 @@ void level_setBC(double ***scalar, int **iBC)
 	    //Loop over the coefficients
 	    for(k=0; k<ncoeff; k++)
 	    {
-		if(iBC[1][j] == 2)scalar[1][j][k] = scalar[2][j][k];
-		if(iBC[xelem-2][j] == 2)scalar[xelem-2][j][k] = scalar[xelem-3][j][k];
+		if(iBC[1][j] == 2)scalar[0][j][k] = scalar[1][j][k];
+		if(iBC[xelem-2][j] == 2)scalar[xelem-1][j][k] = scalar[xelem-2][j][k];
 	    }
 	}
     }
@@ -56,8 +56,8 @@ void level_setBC(double ***scalar, int **iBC)
 	    //Loop over quadrature points
 	    for(k=0; k<ncoeff; k++)
 	    {
-		if(iBC[i][1] == 2)scalar[i][1][k] = scalar[i][2][k];
-		if(iBC[i][yelem-2] == 2)scalar[i][yelem-2][k] = scalar[i][yelem-3][k];
+		if(iBC[i][1] == 2)scalar[i][0][k] = scalar[i][1][k];
+		if(iBC[i][yelem-2] == 2)scalar[i][yelem-1][k] = scalar[i][yelem-2][k];
 	    }
 	} 
     }

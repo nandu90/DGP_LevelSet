@@ -46,9 +46,9 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
     
     //------------------------------------------------------------------------//
     //Loop over the elements
-    for(ielem = 2; ielem<xelem-2; ielem++)
+    for(ielem = 1; ielem<xelem-1; ielem++)
     {
-	for(jelem = 2; jelem<yelem-2; jelem++)
+	for(jelem = 1; jelem<yelem-1; jelem++)
 	{
 	    //Initialize integral to 0
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)

@@ -59,9 +59,9 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	allocator3(&temp, xelem, yelem, ncoeff);
 
 	
-	for(ielem=2; ielem<xelem-2; ielem++)
+	for(ielem=1; ielem<xelem-1; ielem++)
 	{
-	    for(jelem=2; jelem<yelem-2; jelem++)
+	    for(jelem=1; jelem<yelem-1; jelem++)
 	    {
 		for(icoeff=0; icoeff<ncoeff; icoeff++)
 		{
@@ -81,9 +81,9 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	//Forward Euler
 	euler(elem.phi, elem.mass, rhs, deltat);
 	
-	for(ielem=2; ielem<xelem-2; ielem++)
+	for(ielem=1; ielem<xelem-1; ielem++)
 	{
-	    for(jelem=2; jelem<yelem-2; jelem++)
+	    for(jelem=1; jelem<yelem-1; jelem++)
 	    {
 		for(icoeff=0; icoeff<ncoeff; icoeff++)
 		{
@@ -103,9 +103,9 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	double ***temp;
 	allocator3(&temp, xelem, yelem, ncoeff);
 
-	for(ielem=2; ielem<xelem-2; ielem++)
+	for(ielem=1; ielem<xelem-1; ielem++)
 	{
-	    for(jelem=2; jelem<yelem-2; jelem++)
+	    for(jelem=1; jelem<yelem-1; jelem++)
 	    {
 		for(icoeff=0; icoeff<ncoeff; icoeff++)
 		{
@@ -128,9 +128,9 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
 
-	for(ielem=2; ielem<xelem-2; ielem++)
+	for(ielem=1; ielem<xelem-1; ielem++)
 	{
-	    for(jelem=2; jelem<yelem-2; jelem++)
+	    for(jelem=1; jelem<yelem-1; jelem++)
 	    {
 		for(icoeff=0; icoeff<ncoeff; icoeff++)
 		{
@@ -146,9 +146,9 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	getRHS(elem, x, y, rhs);
 	//Forward Euler
 	euler(elem.phi, elem.mass, rhs, deltat);
-	for(ielem=2; ielem<xelem-2; ielem++)
+	for(ielem=1; ielem<xelem-1; ielem++)
 	{
-	    for(jelem=2; jelem<yelem-2; jelem++)
+	    for(jelem=1; jelem<yelem-1; jelem++)
 	    {
 		for(icoeff=0; icoeff<ncoeff; icoeff++)
 		{

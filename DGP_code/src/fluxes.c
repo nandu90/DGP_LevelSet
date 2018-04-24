@@ -244,9 +244,9 @@ void upwind(double ****recflux, double ****recu, double ***flux, int ngauss, int
     
     //------------------------------------------------------------------------//
     //Loop through elements
-    for(ielem=1; ielem < xelem-1; ielem++)
+    for(ielem=0; ielem < xelem-1; ielem++)
     {
-	for(jelem=1; jelem < yelem-1; jelem++)
+	for(jelem=0; jelem < yelem-1; jelem++)
 	{
 	    //Loop over Gauss Quadrature points
 	    for(igauss=0; igauss<ngauss; igauss++)

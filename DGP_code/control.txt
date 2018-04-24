@@ -5,7 +5,7 @@ Basis_Order 1
 
 xlen 150
 ylen 50
-xelem 75
+xelem 100
 yelem 25
 
 /***************Gauss Quadrature********************/
