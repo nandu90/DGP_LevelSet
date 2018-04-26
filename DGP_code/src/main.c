@@ -88,15 +88,18 @@ int main(int argc, char **argv)
     allocator2(&y,xnode,ynode);
 
     //Use the following if required
-    /*allocator2(&xc,xelem,yelem);
+    double **xc, **yc;
+    double **vol;
+    double ****area;
+    allocator2(&xc,xelem,yelem);
     allocator2(&yc,xelem,yelem);
     allocator2(&vol,xelem,yelem);
-    allocator4(&area,xelem,yelem,2,2);*/
+    allocator4(&area,xelem,yelem,2,2);
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Read grid
-    gridread(x,y);
+    gridread(x,y,area, vol, xc, yc);
     //------------------------------------------------------------------------//
 
       
@@ -269,7 +272,28 @@ int main(int argc, char **argv)
 
     double ***rhs;
     allocator3(&rhs, xelem, yelem, ncoeff);
+
+    //------------------------------------------------------------------------//
+    //Temporary variables for INS
+    double **utemp, **vtemp;
+    allocator2(&utemp, xelem, yelem);
+    allocator2(&vtemp, xelem, yelem);
+
+    double **ustar, **vstar;
+    allocator2(&ustar, xelem, yelem);
+    allocator2(&vstar, xelem, yelem);
     
+    int ielem, jelem;
+
+    double **rhsx, **rhsy;
+    allocator2(&rhsx, xelem, yelem);
+    allocator2(&rhsy, xelem, yelem);
+
+    double **st_forcex, **st_forcey;
+    allocator2(&st_forcex, xelem, yelem);
+    allocator2(&st_forcey, xelem, yelem);
+    //------------------------------------------------------------------------//
+
     //Time loop
     for(iter = startstep; iter < itermax; iter++)
     {
@@ -281,8 +305,106 @@ int main(int argc, char **argv)
 	    fprintf(out,"Step: %d Time: %.4f\n",iter+1, time);
 	}
 
-	//Time Integration
+	if(flow_solve == 1)
+	{
+	    if(myrank == master)printf("Solving Flow\n");
+
+	    //------------------------------------------------------------------------//
+	    //Assign velocities to utemp, vtemp
+	    //Note that the first coefficient gives the velocity at the centroid
+	    for(ielem=1; ielem<xelem-1; ielem++)
+	    {
+		for(jelem=1; jelem<yelem-1; jelem++)
+		{
+		    utemp[ielem][jelem] = elem.u[ielem][jelem][0];
+		    vtemp[ielem][jelem] = elem.v[ielem][jelem][0];
+		}
+	    }
+	    //------------------------------------------------------------------------//
+
+	    //------------------------------------------------------------------------//
+	    //Get  RHS
+	    rhscalc(elem, rhsx, rhsy, area, vol, elem.iBC);
+	    //------------------------------------------------------------------------//
+
+	    //------------------------------------------------------------------------//
+	    //Predictor Step
+	    for(ielem=1; ielem<xelem-1; ielem++)
+	    {
+		for(jelem=1; jelem<yelem-1; jelem++)
+		{
+		    ustar[ielem][jelem] = elem.u[ielem][jelem][0] + deltat*rhsx[ielem][jelem];
+		    vstar[ielem][jelem] = elem.v[ielem][jelem][0] + deltat*rhsy[ielem][jelem];
+		}
+	    }
+
+	    INScommu2(ustar);
+	    INScommu2(vstar);
+	    vel_BC(ustar, vstar, elem.iBC);
+	    //------------------------------------------------------------------------//
+
+	    //------------------------------------------------------------------------//
+	    //Add in contributions from body and surface tension force
+	    surface(elem, st_forcex, st_forcey, area);
+	    body(elem, st_forcex, st_forcey, vol);	    
+	    //------------------------------------------------------------------------//
+
+	    //------------------------------------------------------------------------//
+	    //Solve the pressure Poisson equation
+	    variable_pressure(ustar, vstar, elem.p, deltat, elem.rho, st_forcex, st_forcey, area, vol, elem.iBC);
+	    //------------------------------------------------------------------------//
+
+	    //------------------------------------------------------------------------//
+	    //Projection Step
+	    for(ielem=2; ielem<xelem-2; ielem++)
+	    {
+		for(jelem=2; jelem<yelem-2; jelem++)
+		{
+		    ustar[ielem][jelem] = ustar[ielem][jelem] - deltat*((2.0/(elem.rho[ielem][jelem]+elem.rho[ielem+1][jelem]))*((elem.p[ielem+1][jelem]-elem.p[ielem][jelem])/area[ielem][jelem][1][1] + 0.5*(st_forcex[ielem+1][jelem]+st_forcex[ielem][jelem])));
+                    vstar[ielem][jelem] = vstar[ielem][jelem] - deltat*((2.0/(elem.rho[ielem][jelem]+elem.rho[ielem][jelem+1]))*((elem.p[ielem][jelem+1]-elem.p[ielem][jelem])/area[ielem][jelem][0][0] + 0.5*(st_forcey[ielem][jelem+1]+st_forcey[ielem][jelem])));
+		}
+	    }
+
+	    INScommu2(ustar);
+	    INScommu2(vstar);
+	    vel_BC(ustar, vstar, elem.iBC);
+
+	    //Assign to elem vectors
+	    for(ielem=0; ielem<xelem; ielem++)
+	    {
+		for(jelem=0; jelem<yelem; jelem++)
+		{
+		    elem.u[ielem][jelem][0] = ustar[ielem][jelem];
+		    elem.v[ielem][jelem][0] = vstar[ielem][jelem];
+		}
+	    }
+	    //------------------------------------------------------------------------//
+
+	}
+
+	//------------------------------------------------------------------------//
+	//Level-Set advection
 	Runge_Kutta(elem, x, y,deltat,rhs);
+	//------------------------------------------------------------------------//
+
+	//------------------------------------------------------------------------//
+	//Redistancing
+	if(redist_method == 1)
+	{
+	    //Copy the high order LS field onto the lower order one for re-distancing
+	    for(ielem=0; ielem<xelem; ielem++)
+	    {
+		for(jelem=0; jelem<yelem; jelem++)
+		{
+		    elem.phi2[ielem][jelem] = elem.phi[ielem][jelem][0];
+		}
+	    }
+
+	    
+	}
+	//------------------------------------------------------------------------//
+
+
 	
 	//Print out the paraview output
 	print_count++;
@@ -328,10 +450,10 @@ int main(int argc, char **argv)
     deallocator2(&y,xnode,ynode);
 
     //Use the following if required
-    /*deallocator2(&xc,xelem,yelem);
+    deallocator2(&xc,xelem,yelem);
     deallocator2(&yc,xelem,yelem);
     deallocator2(&vol,xelem,yelem);
-    deallocator4(&area,xelem,yelem,2,2);*/
+    deallocator4(&area,xelem,yelem,2,2);
 
     //IO array
     ideallocator2(&io_info,nprocs,4);
@@ -347,6 +469,16 @@ int main(int argc, char **argv)
 
     //Time arrays
     deallocator3(&rhs, xelem, yelem, ncoeff);
+
+    //INS related
+    deallocator2(&utemp, xelem, yelem);
+    deallocator2(&vtemp, xelem, yelem);
+    deallocator2(&ustar, xelem, yelem);
+    deallocator2(&vstar, xelem, yelem);
+    deallocator2(&rhsx, xelem, yelem);
+    deallocator2(&rhsy, xelem, yelem);
+    deallocator2(&st_forcex, xelem, yelem);
+    deallocator2(&st_forcey, xelem, yelem);
     //------------------------------------------------------------------------//
 
     

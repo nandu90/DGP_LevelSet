@@ -8,7 +8,7 @@ Created: 2018-03-04
 #include "common.h"
 #include "mesh.h"
 
-void gridread(double **x, double **y)
+void gridread(double **x, double **y, double ****area, double **vol, double **xc, double **yc)
 {
     int i,j;
     double deltax=xlen/(gxelem);
@@ -72,7 +72,7 @@ void gridread(double **x, double **y)
     //------------------------------------------------------------------------//
     //I don't think i require the following anymore. If needed just uncomment
     //Area components of faces of parallelogram
-    /*for(i=0; i<xelem; i++)
+    for(i=0; i<xelem; i++)
     {
         for(j=0; j<yelem; j++)
         {
@@ -91,19 +91,19 @@ void gridread(double **x, double **y)
             double a=sqrt(pow(x[i][j]-x[i+1][j],2)+pow(y[i][j]-y[i+1][j],2));
             double b=sqrt(pow(x[i+1][j+1]-x[i+1][j],2)+pow(y[i+1][j+1]-y[i+1][j],2));
             double c=sqrt(pow(x[i][j]-x[i+1][j+1],2)+pow(y[i][j]-y[i+1][j+1],2));
-            double s=(a+b+c)/2;
+            double s=(a+b+c)/2.0;
             vol[i][j]=sqrt(s*(s-a)*(s-b)*(s-c));
 
             double a1=sqrt(pow(x[i][j]-x[i][j+1],2)+pow(y[i][j]-y[i][j+1],2));
             double b1=sqrt(pow(x[i][j+1]-x[i+1][j+1],2)+pow(y[i][j+1]-y[i+1][j+1],2));
-            double s1=(a1+b1+c)/2;
+            double s1=(a1+b1+c)/2.0;
             vol[i][j]=vol[i][j]+sqrt(s1*(s1-a1)*(s1-b1)*(s1-c));
 
             //////Centroid of cell///////
             xc[i][j]=0.25*(x[i][j]+x[i+1][j]+x[i+1][j+1]+x[i][j+1]);
             yc[i][j]=0.25*(y[i][j]+y[i+1][j]+y[i+1][j+1]+y[i][j+1]);
         }
-	}*/
+    }
 
     //printf("X and y limits in %d with m x n = %d %d are: %.5f %.5f %.5f %.5f\n",myrank+1,xelem-2, yelem-2,x[0][0], x[xnode-1][0], y[0][0],y[0][ynode-1]);
 }

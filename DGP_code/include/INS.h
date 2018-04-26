@@ -20,4 +20,31 @@ void initializeINS(struct elemsclr);
 void INSlevel_setBC(double **, int **);
 
 void INSinitialize(struct elemsclr);
+
+void rhscalc(struct elemsclr, double **, double **, double ****, double **, int **);
+
+void flux(double , double , double , double , double , double , double , double , int , double *, double *);
+
+void vel_BC(double **, double **, int **);
+
+void grad_level_setBC(double **, int **);
+
+void surface(struct elemsclr, double **, double **, double ****);
+
+void body(struct elemsclr, double **, double **, double **);
+
+void variable_pressure(double **, double **, double **, double , double **, double **, double **, double ****, double **, int **);
+
+void pointJacobi(double ***, double **, double **, int **, double **);
+
+void pressureBC(double **, int **);
+
+void grad_func(double **, double **, double ****, int **);
+
+void delta_func(double **, double **, double);
+
+void hyperbolic(struct elemsclr, double ****);
+
+void rhs_redist2(double **, double **, double **, double ****);
+
 #endif
