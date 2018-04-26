@@ -132,6 +132,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 {
     int i,j,k,l;
 
+    int ielem, jelem, icoeff;
+    
     //Allocate solution vector - known soln at Gauss quadrature points
     double *us, *vs;
     allocator1(&us, tgauss);
@@ -189,6 +191,19 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
     }
 
     //------------------------------------------------------------------------//
+    //For now we consider velocities to be of finite volume nature. Cancel out the gradients
+    for(ielem=0; ielem<xelem; ielem++)
+    {
+	for(jelem=0; jelem<yelem; jelem++)
+	{
+	    for(icoeff=1; icoeff<ncoeff; icoeff++)
+	    {
+		elem.u[ielem][jelem][icoeff] = 0.0;
+		elem.v[ielem][jelem][icoeff] = 0.0;
+	    }
+	}
+    }	    
+    //------------------------------------------------------------------------//
     //Deallocators
     deallocator1(&us, tgauss);
     deallocator1(&vs, tgauss);
@@ -230,7 +245,12 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     //Allocate coordinate matrix corresponding to zs - solution points
     double **xs;
     allocator2(&xs, tgauss, 2);
-    
+
+    //------------------------------------------------------------------------//
+    double line = 2.5*2.0*rb_in;
+    double temp;
+    //------------------------------------------------------------------------//
+
         
     for (i=0; i<xelem; i++)
     {
@@ -253,7 +273,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 			double term2 = 0.5*pow((xs[k][1] - yb_in)/sigmay,2.0);
 			ls[k] = 1.0*exp(-(term1 + term2));
 		}
-		else if(case_tog == 2)
+		else if(case_tog == 2 || case_tog == 4)
 		{
 		    ls[k] = sqrt(pow(xb_in - xs[k][0],2.0) + pow(yb_in - xs[k][1],2.0)) - rb_in;
 		}
@@ -261,7 +281,16 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		{
 		    ls[k] = zalesak(xs[k][0], xs[k][1]);
 		}
-	       
+
+		//Bubble breakup case
+		if(case_tog == 4)
+		{
+		    temp = line - xs[k][1];
+		    if(temp < ls[k])
+		    {
+			ls[k] = temp;
+		    }
+		}
 		//------------------------------------------------------------------------//
 
 	    }

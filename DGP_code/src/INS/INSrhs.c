@@ -27,7 +27,7 @@ void flux(double u1R, double u1L, double u1T, double u1B, double u2R, double u2L
 
 
 
-void rhscalc(struct elemsclr sclr, double **rhsx, double **rhsy, double ****area, double **vol, int **iBC)
+void rhscalc(struct elemsclr sclr, double **rhsx, double **rhsy, double ****area, double **vol, int **iBC, double **u, double **v)
 {
 
 
@@ -40,48 +40,50 @@ void rhscalc(struct elemsclr sclr, double **rhsx, double **rhsy, double ****area
   allocator2(&advx, xelem, yelem);
   allocator2(&advy, xelem, yelem);
 
+  double flux1=0.0, flux2=0.0;
+  
     for(i=1; i<xelem-2; i++)
     {
         for(j=2; j<yelem-2; j++)
         {
             //Calculate the velocities at the edge centers of CV
-            double u1R, u1L;
-            double u1T, u1B;
-            double u2R, u2L;
-            double u2T, u2B;
+            double u1R=0.0, u1L=0.0;
+            double u1T=0.0, u1B=0.0;
+            double u2R=0.0, u2L=0.0;
+            double u2T=0.0, u2B=0.0;
 
-            double u1LL, u1RR;
+            double u1LL=0.0, u1RR=0.0;
 
-            u1R = sclr.u[i+1][j][0];
-            u1L = sclr.u[i][j][0];
+            u1R = u[i+1][j];
+            u1L = u[i][j];
 
-            u1T = sclr.v[i+1][j][0];
-            u1B = sclr.v[i+1][j-1][0];
+            u1T = v[i+1][j];
+            u1B = v[i+1][j-1];
 
-            u2R = sclr.v[i+1][j][0];
-            u2L = sclr.v[i][j][0];
+            u2R = v[i+1][j];
+            u2L = v[i][j];
 
-            u2T = sclr.u[i][j+1][0];
-            u2B = sclr.u[i][j][0];
+            u2T = u[i][j+1];
+            u2B = u[i][j];
 
             if(i==1)
             {
-                u1LL = sclr.u[xelem-3][j][0];
-                u1RR = sclr.u[i+2][j][0];
+                u1LL = u[xelem-3][j];
+                u1RR = u[i+2][j];
             }
             else if(i==xelem-3)
             {
-                u1LL = sclr.u[i-1][j][0];
-                u1RR = sclr.u[2][j][0];
+                u1LL = u[i-1][j];
+                u1RR = u[2][j];
             }
             else
             {
-                u1LL = sclr.u[i-1][j][0];
-                u1RR = sclr.u[i+2][j][0];
+                u1LL = u[i-1][j];
+                u1RR = u[i+2][j];
             }
 
 
-            double flux1, flux2;
+            
             flux(u1R, u1L, u1T, u1B, u2R, u2L, u2T, u2B, 1, &flux1, &flux2);
             //quick(u1R, u1L, u1T, u1B, u2R, u2L, u2T, u2B, u1LL, u1RR, 1, flux1, flux2);
             advx[i][j]=(area[i][j][0][0]*flux1 + area[i][j][1][1]*flux2)/vol[i][j];
@@ -93,43 +95,42 @@ void rhscalc(struct elemsclr sclr, double **rhsx, double **rhsy, double ****area
     {
         for (j=1; j< yelem-2; j++)
         {
-            double v1R, v1L;
-            double v1T, v1B;
-            double v2R, v2L;
-            double v2T, v2B;
+            double v1R=0.0, v1L=0.0;
+            double v1T=0.0, v1B=0.0;
+            double v2R=0.0, v2L=0.0;
+            double v2T=0.0, v2B=0.0;
 
-            double v2TT, v2BB;
+            double v2TT=0.0, v2BB=0.0;
 
-            v1R = sclr.v[i+1][j][0];
-            v1L = sclr.v[i][j][0];
+            v1R = v[i+1][j];
+            v1L = v[i][j];
 
-            v1T = sclr.u[i][j+1][0];
-            v1B = sclr.u[i][j][0];
+            v1T = u[i][j+1];
+            v1B = u[i][j];
 
-            v2R = sclr.u[i][j+1][0];
-            v2L = sclr.u[i-1][j+1][0];
+            v2R = u[i][j+1];
+            v2L = u[i-1][j+1];
 
-            v2T = sclr.v[i][j+1][0];
-            v2B = sclr.v[i][j][0];
+            v2T = v[i][j+1];
+            v2B = v[i][j];
 
             if(j==1)
             {
-                v2TT = sclr.v[i][j+2][0];
+                v2TT = v[i][j+2];
                 v2BB = 0.0;
             }
             else if(j==yelem-3)
             {
                 v2TT = 0.0;
-                v2BB = sclr.v[i][j-1][0];
+                v2BB = v[i][j-1];
             }
             else
             {
-                v2TT = sclr.v[i][j+2][0];
-                v2BB = sclr.v[i][j-1][0];
+                v2TT = v[i][j+2];
+                v2BB = v[i][j-1];
             }
 
 
-            double flux1, flux2;
             flux(v1R, v1L, v1T, v1B, v2R, v2L, v2T, v2B, 2, &flux1, &flux2);
             //quick(v1R, v1L, v1T, v1B, v2R, v2L, v2T, v2B, v2BB, v2TT, 2, flux1, flux2);
             advy[i][j]=(area[i][j][0][0]*flux1 + area[i][j][1][1]*flux2)/vol[i][j];
@@ -147,51 +148,51 @@ void rhscalc(struct elemsclr sclr, double **rhsx, double **rhsy, double ****area
         for(j=2; j<yelem-2; j++)
         {
             //Simple taylor series approximation of second diff is used
-            double u, uR, uL, uT, uB;
+            double uc=0.0, uR=0.0, uL=0.0, uT=0.0, uB=0.0;
             if (i == 1)
             {
-                u = sclr.u[i][j][0];
-                uR = sclr.u[i+1][j][0];
+                uc = u[i][j];
+                uR = u[i+1][j];
                 if(x_bound == 1)
                 {
 		  if(iBC[i][j]==2)
 		    {
-		      uL = -sclr.u[i+1][j][0];
+		      uL = -u[i+1][j];
 		    }
 		  else
 		    {
-		      uL = sclr.u[i-1][j][0];
+		      uL = u[i-1][j];
 		    }
                 }
                 else if(x_bound == 2)
                 {
 		  if(iBC[i][j]==2)
 		    {
-		      uL = sclr.u[i+1][j][0];
+		      uL = u[i+1][j];
 		    }
 		  else
 		    {
-		      uL = sclr.u[i-1][j][0];
+		      uL = u[i-1][j];
 		    }
                 }
                 else if(x_bound == 3)
                 {
-                    uL = sclr.u[xelem-3][j][0];
+                    uL = u[xelem-3][j];
                 }
 
-                uT = sclr.u[i][j+1][0];
-                uB = sclr.u[i][j-1][0];
+                uT = u[i][j+1];
+                uB = u[i][j-1];
             }
             else
             {
-                u = sclr.u[i][j][0];
-                uR = sclr.u[i+1][j][0];
-                uL = sclr.u[i-1][j][0];
-                uT = sclr.u[i][j+1][0];
-                uB = sclr.u[i][j-1][0];
+                uc = u[i][j];
+                uR = u[i+1][j];
+                uL = u[i-1][j];
+                uT = u[i][j+1];
+                uB = u[i][j-1];
             }
 
-            diffx[i][j] = ((sclr.mu[i+1][j] + sclr.mu[i][j])/(sclr.rho[i+1][j] + sclr.rho[i][j]))*((uR + uL - 2.0*u)/pow(area[i][j][1][1],2.0) + (uT + uB - 2.0*u)/pow(area[i][j][0][0],2.0));
+            diffx[i][j] = ((sclr.mu[i+1][j] + sclr.mu[i][j])/(sclr.rho[i+1][j] + sclr.rho[i][j]))*((uR + uL - 2.0*uc)/pow(area[i][j][1][1],2.0) + (uT + uB - 2.0*uc)/pow(area[i][j][0][0],2.0));
         }
     }
 
@@ -200,13 +201,13 @@ void rhscalc(struct elemsclr sclr, double **rhsx, double **rhsy, double ****area
         for(j=1; j<yelem-2; j++)
         {
             //Simple taylor series approximation of second diff is used
-            double v, vR, vL, vT, vB;
+            double vc=0.0, vR=0.0, vL=0.0, vT=0.0, vB=0.0;
             if (j == 1)
             {
-                v = sclr.v[i][j][0];
-                vR = sclr.v[i+1][j][0];
-                vL = sclr.v[i-1][j][0];
-                vT = sclr.v[i][j+1][0];
+                vc = v[i][j];
+                vR = v[i+1][j];
+                vL = v[i-1][j];
+                vT = v[i][j+1];
                 if(y_bound == 1)
                 {
 		  if(iBC[i][j]==2)
@@ -216,7 +217,7 @@ void rhscalc(struct elemsclr sclr, double **rhsx, double **rhsy, double ****area
 		    }
 		  else
 		    {
-		      vB = sclr.v[i][j-1][0];
+		      vB = v[i][j-1];
 		    }
                 }
                 else if(y_bound == 2)
@@ -228,24 +229,24 @@ void rhscalc(struct elemsclr sclr, double **rhsx, double **rhsy, double ****area
 		    }
 		  else
 		    {
-		      vB = sclr.v[i][j-1][0];
+		      vB = v[i][j-1];
 		    }
                 }
                 else if(y_bound == 3)
                 {
-                    vB = sclr.v[i][yelem-3][0];
+                    vB = v[i][yelem-3];
                 }
 
             }
             else
             {
-                v = sclr.v[i][j][0];
-                vR = sclr.v[i+1][j][0];
-                vL = sclr.v[i-1][j][0];
-                vT = sclr.v[i][j+1][0];
-                vB = sclr.v[i][j-1][0];
+                vc = v[i][j];
+                vR = v[i+1][j];
+                vL = v[i-1][j];
+                vT = v[i][j+1];
+                vB = v[i][j-1];
             }
-            diffy[i][j] = ((sclr.mu[i][j+1] + sclr.mu[i][j])/(sclr.rho[i][j+1] + sclr.rho[i][j]))*((vR + vL - 2.0*v)/pow(area[i][j][1][1],2.0) + (vT + vB - 2.0*v)/pow(area[i][j][0][0],2.0));
+            diffy[i][j] = ((sclr.mu[i][j+1] + sclr.mu[i][j])/(sclr.rho[i][j+1] + sclr.rho[i][j]))*((vR + vL - 2.0*vc)/pow(area[i][j][1][1],2.0) + (vT + vB - 2.0*vc)/pow(area[i][j][0][0],2.0));
         }
     }
 

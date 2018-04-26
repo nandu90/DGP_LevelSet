@@ -21,7 +21,7 @@ void INSlevel_setBC(double **, int **);
 
 void INSinitialize(struct elemsclr);
 
-void rhscalc(struct elemsclr, double **, double **, double ****, double **, int **);
+void rhscalc(struct elemsclr, double **, double **, double ****, double **, int **, double **, double **);
 
 void flux(double , double , double , double , double , double , double , double , int , double *, double *);
 
@@ -43,8 +43,10 @@ void grad_func(double **, double **, double ****, int **);
 
 void delta_func(double **, double **, double);
 
+void rhs_redist2(double **, double **, double **, double ****, int **);
+
 void hyperbolic(struct elemsclr, double ****);
 
-void rhs_redist2(double **, double **, double **, double ****);
+
 
 #endif

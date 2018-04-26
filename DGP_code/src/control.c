@@ -260,11 +260,11 @@ void control()
 		    {
 			case_tog=3;
 		    }
-		    /*else if(strcmp(word,"zalesak\n") == 0)
+		    else if(strcmp(word,"bubble_break\n") == 0)
 		    {
 			case_tog=4;
 		    }
-		    else if(strcmp(word,"homework\n") == 0)
+		    /*else if(strcmp(word,"homework\n") == 0)
 		    {
 			case_tog=5;
 			}*/

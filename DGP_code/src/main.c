@@ -275,9 +275,9 @@ int main(int argc, char **argv)
 
     //------------------------------------------------------------------------//
     //Temporary variables for INS
-    double **utemp, **vtemp;
-    allocator2(&utemp, xelem, yelem);
-    allocator2(&vtemp, xelem, yelem);
+    double **uedge, **vedge;
+    allocator2(&uedge, xelem, yelem);
+    allocator2(&vedge, xelem, yelem);
 
     double **ustar, **vstar;
     allocator2(&ustar, xelem, yelem);
@@ -292,6 +292,8 @@ int main(int argc, char **argv)
     double **st_forcex, **st_forcey;
     allocator2(&st_forcex, xelem, yelem);
     allocator2(&st_forcey, xelem, yelem);
+
+    double uL, uR, vT, vB;
     //------------------------------------------------------------------------//
 
     //Time loop
@@ -310,21 +312,39 @@ int main(int argc, char **argv)
 	    if(myrank == master)printf("Solving Flow\n");
 
 	    //------------------------------------------------------------------------//
-	    //Assign velocities to utemp, vtemp
 	    //Note that the first coefficient gives the velocity at the centroid
+	    //Upwind and assign velocities to uedge, vedge
 	    for(ielem=1; ielem<xelem-1; ielem++)
 	    {
 		for(jelem=1; jelem<yelem-1; jelem++)
 		{
-		    utemp[ielem][jelem] = elem.u[ielem][jelem][0];
-		    vtemp[ielem][jelem] = elem.v[ielem][jelem][0];
+		    uL = elem.u[ielem][jelem][0];
+		    uR = elem.u[ielem+1][jelem][0];
+		    if(uL > uR)
+		    {
+			uedge[ielem][jelem] = uL;
+		    }
+		    else
+		    {
+			uedge[ielem][jelem] = uR;
+		    }
+		    vB = elem.v[ielem][jelem][0];
+		    vT = elem.v[ielem][jelem+1][0];
+		    if(vB > vT)
+		    {
+			vedge[ielem][jelem] = vB;
+		    }
+		    else
+		    {
+			vedge[ielem][jelem] = vT;
+		    }
 		}
 	    }
 	    //------------------------------------------------------------------------//
 
 	    //------------------------------------------------------------------------//
 	    //Get  RHS
-	    rhscalc(elem, rhsx, rhsy, area, vol, elem.iBC);
+	    rhscalc(elem, rhsx, rhsy, area, vol, elem.iBC, uedge, vedge);
 	    //------------------------------------------------------------------------//
 
 	    //------------------------------------------------------------------------//
@@ -333,8 +353,8 @@ int main(int argc, char **argv)
 	    {
 		for(jelem=1; jelem<yelem-1; jelem++)
 		{
-		    ustar[ielem][jelem] = elem.u[ielem][jelem][0] + deltat*rhsx[ielem][jelem];
-		    vstar[ielem][jelem] = elem.v[ielem][jelem][0] + deltat*rhsy[ielem][jelem];
+		    ustar[ielem][jelem] = uedge[ielem][jelem] + deltat*rhsx[ielem][jelem];
+		    vstar[ielem][jelem] = vedge[ielem][jelem] + deltat*rhsy[ielem][jelem];
 		}
 	    }
 
@@ -370,12 +390,15 @@ int main(int argc, char **argv)
 	    vel_BC(ustar, vstar, elem.iBC);
 
 	    //Assign to elem vectors
-	    for(ielem=0; ielem<xelem; ielem++)
+	    for(ielem=1; ielem<xelem; ielem++)
 	    {
-		for(jelem=0; jelem<yelem; jelem++)
+		for(jelem=1; jelem<yelem; jelem++)
 		{
-		    elem.u[ielem][jelem][0] = ustar[ielem][jelem];
-		    elem.v[ielem][jelem][0] = vstar[ielem][jelem];
+		    uedge[ielem][jelem] = ustar[ielem][jelem];
+		    vedge[ielem][jelem] = vstar[ielem][jelem];
+
+		    elem.u[ielem][jelem][0] = 0.5*(uedge[ielem][jelem] + uedge[ielem-1][jelem]);
+		    elem.v[ielem][jelem][0] = 0.5*(uedge[ielem][jelem] + uedge[ielem][jelem-1]);
 		}
 	    }
 	    //------------------------------------------------------------------------//
@@ -400,10 +423,11 @@ int main(int argc, char **argv)
 		}
 	    }
 
-	    
+	    hyperbolic(elem, area);
 	}
 	//------------------------------------------------------------------------//
 
+	
 
 	
 	//Print out the paraview output
@@ -471,8 +495,8 @@ int main(int argc, char **argv)
     deallocator3(&rhs, xelem, yelem, ncoeff);
 
     //INS related
-    deallocator2(&utemp, xelem, yelem);
-    deallocator2(&vtemp, xelem, yelem);
+    deallocator2(&uedge, xelem, yelem);
+    deallocator2(&vedge, xelem, yelem);
     deallocator2(&ustar, xelem, yelem);
     deallocator2(&vstar, xelem, yelem);
     deallocator2(&rhsx, xelem, yelem);

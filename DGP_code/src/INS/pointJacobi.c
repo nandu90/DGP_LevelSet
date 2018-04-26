@@ -21,7 +21,7 @@ void pointJacobi(double ***a, double **b, double **p, int **iBC, double **vol)
   allocator2(&delp, xelem, yelem);
   allocator2(&d, xelem, yelem);
 
-    double ires;
+    double ires = 0.0;
     double resnorm=0.0;
 
     for(j=0; j<yelem; j++)

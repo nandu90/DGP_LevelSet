@@ -8,6 +8,7 @@ Created: 2018-04-25
 #include "common.h"
 #include "INS.h"
 #include "memory.h"
+#include "generalFunc.h"
 
 double minmod(double a, double b)
 {
@@ -44,7 +45,7 @@ double signof(double a)
     return result;
 }
 
-void rhs_redist2(double **rhs, double **phi2, double **phi, double ****area)
+void rhs_redist2(double **rhs, double **phi2, double **phi, double ****area, int **iBC)
 {
     double **dxbarplus;
     double **dxbarminus;
@@ -56,11 +57,17 @@ void rhs_redist2(double **rhs, double **phi2, double **phi, double ****area)
 
     int i,j;
 
+    double temp_phi[5];
+    for(i=0; i<5; i++)
+    {
+	temp_phi[i] = 0.0;
+    }
+    
     for(i=2; i<xelem-2; i++)
     {
         for(j=2; j<yelem-2; j++)
         {
-            double temp_phi[5];
+            
             if(i == 2)
             {
                 temp_phi[2] = phi2[i][j];
@@ -143,11 +150,15 @@ void rhs_redist2(double **rhs, double **phi2, double **phi, double ****area)
     allocator2(&dybarminus, xelem, yelem);
     allocator2(&dybar, xelem, yelem);
 
+    for(i=0; i<5; i++)
+    {
+	temp_phi[i] = 0.0;
+    }
+    
     for(i=2; i<xelem-2; i++)
     {
         for(j=2; j<yelem-2; j++)
         {
-            double temp_phi[5];
             if(j == 2)
             {
                 temp_phi[2] = phi2[i][j];

@@ -7,11 +7,10 @@ Created: 2018-04-25
 
 
 #include "common.h"
-#include "INS.h"
 #include "memory.h"
 #include "commu.h"
 #include "generalFunc.h"
-
+#include "INS.h"
 
 void hyperbolic(struct elemsclr sclr, double ****area)
 {
@@ -34,9 +33,9 @@ void hyperbolic(struct elemsclr sclr, double ****area)
     
      double deltat=re_time;
     
-    double ires=0.0;  
+     //double ires=0.0;  
     
-    bool exitflag = false;
+     //bool exitflag = false;
     
     /****Heavyside and delta functions for volume constraint***/
     double **H, **delta, **grad_phi;
@@ -83,7 +82,7 @@ void hyperbolic(struct elemsclr sclr, double ****area)
         /*****Now onto calculating fluxes******/
 	
         
-        rhs_redist2(rhs, phi2, sclr.phi2, area);
+        rhs_redist2(rhs, phi2, sclr.phi2, area, sclr.iBC);
         
         
         
@@ -110,7 +109,7 @@ void hyperbolic(struct elemsclr sclr, double ****area)
 	
 	
         //Calculate the star fluxes
-        rhs_redist2(rhstar, phistar, sclr.phi2, area);
+        rhs_redist2(rhstar, phistar, sclr.phi2, area, sclr.iBC);
         
         for(i=2; i<xelem-2; i++)
         {

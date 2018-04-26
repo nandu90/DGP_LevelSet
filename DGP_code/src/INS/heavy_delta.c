@@ -8,6 +8,7 @@ Created: 2018-04-25
 
 #include "common.h"
 #include "INS.h"
+#include "memory.h"
 
 void find_density_visc(double **H, double **rho, double **mu)
 {
