@@ -1,5 +1,5 @@
 /******************Basis Functions*****************/
-Basis_Order 1
+Basis_Order 2
 
 /******************Grid related Inputs*******************//
 
@@ -32,7 +32,7 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.01
+advect_deltat 0.0001
 RK_Stages 3
 
 /***************Simulation Control**************/
@@ -69,8 +69,8 @@ Tolerance_p 1e-2
 
 /*****************Re-distancing control*****************/
 Re-distance_method 1               #0 - off; 1 - hyperbolic; 2 - fastmarch; 3 - direct
-Re_distance_timestep 1.0E-04
-Re_distance_loops 5
+Re_distance_timestep 1.0E-03
+Re_distance_loops 20
 
 
 

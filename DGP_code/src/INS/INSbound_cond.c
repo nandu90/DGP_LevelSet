@@ -18,8 +18,8 @@ void INSlevel_setBC(double **scalar, int **iBC)
     {
         for( j=0; j<yelem; j++)
         {
-            if(iBC[1][j] == 2)scalar[1][j] = scalar[2][j];
-            if(iBC[xelem-2][j] == 2)scalar[xelem-2][j] = scalar[xelem-3][j];
+            if(iBC[1][j] == 2)scalar[0][j] = scalar[1][j];
+            if(iBC[xelem-2][j] == 2)scalar[xelem-1][j] = scalar[xelem-2][j];
         }
     }
     else if(x_bound == 3)
@@ -36,8 +36,8 @@ void INSlevel_setBC(double **scalar, int **iBC)
     {
         for( i=0; i<xelem; i++)
         {
-            if(iBC[i][1] == 2)scalar[i][1] = scalar[i][2];
-            if(iBC[i][yelem-2] == 2)scalar[i][yelem-2] = scalar[i][yelem-3];
+            if(iBC[i][1] == 2)scalar[i][0] = scalar[i][1];
+            if(iBC[i][yelem-2] == 2)scalar[i][yelem-1] = scalar[i][yelem-2];
         }
     }
     else if(y_bound == 3)

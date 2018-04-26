@@ -294,6 +294,9 @@ int main(int argc, char **argv)
     allocator2(&st_forcey, xelem, yelem);
 
     double uL, uR, vT, vB;
+    int icoeff;
+
+    double cellSize = max(xlen/gxelem, ylen/gyelem);
     //------------------------------------------------------------------------//
 
     //Time loop
@@ -320,24 +323,13 @@ int main(int argc, char **argv)
 		{
 		    uL = elem.u[ielem][jelem][0];
 		    uR = elem.u[ielem+1][jelem][0];
-		    if(uL > uR)
-		    {
-			uedge[ielem][jelem] = uL;
-		    }
-		    else
-		    {
-			uedge[ielem][jelem] = uR;
-		    }
+		    
+		    uedge[ielem][jelem] = 0.5*(uL + uR);
+		    
 		    vB = elem.v[ielem][jelem][0];
 		    vT = elem.v[ielem][jelem+1][0];
-		    if(vB > vT)
-		    {
-			vedge[ielem][jelem] = vB;
-		    }
-		    else
-		    {
-			vedge[ielem][jelem] = vT;
-		    }
+		    
+		    vedge[ielem][jelem] = 0.5*(vB + vT);
 		}
 	    }
 	    //------------------------------------------------------------------------//
@@ -398,9 +390,16 @@ int main(int argc, char **argv)
 		    vedge[ielem][jelem] = vstar[ielem][jelem];
 
 		    elem.u[ielem][jelem][0] = 0.5*(uedge[ielem][jelem] + uedge[ielem-1][jelem]);
-		    elem.v[ielem][jelem][0] = 0.5*(uedge[ielem][jelem] + uedge[ielem][jelem-1]);
+		    elem.v[ielem][jelem][0] = 0.5*(vedge[ielem][jelem] + vedge[ielem][jelem-1]);
+		    for(icoeff=1; icoeff<ncoeff; icoeff++)
+		    {
+			elem.u[ielem][jelem][icoeff] = 0.0;
+			elem.v[ielem][jelem][icoeff] = 0.0;
+		    }
 		}
 	    }
+	    commu2(elem.u);
+	    commu2(elem.v);
 	    //------------------------------------------------------------------------//
 
 	}
@@ -419,11 +418,32 @@ int main(int argc, char **argv)
 	    {
 		for(jelem=0; jelem<yelem; jelem++)
 		{
-		    elem.phi2[ielem][jelem] = elem.phi[ielem][jelem][0];
+		    if(fabs(elem.phi2[ielem][jelem]) <  10.0*cellSize)
+		    {
+			elem.phi2[ielem][jelem] = elem.phi[ielem][jelem][0];
+		    }
+		}
+	    }
+	    INScommu2(elem.phi2);
+	    hyperbolic(elem, area);
+
+	    for(ielem=0; ielem<xelem; ielem++)
+	    {
+		for(jelem=0; jelem<yelem; jelem++)
+		{
+		    if(fabs(elem.phi2[ielem][jelem]) > 10.0*cellSize)
+		    {
+			elem.phi[ielem][jelem][0] = elem.phi2[ielem][jelem];
+			for(icoeff=1; icoeff<ncoeff; icoeff++)
+			{
+			    elem.phi[ielem][jelem][icoeff] = 0.0;
+			}
+		    }
 		}
 	    }
 
-	    hyperbolic(elem, area);
+	    level_setBC(elem.phi, elem.iBC);
+	    
 	}
 	//------------------------------------------------------------------------//
 
