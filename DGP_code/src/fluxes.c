@@ -336,7 +336,6 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
     allocator1(&basisx, ncoeff);
     allocator1(&basisy, ncoeff);
 
-    double detJ;
     //------------------------------------------------------------------------//
 
     double *rightInt;
@@ -370,11 +369,6 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		{
 		    //Get the basis
 		    basis2D(1.0, zy[iygauss], basisy);
-		    //Get the value of determinant
-		    detJ = lineJacobian(ielem, jelem, zy[iygauss], y, 2);
-		    //detJ = mappingJacobianDeterminant(ielem,jelem, 1.0, zy[iygauss], x, y);
-
-		    //detJ = 1.0;
 		    
 		    rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss];//*detJ;
 		    
@@ -385,11 +379,6 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		{
 		    //Get the basis
 		    basis2D(-1.0, zy[iygauss], basisy);
-		    //Get the value of determinant
-		    detJ = lineJacobian(ielem, jelem, zy[iygauss], y, 2);
-		    //detJ = mappingJacobianDeterminant(ielem,jelem, -1.0, zy[iygauss], x, y);
-
-		    //detJ = 1.0;
 		    
 		    leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss];//*detJ;
 		}
@@ -401,8 +390,6 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		{
 		    //Get the basis
 		    basis2D(zx[ixgauss], 1.0, basisx);
-		    //Get the value of determinant
-		    detJ = lineJacobian(ielem, jelem, zx[ixgauss], x, 1);
 		    
 		    //Sum to the integral		    
 		    topInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss];//*detJ;
@@ -414,8 +401,6 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		{
 		    //Get the basis
 		    basis2D(zx[ixgauss], -1.0, basisx);
-		    //Get the value of determinant
-		    detJ = lineJacobian(ielem, jelem, zx[ixgauss], x, 1);
 		    
 		    //Sum to the integral		    
 		    bottomInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem-1][ixgauss];//*detJ;

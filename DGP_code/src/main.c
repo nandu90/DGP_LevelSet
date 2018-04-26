@@ -25,6 +25,8 @@ Notes:
 #include "commu.h"
 #include "rhs.h"
 #include "solvers.h"
+#include "INS.h"
+
 /*#include "partition.h"
 #include "grid.h"
 #include "commu.h"
@@ -119,6 +121,10 @@ int main(int argc, char **argv)
     allocator3(&elem.u,xelem,yelem,ncoeff);
     allocator3(&elem.v,xelem,yelem,ncoeff);
     allocator3(&elem.phi,xelem,yelem,ncoeff);
+    allocator2(&elem.p,xelem,yelem);
+    allocator2(&elem.rho,xelem,yelem);
+    allocator2(&elem.mu,xelem,yelem);
+    allocator2(&elem.phi2,xelem,yelem);
     allocator4(&elem.mass,xelem,yelem,tgauss,tgauss);
     iallocator2(&elem.iBC,xelem,yelem);
 
@@ -201,6 +207,10 @@ int main(int argc, char **argv)
     sendptr = (double **) malloc(4 * sizeof(double *));
     recvptr = (double **) malloc(4 * sizeof(double *));
     setupcommu();
+
+    INSsendptr = (double **) malloc(4 * sizeof(double *));
+    INSrecvptr = (double **) malloc(4 * sizeof(double *));
+    INSsetupcommu();
     /*for(i=0; i<yelem; i++)
     {
       if(myrank == master)printf("%d %.4f\n",i,bhai.sendrbuf[i]);
@@ -212,7 +222,8 @@ int main(int argc, char **argv)
     //Initialize solution vectors
     //Arrange quadratures in an array for easy access
     
-    initialize(elem, x, y); 
+    initialize(elem, x, y);
+    INSinitialize(elem);
     //------------------------------------------------------------------------//
 
     
@@ -307,10 +318,10 @@ int main(int argc, char **argv)
     deallocator4(&elem.mass,xelem,yelem,tgauss,tgauss); //Should this be ncoeff? - Yes it should be
     ideallocator2(&elem.iBC,xelem,yelem);
 
-    //Uncomment when you need them
-    /*deallocator3(&elem.p,xelem,yelem,zelem);
-    deallocator3(&elem.rho,xelem,yelem,zelem);
-    deallocator3(&elem.mu,xelem,yelem,zelem);*/
+    deallocator2(&elem.p,xelem,yelem);
+    deallocator2(&elem.rho,xelem,yelem);
+    deallocator2(&elem.mu,xelem,yelem);
+    deallocator2(&elem.phi2,xelem,yelem);
 
     //Mesh
     deallocator2(&x,xnode,ynode);
@@ -329,6 +340,10 @@ int main(int argc, char **argv)
     destroycommu();
     free(sendptr);
     free(recvptr);
+
+    INSdestroycommu();
+    free(INSsendptr);
+    free(INSrecvptr);
 
     //Time arrays
     deallocator3(&rhs, xelem, yelem, ncoeff);

@@ -73,6 +73,9 @@ double **sendptr;
 double **recvptr;
 int **io_info;
 
+double **INSsendptr;
+double **INSrecvptr;
+
 struct bhaiarray
 {
     double *sendrbuf;
@@ -86,7 +89,7 @@ struct bhaiarray
     
     double *senddbuf;
     double *recvdbuf;
-}bhai;
+}bhai, INSbhai;
 
 
 //------------------------------------------------------------------------//
@@ -101,9 +104,10 @@ struct elemsclr
     double ***phi;
     double ****mass;
     int **iBC;
-    /*double ***p;
-    double ***rho;
-    double ***mu;*/
+    double **p;
+    double **rho;
+    double **mu;
+    double **phi2;
 };
 
 

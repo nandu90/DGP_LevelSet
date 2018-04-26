@@ -108,16 +108,10 @@ void control()
 		    word = strtok(NULL,delim);
 		    RKstages = atoi(word);
 		}
-		/*if(strcmp(word,"advect_steps") == 0)
+		if(strcmp(word,"Epsilon") == 0)
 		{
 		    word = strtok(NULL,delim);
-		    advect_steps = atoi(word);
-		    }*/
-		
-		/*if(strcmp(word,"Solution_read") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    solnread = atoi(word);
+		    epsilon = atof(word);
 		}
 		if(strcmp(word,"Liquid_density") == 0)
 		{
@@ -139,16 +133,24 @@ void control()
 		    word = strtok(NULL,delim);
 		    mug = atof(word);
 		}
-		if(strcmp(word,"Epsilon") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    epsilon = atof(word);
-		}
+		
 		if(strcmp(word,"Surface_tension_coefficient") == 0)
 		{
 		    word = strtok(NULL,delim);
 		    sf_coeff = atof(word);
 		}
+		/*if(strcmp(word,"advect_steps") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    advect_steps = atoi(word);
+		    }*/
+		
+		/*if(strcmp(word,"Solution_read") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    solnread = atoi(word);
+		}
+		
 		if(strcmp(word,"GS_relaxation_factor") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -370,6 +372,18 @@ void control()
 
   MPI_Bcast(&case_tog,1,MPI_INT,master,MPI_COMM_WORLD);
   
+  
+
+  //------------------------------------------------------------------------//
+  //FOR INS
+  MPI_Bcast(&epsilon,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&rhof,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&rhog,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&muf,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&mug,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&sf_coeff,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  //------------------------------------------------------------------------//
+
 /*MPI_Bcast(&nu,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   
 	MPI_Bcast(&advect_steps,1,MPI_INT,master,MPI_COMM_WORLD);
@@ -377,13 +391,7 @@ void control()
 	
 	MPI_Bcast(&solnread,1,MPI_INT,master,MPI_COMM_WORLD);
 	
-	MPI_Bcast(&rhof,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&rhog,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&muf,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&mug,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	
-	MPI_Bcast(&epsilon,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&sf_coeff,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+
 	
 	MPI_Bcast(&relax,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
 	MPI_Bcast(&ptol,1,MPI_DOUBLE,master,MPI_COMM_WORLD);

@@ -37,13 +37,24 @@ RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 100
+Max_Iterations 1
 print_gap 10
 
 /***************Particular CASES***************/
 //Case Gaussian_Wave
 //Case Circle
 Case zalesak
+
+/*****************************************For INS*********************/
+/******************Multiphase Parameters*****************//
+Liquid_density 1000.0    //958.349
+Gas_density 500.0
+Liquid_viscosity 1.0    //281.742e-6
+Gas_viscosity 0.5
+Epsilon 1.2
+Surface_tension_coefficient 1.0
+
+
 
 /*****************Old Inputs*********************/
 Start_step 0
@@ -58,13 +69,7 @@ bub_advect_scheme book
 /****************************
 GS_relaxation_factor 0.5
 
-/******************Multiphase Parameters*****************//
-Liquid_density 1000.0    //958.349
-Gas_density 500.0
-Liquid_viscosity 1.0    //281.742e-6
-Gas_viscosity 0.5
-Epsilon 1.2
-Surface_tension_coefficient 1.0
+
 
 /******************Re-Distance Parameters****************//
 Re_distance_timestep 0.005
