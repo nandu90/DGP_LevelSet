@@ -128,6 +128,23 @@ double zalesak(double x, double y)
     return phi;
 }
 
+
+void GaussianStep(double x, double y, double *ls)
+{
+    double xmin = 90.0;
+    double xmax = 110.0;
+    double ymin = 15.0;
+    double ymax = 35.0;
+
+    if(x >= xmin && x <= xmax)
+    {
+	if(y >= ymin && y<=ymax)
+	{
+	    (*ls) = 1.0;
+	}
+    }
+}
+
 void initializeVel(struct elemsclr elem, double **x, double **y)
 {
     int i,j,k,l;
@@ -173,7 +190,7 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 	    //Get the vel values at the Cartesian Quadrature points
 	    for(k=0; k<tgauss; k++)
 	    {
-		if(case_tog == 1 || case_tog == 2)
+		if(case_tog == 1 || case_tog == 2 || case_tog == 5)
 		{
 		    us[k] = 1.0;
 		    vs[k] = 0.0;
@@ -182,6 +199,11 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		{
 		    us[k] = PI*(50.0 - xs[k][1])/314.0;
 		    vs[k] = PI*(xs[k][0] - 50.0)/314.0;
+		}
+		else
+		{
+		    us[k] = 0.0;
+		    vs[k] = 0.0;
 		}
 	    }
 	    //Solve the system to get the coefficients
@@ -249,8 +271,13 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     //------------------------------------------------------------------------//
     double line = 2.5*2.0*rb_in;
     double temp;
+    double sigmax;
+    double sigmay;
+    double term1;
+    double term2; 
     //------------------------------------------------------------------------//
 
+    
         
     for (i=0; i<xelem; i++)
     {
@@ -267,10 +294,10 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		//Gaussian Wave
 		if(case_tog == 1)
 		{
-		    	double sigmax = 25.0;
-			double sigmay = 25.0;
-			double term1 = 0.5*pow((xs[k][0] - xb_in)/sigmax,2.0);
-			double term2 = 0.5*pow((xs[k][1] - yb_in)/sigmay,2.0);
+		    	sigmax = 25.0;
+			sigmay = 25.0;
+			term1 = 0.5*pow((xs[k][0] - xb_in)/sigmax,2.0);
+			term2 = 0.5*pow((xs[k][1] - yb_in)/sigmay,2.0);
 			ls[k] = 1.0*exp(-(term1 + term2));
 		}
 		else if(case_tog == 2 || case_tog == 4)
@@ -280,6 +307,31 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		else if(case_tog == 3)
 		{
 		    ls[k] = zalesak(xs[k][0], xs[k][1]);
+		}
+		else if(case_tog == 5)
+		{
+		    sigmax = 10.0;
+		    sigmay = 10.0;
+		    term1 = 0.5*pow((xs[k][0] - xb_in)/sigmax,2.0);
+		    term2 = 0.5*pow((xs[k][1] - yb_in)/sigmay,2.0);
+		    ls[k] = 1.0*exp(-(term1 + term2));
+		    double xmin = 100.0;
+		    double xmax = 120.0;
+		    double ymin = 15.0;
+		    double ymax = 35.0;
+		    
+		    if(xs[k][0] >= xmin && xs[k][0] <= xmax)
+		    {
+			if(xs[k][1] >= ymin && xs[k][1]<=ymax)
+			{
+			    ls[k] = 1.0;
+			}
+		    }
+		    //GaussianStep(xs[k][0], xs[k][1], &ls[k]);
+		}
+		else
+		{
+		    if(myrank == master)printf("Please enter a valid case number. Exiting...\n");
 		}
 
 		//Bubble breakup case
@@ -294,6 +346,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		//------------------------------------------------------------------------//
 
 	    }
+	    
 	    //Solve the system to get the coefficients
 	    solveSystem(vand, ls, elem.phi[i][j]);
 
@@ -316,7 +369,6 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 
 	}
     }
-    
     deallocator1(&basis, ncoeff);
     deallocator2(&vand,tgauss, ncoeff);
     deallocator2(&xs,tgauss,2);

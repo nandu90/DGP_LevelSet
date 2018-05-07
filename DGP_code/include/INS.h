@@ -47,6 +47,6 @@ void rhs_redist2(double **, double **, double **, double ****, int **);
 
 void hyperbolic(struct elemsclr, double ****);
 
-
+void heavy_funcDG(double ***, double ***, double);
 
 #endif

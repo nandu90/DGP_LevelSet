@@ -1,5 +1,5 @@
 /******************Basis Functions*****************/
-Basis_Order 2
+Basis_Order 3
 
 /******************Grid related Inputs*******************//
 
@@ -19,7 +19,7 @@ y_pos_of_bubble 25
 
 
 /****************Boundary Conditions**************/
-//x-boundary no-slip
+/x-boundary no-slip
 //x-boundary slip
 x-boundary periodic
 
@@ -32,31 +32,22 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.25
+advect_deltat 0.1            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
 RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 1500
+Max_Iterations 3000
 print_gap 10
 
 /***************Particular CASES***************/
 Case Gaussian_Wave
 //Case Circle
+//Case zalesak
+//Case bubble_break
+//Case Gaussian_Step
 
-/*****************Old Inputs*********************/
-Start_step 0
-Kinematic_viscosity 10e-5
-Tolerance_x 1e-2
-Tolerance_p 1e-2
-
-advect_steps 100
-bub_advect_scheme book
-//bub_advect_scheme HJ-WENO !Do not use this for now. BC are not adapted to this scheme
-
-/****************************
-GS_relaxation_factor 0.5
-
+/*****************************************For INS*********************/
 /******************Multiphase Parameters*****************//
 Liquid_density 1000.0    //958.349
 Gas_density 500.0
@@ -65,33 +56,26 @@ Gas_viscosity 0.5
 Epsilon 1.2
 Surface_tension_coefficient 1.0
 
-/******************Re-Distance Parameters****************//
-Re_distance_timestep 0.005
-Re_distance_loops 15
-
-
-
-/***************Other Control Parameters**************/
-//Solver_type steady-state
-Solver_type transient
-Solve_flow 1
-Variable_density_pressure_solver 2    #0 - off; 1 - constant density; 2 - variable density
+/***************INS Solver Control*******************/
+Solve_flow 0
 Surface_tension 1
-Advect_bubble 1
-Void_fraction_control 1
-Re-distance_method 1               #0 - off; 1 - hyperbolic; 2 - fastmarch; 3 - direct
-
-
-
 
 /******Buoyancy Force Accelerations******/
 /**Give sign according to gravity direction**/
 gx 0.0
 gy -9.81
 
-/*****Case control for specific Initial Conditions and BC's*/
-//Case vortex
-//Case bubble_rise
-Case bubble_break
-//Case zalesak
-//Case homework
+/********************Pressure Solver Control***********/
+Tolerance_p 1e-2
+
+/*****************Re-distancing control*****************/
+Re-distance_method 0               #0 - off; 1 - hyperbolic; 2 - fastmarch; 3 - direct
+Re_distance_timestep 1.0E-03
+Re_distance_loops 30
+
+
+
+
+
+
+

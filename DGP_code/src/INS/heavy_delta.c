@@ -9,6 +9,63 @@ Created: 2018-04-25
 #include "common.h"
 #include "INS.h"
 #include "memory.h"
+#include "DGPFunc.h"
+
+void heavy_funcDG(double ***H, double ***phi, double eps)
+{
+    //------------------------------------------------------------------------//
+    //Note: Heavy func will be constructed and stored at all quadrature points
+    
+     //------------------------------------------------------------------------//
+    //Loop Indexes
+    int ielem,jelem;
+    int igauss;
+    int icoeff;
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Temporary variables
+    double recphi;
+    double *basis;
+    allocator1(&basis, ncoeff);
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    for(ielem =2; ielem<xelem-2; ielem++)
+    {
+	for(jelem=2; jelem<yelem-2; jelem++)
+	{
+	    for(igauss=0; igauss<tgauss; igauss++)
+	    {
+		recphi = 0.0;
+		basis2D(zeta[igauss][0], zeta[igauss][1], basis);
+		for(icoeff=0; icoeff<ncoeff; icoeff++)
+		{
+		    recphi += basis[icoeff]*phi[ielem][jelem][icoeff];
+		}
+		if(recphi < -eps)
+                {
+                    H[ielem][jelem][igauss] = 0.0;
+                }
+                else if(recphi > eps)
+                {
+                    H[ielem][jelem][igauss] = 1.0;
+                }
+                else
+                {
+                    H[ielem][jelem][igauss] = 0.5 + recphi/(2.0*eps) + (1.0/(2.0*PI)*sin(PI * recphi/eps));
+                }
+	    }
+	}
+    }
+
+    //------------------------------------------------------------------------//
+    //Deallocators
+    deallocator1(&basis, ncoeff);
+    //------------------------------------------------------------------------//
+
+    
+}
 
 void find_density_visc(double **H, double **rho, double **mu)
 {

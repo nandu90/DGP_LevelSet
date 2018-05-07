@@ -48,8 +48,10 @@ int main(int argc, char **argv)
 	printf("---------------------------------------\n");
     }
     int i,j,k;
+    int ielem, jelem;
+    int icoeff;
     double time1 = MPI_Wtime();
-
+    
     //------------------------------------------------------------------------//
     //Create necessary output directories//
     //Let only the master create directory
@@ -224,9 +226,27 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
     //Initialize solution vectors
     //Arrange quadratures in an array for easy access
+
     
     initialize(elem, x, y);
-    INSinitialize(elem);
+
+    if(flow_solve == 1)
+    {
+	INSinitialize(elem);
+    }
+
+    double ***iniphi;
+    allocator3(&iniphi, xelem, yelem, ncoeff);
+    for(ielem=0; ielem<xelem; ielem++)
+    {
+	for(jelem=0; jelem<yelem; jelem++)
+	{
+	    for(icoeff=0; icoeff<ncoeff; icoeff++)
+	    {
+		iniphi[ielem][jelem][icoeff] = elem.phi[ielem][jelem][icoeff];
+	    }
+	}
+    }
     //------------------------------------------------------------------------//
 
     
@@ -263,6 +283,17 @@ int main(int argc, char **argv)
 	}
     }
 
+    FILE *vfout;
+    if(myrank == master)
+    {
+	vfout = fopen("vf.txt","w");
+	if(vfout == NULL)
+	{
+	    printf("Error opening vf.txt!\n");
+	    exit(0);
+	}
+    }
+
     
     //Print out the paraview output if startstep == 0 i.e., initial conditions
     if(startstep == 0)
@@ -283,7 +314,7 @@ int main(int argc, char **argv)
     allocator2(&ustar, xelem, yelem);
     allocator2(&vstar, xelem, yelem);
     
-    int ielem, jelem;
+   
 
     double **rhsx, **rhsy;
     allocator2(&rhsx, xelem, yelem);
@@ -294,11 +325,16 @@ int main(int argc, char **argv)
     allocator2(&st_forcey, xelem, yelem);
 
     double uL, uR, vT, vB;
-    int icoeff;
+    
 
     double cellSize = max(xlen/gxelem, ylen/gyelem);
+    double *basisL, *basisR;
+    allocator1(&basisL, ncoeff);
+    allocator1(&basisR, ncoeff);
     //------------------------------------------------------------------------//
 
+    double inivf;
+    
     //Time loop
     for(iter = startstep; iter < itermax; iter++)
     {
@@ -321,15 +357,28 @@ int main(int argc, char **argv)
 	    {
 		for(jelem=1; jelem<yelem-1; jelem++)
 		{
-		    uL = elem.u[ielem][jelem][0];
-		    uR = elem.u[ielem+1][jelem][0];
-		    
+		    uL = 0.0;
+		    uR = 0.0;
+		    vT = 0.0;
+		    vB = 0.0;
+		    basis2D(1.0,0.0,basisL);
+		    basis2D(-1.0,0.0,basisR);
+		    for(icoeff=0; icoeff<ncoeff; icoeff++)
+		    {
+			uL += elem.u[ielem][jelem][icoeff]*basisL[icoeff];
+			uR += elem.u[ielem+1][jelem][icoeff]*basisR[icoeff];
+		    }
+		    basis2D(0.0,1.0,basisL);
+		    basis2D(0.0,-1.0,basisR);
+		    for(icoeff=0; icoeff<ncoeff; icoeff++)
+		    {
+			vB += elem.v[ielem][jelem][icoeff]*basisL[icoeff];
+			vT += elem.v[ielem][jelem+1][icoeff]*basisR[icoeff];
+			
+		    }
 		    uedge[ielem][jelem] = 0.5*(uL + uR);
-		    
-		    vB = elem.v[ielem][jelem][0];
-		    vT = elem.v[ielem][jelem+1][0];
-		    
 		    vedge[ielem][jelem] = 0.5*(vB + vT);
+
 		}
 	    }
 	    //------------------------------------------------------------------------//
@@ -349,7 +398,6 @@ int main(int argc, char **argv)
 		    vstar[ielem][jelem] = vedge[ielem][jelem] + deltat*rhsy[ielem][jelem];
 		}
 	    }
-
 	    INScommu2(ustar);
 	    INScommu2(vstar);
 	    vel_BC(ustar, vstar, elem.iBC);
@@ -448,6 +496,7 @@ int main(int argc, char **argv)
 	//------------------------------------------------------------------------//
 
 	
+	
 
 	
 	//Print out the paraview output
@@ -460,11 +509,70 @@ int main(int argc, char **argv)
         {
             print_count = 0;
         }
+
+	//------------------------------------------------------------------------//
+	//Mass Conservation monitoring
+	if(case_tog == 3 || case_tog == 4)
+	{
+	    double ***H;
+	    allocator3(&H, xelem, yelem, tgauss);
+
+	    double vf;
+	    
+	    double eps=1.0*max(xlen/(gxelem), ylen/(gyelem));
+	    
+	    heavy_funcDG(H, elem.phi, eps);
+	    
+	    double jacobian = mappingJacobianDeterminant(2, 2, 0.0, 0.0, x, y);
+	    
+	    //printf("Jacobian is %.4e and area is %.4e\n", jacobian, area[2][2][0][0]*area[2][2][1][1]);
+
+	    calc_vf(H, jacobian, &vf);
+
+	    if(iter == 0)
+	    {
+		inivf = vf;
+	    }
+	    
+	    if(myrank == master)
+	    {
+		printf("Void fraction evolution is %.4e\n",vf/inivf);
+		fprintf(vfout,"%d %.4e %.4e\n",iter, time, vf/inivf);
+	    }
+	    
+	    //exit(1);
+	    
+	    deallocator3(&H, xelem, yelem, tgauss);
+	}
+	//------------------------------------------------------------------------//
+
+	if(myrank == master)printf("\n\n");
     }
     
     
     //------------------------------------------------------------------------//
 
+    //------------------------------------------------------------------------//
+    //Calculate Error Norms
+    if(case_tog == 1 || case_tog == 5)
+    {
+	double err1, lerr1;
+	errorNormL1(iniphi, elem.phi, &err1, &lerr1);
+
+	double err2, lerr2;
+	errorNormL2(iniphi, elem.phi, &err2, &lerr2);
+	
+	if(myrank == master)
+	{
+	    printf("The L1 norm of error is %.4e and the Log of norm is %.4e\n", err1, lerr1);
+	    printf("The L2 norm of error is %.4e and the Log of norm is %.4e\n", err2, lerr2);
+
+	    fprintf(out,"The L1 norm of error is %.4e and the Log of norm is %.4e\n", err1, lerr1);
+	    fprintf(out,"The L2 norm of error is %.4e and the Log of norm is %.4e\n", err2, lerr2);
+	}
+    }
+    
+    //------------------------------------------------------------------------//
     
     
     
@@ -523,6 +631,10 @@ int main(int argc, char **argv)
     deallocator2(&rhsy, xelem, yelem);
     deallocator2(&st_forcex, xelem, yelem);
     deallocator2(&st_forcey, xelem, yelem);
+    deallocator1(&basisL, ncoeff);
+    deallocator1(&basisR, ncoeff);
+
+    deallocator3(&iniphi, xelem, yelem, ncoeff);
     //------------------------------------------------------------------------//
 
     
@@ -535,6 +647,7 @@ int main(int argc, char **argv)
 	printf("Total run time: %.6f secs\n",secs);
 	fprintf(out,"Total run time: %.6f secs\n",secs);
 	fclose(out);
+	fclose(vfout);
     }
     
     if(myrank == master)

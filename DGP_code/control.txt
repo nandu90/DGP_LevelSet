@@ -1,5 +1,5 @@
 /******************Basis Functions*****************/
-Basis_Order 2
+Basis_Order 3
 
 /******************Grid related Inputs*******************//
 
@@ -32,12 +32,12 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.0001
+advect_deltat 0.01
 RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 100
+Max_Iterations 1000
 print_gap 10
 
 /***************Particular CASES***************/

@@ -264,10 +264,10 @@ void control()
 		    {
 			case_tog=4;
 		    }
-		    /*else if(strcmp(word,"homework\n") == 0)
+		    else if(strcmp(word,"Gaussian_Step\n") == 0)
 		    {
 			case_tog=5;
-			}*/
+		    }
 		}
 		word = strtok(NULL,delim);
 	    }
