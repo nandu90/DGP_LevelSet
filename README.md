@@ -9,3 +9,6 @@
 ## Code progress
 - DGPn implementation of Level-set advection is complete.
 
+For suggestions/questions contact: nsaini3@ncsu.edu
+
+:)
