@@ -18,6 +18,6 @@ void dgels_ (char *, int *, int *, int *, double *, int *, double *, int *, doub
 
 void euler(double ***, double ****, double ***, double);
 
-void Runge_Kutta(struct elemsclr, double **, double **, double, double ***);
+void Runge_Kutta(struct elemsclr, double **, double **, double, double ***, double ****);
 
 #endif

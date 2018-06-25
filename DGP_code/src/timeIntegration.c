@@ -34,7 +34,7 @@ void euler(double ***scalar, double ****mass, double ***rhs, double deltat)
 }
 
 
-void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, double ***rhs)
+void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, double ***rhs, double ****area)
 {
     
     //------------------------------------------------------------------------//
@@ -46,7 +46,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
     if(RKstages == 1)
     {
 	//Get the Right hand side
-	getRHS(elem, x, y, rhs);
+	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
 	euler(elem.phi, elem.mass, rhs, deltat);	
 	//Apply boundary conditions
@@ -70,14 +70,14 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    }
 	}
 	//Get the Right hand side
-	getRHS(elem, x, y, rhs);
+	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
 	euler(elem.phi, elem.mass, rhs, deltat);	
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
 
 	//Get the Right hand side
-	getRHS(elem, x, y, rhs);
+	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
 	euler(elem.phi, elem.mass, rhs, deltat);
 	
@@ -115,14 +115,14 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	}
 
 	//Get the Right hand side
-	getRHS(elem, x, y, rhs);
+	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
 	euler(elem.phi, elem.mass, rhs, deltat);	
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
 
 	//Get the Right hand side
-	getRHS(elem, x, y, rhs);
+	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
 	euler(elem.phi, elem.mass, rhs, deltat);	
 	//Apply boundary conditions
@@ -143,7 +143,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	level_setBC(elem.phi, elem.iBC);
 
 	//Get the Right hand side
-	getRHS(elem, x, y, rhs);
+	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
 	euler(elem.phi, elem.mass, rhs, deltat);
 	for(ielem=1; ielem<xelem-1; ielem++)

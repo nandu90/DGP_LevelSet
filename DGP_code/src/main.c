@@ -454,12 +454,12 @@ int main(int argc, char **argv)
 
 	//------------------------------------------------------------------------//
 	//Level-Set advection
-	Runge_Kutta(elem, x, y,deltat,rhs);
+	Runge_Kutta(elem, x, y,deltat,rhs, area);
 	//------------------------------------------------------------------------//
 
 	//------------------------------------------------------------------------//
 	//Redistancing
-	if(redist_method == 1)
+	if(flow_solve == 1 && redist_method == 1)
 	{
 	    //Copy the high order LS field onto the lower order one for re-distancing
 	    for(ielem=0; ielem<xelem; ielem++)
@@ -543,6 +543,14 @@ int main(int argc, char **argv)
 	    //exit(1);
 	    
 	    deallocator3(&H, xelem, yelem, tgauss);
+	}
+	//------------------------------------------------------------------------//
+
+	//------------------------------------------------------------------------//
+	//Active error norm calc
+	if(case_tog == 1)
+	{
+	    errorGaussian(elem.phi, time, x, y);
 	}
 	//------------------------------------------------------------------------//
 

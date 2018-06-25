@@ -146,7 +146,7 @@ void massmatrix(double **x, double **y, double ****mass)
     }
 
     //Check
-    /*/printf("The mass matrix is\n");
+    /*printf("The mass matrix is\n");
     for(i=2; i<xelem-2; i++)
     {
 	for(j=2; j<yelem-2; j++)

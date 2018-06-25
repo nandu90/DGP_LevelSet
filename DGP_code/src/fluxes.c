@@ -285,11 +285,11 @@ void upwind(double ****recflux, double ****recu, double ***flux, int ngauss, int
 }
 
 
-void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, double **x, double **y)
+void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, double **x, double **y, double ****area)
 {
     //------------------------------------------------------------------------//
     /*
-      This routine will calculate the net domain integral
+      This routine will calculate the net boundary integral
      */
     //------------------------------------------------------------------------//
 
@@ -369,8 +369,15 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		{
 		    //Get the basis
 		    basis2D(1.0, zy[iygauss], basisy);
-		    
-		    rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss];//*detJ;
+
+		    if(polyorder == 0)
+		    {
+			rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss] / area[ielem][jelem][0][0];
+		    }
+		    else
+		    {
+			rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss];
+		    }
 		    
 		}
 
@@ -379,31 +386,52 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		{
 		    //Get the basis
 		    basis2D(-1.0, zy[iygauss], basisy);
-		    
-		    leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss];//*detJ;
+
+		    if(polyorder == 0)
+		    {
+			leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss] / area[ielem][jelem][0][0];
+		    }
+		    else
+		    {
+			leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss];
+		    }
 		}
 		
 		
 		
-		//Loop over the quadrature points in the top face
+		//Loop over the quadrature points on the top face
 		for(ixgauss=0; ixgauss<xgpts; ixgauss++)
 		{
 		    //Get the basis
 		    basis2D(zx[ixgauss], 1.0, basisx);
-		    
+
+		    if(polyorder == 0)
+		    {
 		    //Sum to the integral		    
-		    topInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss];//*detJ;
+			topInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss] / area[ielem][jelem][1][1];
+		    }
+		    else
+		    {
+			topInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss];
+		    }
 		    
 		}
 
-		//Loop over the quadrature points in the bottom face
+		//Loop over the quadrature points on the bottom face
 		for(ixgauss=0; ixgauss<xgpts; ixgauss++)
 		{
 		    //Get the basis
 		    basis2D(zx[ixgauss], -1.0, basisx);
 		    
-		    //Sum to the integral		    
-		    bottomInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem-1][ixgauss];//*detJ;
+		    //Sum to the integral
+		    if(polyorder == 0)
+		    {
+			bottomInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem-1][ixgauss]  / area[ielem][jelem][1][1];
+		    }
+		    else
+		    {
+			bottomInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem-1][ixgauss];
+		    }
 		    
 		}
 	    }

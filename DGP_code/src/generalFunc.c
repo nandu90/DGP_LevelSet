@@ -3,6 +3,30 @@
 #include "DGPFunc.h"
 #include "memory.h"
 
+double remainder(double a, double b)
+{
+    int i;
+    int n = 100000000;
+
+    a = fabs(a);
+    b = fabs(b);
+    if(b == 0.0)
+    {
+	printf("Division by 0 in remainder() function");
+	exit(1);
+    }
+    for(i=0; i<n; i++)
+    {
+	if(a >= b*i && a < b*(i+1))
+	{
+	    break;
+	}
+    }
+
+    double rem = a - b*i;
+
+    return rem;
+}
 double max(double a, double b)
 {
   if(a > b)
@@ -230,4 +254,79 @@ void calc_vf(double ***H, double detJ, double *vf)
     {
 	printf("Total area is %.4e\n",totalvf);
     }
+}
+
+
+void errorGaussian(double ***phi, double time, double **x, double **y)
+{
+    int ielem, jelem, icoeff;
+    int igauss;
+
+    double *basis;
+    allocator1(&basis, ncoeff);
+
+    double rec;
+
+    //Allocate coordinate matrix corresponding to zs - solution points
+    double **xs;
+    allocator2(&xs, tgauss, 2);
+    double sigmax;
+    double sigmay;
+    double term1;
+    double term2;
+    double exact;
+
+    double exactx;
+
+    double sum = 0.0;
+    double error;
+    //Lets compare at the Gauss Quadrature points
+    for(ielem =2; ielem<xelem-2; ielem++)
+    {
+	for(jelem=2; jelem<yelem-2; jelem++)
+	{
+	    //Convert natural coordinates at quadrature points to Cartesian
+	   
+	    naturalToCartesian(xs, x, y, ielem, jelem);
+	    
+	    for(igauss=0; igauss<tgauss; igauss++)
+	    {
+		rec = 0.0;
+		basis2D(zeta[igauss][0], zeta[igauss][1], basis);
+		for(icoeff=0; icoeff<ncoeff; icoeff++)
+		{
+		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
+		}
+		
+		sigmax = 25.0;
+		sigmay = 25.0;
+		exactx = xs[igauss][0] - 1.0*remainder(time, 150.0);
+		if(exactx < 0.0)
+		{
+		    exactx = 150.0 + exactx;
+		}
+		else if(exactx > 150.0)
+		{
+		    exactx = exactx - 150.0;
+		}
+		term1 = 0.5*pow((exactx - xb_in)/sigmax,2.0);
+		term2 = 0.5*pow((xs[igauss][1] - yb_in)/sigmay,2.0);
+		exact = 1.0*exp(-(term1 + term2));
+		
+		sum += pow(exact - rec, 2.0);
+	    }
+	    
+	}
+    }
+
+    MPI_Allreduce(&sum, &error, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    
+    error = sqrt(error);
+    
+    if(myrank == master)printf("The error for time %.4e is %.4e and Log of error is %.4e\n",time,error, -log(error));
+    
+    deallocator1(&basis, ncoeff);
+    deallocator2(&xs, tgauss, 2);
+    
+    //if(myrank == master) exit(1);
 }

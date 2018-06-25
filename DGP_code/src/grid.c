@@ -80,8 +80,11 @@ void gridread(double **x, double **y, double ****area, double **vol, double **xc
             area[i][j][0][1] = -(x[i+1][j+1] - x[i+1][j]);
             area[i][j][1][0] = y[i][j+1] - y[i+1][j+1];
             area[i][j][1][1] = -(x[i][j+1]-x[i+1][j+1]);
+	    //printf("%.4e %.4e %.4e %.4e\n",area[i][j][0][0],area[i][j][0][1],area[i][j][1][0],area[i][j][1][1]);
+	    
         }
     }
+    //exit(1);
     
     for(i=0; i<xelem; i++)
     {

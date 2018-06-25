@@ -11,7 +11,7 @@ Created: 2018-03-29
 #include "memory.h"
 #include "commu.h"
 
-void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs)
+void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs, double ****area)
 {
     //------------------------------------------------------------------------//
     //Get the domain integral
@@ -33,7 +33,7 @@ void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs)
     double ***boundIntegral;
     allocator3(&boundIntegral, xelem, yelem, ncoeff);
 
-    boundaryIntegral(boundIntegral, rflux, tflux, x, y);
+    boundaryIntegral(boundIntegral, rflux, tflux, x, y, area);
     //------------------------------------------------------------------------//
 
 

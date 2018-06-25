@@ -1,27 +1,27 @@
 /******************Basis Functions*****************/
-Basis_Order 3
+Basis_Order 1
 
 /******************Grid related Inputs*******************//
 
-xlen 3.0
-ylen 3.5
-xelem 60
-yelem 70
+xlen 150
+ylen 50
+xelem 50
+yelem 25
 
 /***************Gauss Quadrature********************/
 //Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE
 Gauss_Quadrature_Type Gauss-Legendre
 
 /***************Initial Conditions******************/
-Bubble_radius 0.5
-x_pos_of_bubble 1.5
-y_pos_of_bubble 1.5
+Bubble_radius 10
+x_pos_of_bubble 75
+y_pos_of_bubble 25
 
 
 /****************Boundary Conditions**************/
-//x-boundary no-slip
-x-boundary slip
-//x-boundary periodic
+/x-boundary no-slip
+//x-boundary slip
+x-boundary periodic
 
 y-boundary no-slip
 //y-boundary slip
@@ -32,19 +32,20 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.01
+advect_deltat 0.1            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
 RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 1000
+Max_Iterations 1500
 print_gap 10
 
 /***************Particular CASES***************/
-//Case Gaussian_Wave
+Case Gaussian_Wave
 //Case Circle
 //Case zalesak
-Case bubble_break
+//Case bubble_break
+//Case Gaussian_Step
 
 /*****************************************For INS*********************/
 /******************Multiphase Parameters*****************//
@@ -56,7 +57,7 @@ Epsilon 1.2
 Surface_tension_coefficient 1.0
 
 /***************INS Solver Control*******************/
-Solve_flow 1
+Solve_flow 0
 Surface_tension 1
 
 /******Buoyancy Force Accelerations******/
@@ -68,9 +69,9 @@ gy -9.81
 Tolerance_p 1e-2
 
 /*****************Re-distancing control*****************/
-Re-distance_method 1               #0 - off; 1 - hyperbolic; 2 - fastmarch; 3 - direct
+Re-distance_method 0               #0 - off; 1 - hyperbolic; 2 - fastmarch; 3 - direct
 Re_distance_timestep 1.0E-03
-Re_distance_loops 20
+Re_distance_loops 30
 
 
 
