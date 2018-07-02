@@ -28,7 +28,7 @@ void gridread(double **x, double **y, double ****area, double **vol, double **xc
 
     //Generate ghost nodes
     //Add cells on both sides of x
-    for(j=1; j < ynode-1; j++)
+    for(j=2; j < ynode-2; j++)
     {
 	for(i=1; i>=0;i--)
 	{
@@ -40,7 +40,7 @@ void gridread(double **x, double **y, double ****area, double **vol, double **xc
 	}
     }
     
-    for(i=1; i < xnode-1; i++)
+    for(i=2; i < xnode-2; i++)
     {
       for(j=1; j>=0; j--)
 	{
@@ -51,6 +51,28 @@ void gridread(double **x, double **y, double ****area, double **vol, double **xc
 	}
     }
     //Not required but assign proper coordinates to corner ghost nodes
+    for (i=1; i>=0; i--)
+    {
+	for(j=1; j>=0; j--)
+	{
+	    x[i][j]=2.0*x[i][1+j]-x[i][2+j];
+	    y[i][j]=2.0*y[i][1+j]-y[i][2+j];
+	    x[i][ynode-1-j] = 2*x[i][ynode-2-j]-x[i][ynode-3-j];
+	    y[i][ynode-1-j] = 2*y[i][ynode-2-j]-y[i][ynode-3-j];
+	}
+    }
+
+    for(i=xnode-2; i<xnode; i++)
+    {
+	for(j=1; j>=0; j--)
+	{
+	    x[i][j]=2.0*x[i][1+j]-x[i][2+j];
+	    y[i][j]=2.0*y[i][1+j]-y[i][2+j];
+	    x[i][ynode-1-j] = 2*x[i][ynode-2-j]-x[i][ynode-3-j];
+	    y[i][ynode-1-j] = 2*y[i][ynode-2-j]-y[i][ynode-3-j];
+	}
+    }
+    
     x[0][0] = 2.0*x[0][1]-x[0][2];
     y[0][0] = 2.0*y[0][1]-y[0][2];
     x[0][ynode-1] = 2.0*x[0][ynode-2]-x[0][ynode-3];

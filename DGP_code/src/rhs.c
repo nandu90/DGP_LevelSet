@@ -57,6 +57,15 @@ void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs, double 
     commu2(rhs);
     //------------------------------------------------------------------------//
 
+    /*printf("RHS \n");
+    for(icoeff=0; icoeff<ncoeff; icoeff++)
+    {
+	printf("%.4e ",rhs[2][2][icoeff]);
+    }
+    printf("\n");
+    //exit(1);*/
+
+    
 
     
     //------------------------------------------------------------------------//

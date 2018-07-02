@@ -31,6 +31,17 @@ void euler(double ***scalar, double ****mass, double ***rhs, double deltat)
 	    }
 	}
     }
+
+    /*printf("deltat %.4e \n",deltat);
+    
+    ielem = 2;
+    jelem = 2;
+
+    for(icoeff =0; icoeff <ncoeff; icoeff++)
+    {
+	printf("RHS %.4e mass %.4e difference %.4e\n",rhs[ielem][jelem][icoeff], mass[ielem][jelem][icoeff][icoeff], deltat*rhs[ielem][jelem][icoeff]/mass[ielem][jelem][icoeff][icoeff]);
+}
+exit(1);*/
 }
 
 

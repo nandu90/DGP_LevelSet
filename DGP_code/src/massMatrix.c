@@ -30,11 +30,11 @@ double lineJacobian(int i, int j, double zeta, double **x, int dircode)
     x1 = x[i][j];
     x2 = x[i+xinc][j+yinc];
 
-    double J = fabs(x2-x1)/2.0;
+    double J = fabs((x2-x1)/2.0);
     return J;
 }
 
-double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, double **x, double **y)
+double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, double **x, double **y, double **inv)
 {
     double x1, x2, x3, x4;
     double y1, y2, y3, y4;
@@ -52,14 +52,22 @@ double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, doub
     y3 = y[i][j+1];
     y4 = y[i+1][j+1];
 
-    dxdz1 = x1*(zeta2-1.0)*(1.0/4.0)-x2*(zeta2-1.0)*(1.0/4.0)-x3*(zeta2+1.0)*(1.0/4.0)+x4*(zeta2+1.0)*(1.0/4.0);
+    dxdz1 = x1*(zeta2-1.0)*(1.0/4.0)-x2*(zeta2-1.0)*(1.0/4.0)-x3*(zeta2+1.0)*(1.0/4.0)+x4*(zeta2+1.0)*(1.0/4.0);    
     dxdz2 = x1*(zeta1-1.0)*(1.0/4.0)-x2*(zeta1+1.0)*(1.0/4.0)-x3*(zeta1-1.0)*(1.0/4.0)+x4*(zeta1+1.0)*(1.0/4.0);
     dydz1 = y1*(zeta2-1.0)*(1.0/4.0)-y2*(zeta2-1.0)*(1.0/4.0)-y3*(zeta2+1.0)*(1.0/4.0)+y4*(zeta2+1.0)*(1.0/4.0);
     dydz2 = y1*(zeta1-1.0)*(1.0/4.0)-y2*(zeta1+1.0)*(1.0/4.0)-y3*(zeta1-1.0)*(1.0/4.0)+y4*(zeta1+1.0)*(1.0/4.0);
 
-    detJ = dxdz1*dydz2-dxdz2*dydz1;
+    detJ = (dxdz1*dydz2-dxdz2*dydz1);
 
+
+    inv[0][0] = dydz2/detJ;
+    inv[0][1] = -dxdz2/detJ;
+    inv[1][0] = -dydz1/detJ;
+    inv[1][1] = dxdz1/detJ;
+    
     return detJ;
+
+    
     
 }
 
@@ -115,7 +123,9 @@ void massmatrix(double **x, double **y, double ****mass)
 
     double *basis;
     allocator1(&basis, tgauss);
-      
+
+    double **inv;
+    allocator2(&inv, 2, 2);
     
     for(i=0; i<xelem; i++)
     {
@@ -129,14 +139,15 @@ void massmatrix(double **x, double **y, double ****mass)
 		    // Get the 2D Basis vector
 		    basis2D(z1g[k], z2g[l], basis);
 		    // Get the value of determinant
-		    detJ = mappingJacobianDeterminant(i,j, z1g[k], z2g[l], x, y);
+		    detJ = mappingJacobianDeterminant(i,j, z1g[k], z2g[l], x, y, inv);
 		    
 		    //Loop over the Basis matrix
 		    for(Bi=0; Bi<(int)pow(polyorder+1,2.0); Bi++)
 		    {
 			for(Bj=0; Bj<(int)pow(polyorder+1,2.0); Bj++)
 			{
-			    mass[i][j][Bi][Bj] += basis[Bi]*basis[Bj]*detJ*w1g[k]*w2g[l];
+			    mass[i][j][Bi][Bj] += basis[Bi]*basis[Bj]*w1g[k]*w2g[l]*detJ;
+			    //mass[i][j][Bi][Bj] += basis[Bi]*basis[Bj]*w1g[k]*w2g[l];
 			}
 		    }
 		    
@@ -147,21 +158,21 @@ void massmatrix(double **x, double **y, double ****mass)
 
     //Check
     /*printf("The mass matrix is\n");
-    for(i=2; i<xelem-2; i++)
+    for(i=0; i<1; i++)
     {
-	for(j=2; j<yelem-2; j++)
+	for(j=0; j<1; j++)
 	{
-	    printf("%d %d ",i,j);
+	    //printf("%d %d ",i,j);
 	    for(Bi=0; Bi<(int)pow(polyorder+1,2.0); Bi++)
 	    {
 		for(Bj=0; Bj<(int)pow(polyorder+1,2.0); Bj++)
 		{
-		    if(Bi == Bj)
-		    {
+		    //if(Bi == Bj)
+		    // {
 			printf("%.6f ",mass[2][2][Bi][Bj]);
-		    }
+			//}
 		}
-		
+		printf("\n");
 	    }
 	    printf("\n");
 	}
@@ -174,4 +185,6 @@ void massmatrix(double **x, double **y, double ****mass)
     deallocator1(&z2g, npz2);
     deallocator1(&w1g, npz1);
     deallocator1(&w2g, npz2);
+
+    deallocator2(&inv, 2, 2);
 }

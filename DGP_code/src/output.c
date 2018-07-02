@@ -55,6 +55,8 @@ void output_xml(struct elemsclr elem, int iter , double **x, double **y)
     zs[3][0] = 1.0;
     zs[3][1] = 1.0;
 
+    double detJ;
+    
     for(i=0; i<xelem; i++)
     {
 	for(j=0; j<yelem; j++)
@@ -66,6 +68,7 @@ void output_xml(struct elemsclr elem, int iter , double **x, double **y)
 		recv[i][j][k] = 0.0;
 
 		basis2D(zs[k][0], zs[k][1], basis);
+		
 		for(l=0; l<ncoeff; l++)
 		{
 		    recphi[i][j][k] += basis[l]*elem.phi[i][j][l];

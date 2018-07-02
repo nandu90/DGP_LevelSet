@@ -278,8 +278,26 @@ void errorGaussian(double ***phi, double time, double **x, double **y)
 
     double exactx;
 
-    double sum = 0.0;
-    double error;
+    double sum1 = 0.0;
+    double sum2 = 0.0;
+    double suminf = 0.0;
+    double error1, error2, errorinf;
+
+    //Position of center on the circumference
+    double speed, dist,theta,xc,yc;
+    if(case_tog == 6)
+    {
+	 speed = PI*25.0/314.0;
+	 dist = speed * time;
+	 theta = PI/2.0 + dist/25.0;
+	 yc = 25.0*sin(theta)+50.0;
+	 xc = 25.0*cos(theta)+50.0;
+    
+	if(myrank == master)
+	{
+	    printf("Theta %.4e, xc %.4e, yc %.4e\n",theta*180.0/PI, xc, yc);
+	}
+    }
     //Lets compare at the Gauss Quadrature points
     for(ielem =2; ielem<xelem-2; ielem++)
     {
@@ -297,33 +315,57 @@ void errorGaussian(double ***phi, double time, double **x, double **y)
 		{
 		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
 		}
-		
-		sigmax = 25.0;
-		sigmay = 25.0;
-		exactx = xs[igauss][0] - 1.0*remainder(time, 150.0);
-		if(exactx < 0.0)
+
+		if(case_tog == 1)
 		{
-		    exactx = 150.0 + exactx;
+		    sigmax = 25.0;
+		    sigmay = 25.0;
+		    exactx = xs[igauss][0] - 1.0*remainder(time, 150.0);
+		    if(exactx < 0.0)
+		    {
+			exactx = 150.0 + exactx;
+		    }
+		    else if(exactx > 150.0)
+		    {
+			exactx = exactx - 150.0;
+		    }
+		    term1 = 0.5*pow((exactx - xb_in)/sigmax,2.0);
+		    term2 = 0.5*pow((xs[igauss][1] - yb_in)/sigmay,2.0);
+		    exact = 1.0*exp(-(term1 + term2));
 		}
-		else if(exactx > 150.0)
+		else if(case_tog == 6)
 		{
-		    exactx = exactx - 150.0;
+		    
+		    exact = sqrt(pow(xc-xs[igauss][0],2.0) + pow(yc-xs[igauss][1],2.0)) - 15.0;
+		    if(exact > 1.0)
+		    {
+			exact = rec;
+		    }
+		    /*else if(exact < 0.0)
+		    {
+			printf("%.4e %.4e %.4e %.4e\n",xs[igauss][0],xs[igauss][1], exact,rec);
+			exit(1);
+			}*/
 		}
-		term1 = 0.5*pow((exactx - xb_in)/sigmax,2.0);
-		term2 = 0.5*pow((xs[igauss][1] - yb_in)/sigmay,2.0);
-		exact = 1.0*exp(-(term1 + term2));
-		
-		sum += pow(exact - rec, 2.0);
+		sum1 += fabs(exact - rec);
+		sum2 += pow(exact - rec, 2.0);
+
+		suminf = max(suminf, fabs(exact-rec));
 	    }
 	    
 	}
     }
 
-    MPI_Allreduce(&sum, &error, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&sum1, &error1, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&sum2, &error2, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    error2 = sqrt(error2);
+
+    MPI_Allreduce(&suminf, &errorinf, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
     
-    error = sqrt(error);
-    
-    if(myrank == master)printf("The error for time %.4e is %.4e and Log of error is %.4e\n",time,error, -log(error));
+    if(myrank == master)
+    {
+	printf("The errors for time %.4e are:\n L1: %.4e and Log of error is %.4e\n L2: %.4e and Log of error is %.4e\n Linf: %.4e and Log of error is %.4e\n",time,error1, -log(error1), error2, -log(error2), errorinf, -log(errorinf));
+    }
     
     deallocator1(&basis, ncoeff);
     deallocator2(&xs, tgauss, 2);

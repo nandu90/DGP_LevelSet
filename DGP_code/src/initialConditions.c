@@ -195,10 +195,10 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		    us[k] = 1.0;
 		    vs[k] = 0.0;
 		}
-		else if(case_tog == 3)
+		else if(case_tog == 3 || case_tog == 6)
 		{
-		    us[k] = PI*(50.0 - xs[k][1])/314.0;
-		    vs[k] = PI*(xs[k][0] - 50.0)/314.0;
+		    us[k] =  PI*(50.0 - xs[k][1])/314.0;
+		    vs[k] =  PI*(xs[k][0] - 50.0)/314.0;
 		}
 		else
 		{
@@ -328,6 +328,12 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 			}
 		    }
 		    //GaussianStep(xs[k][0], xs[k][1], &ls[k]);
+		}
+		else if(case_tog == 6)
+		{
+		    //ls[k] = 1.0;
+		    ls[k] = sqrt(pow(xs[k][0]-50.0,2.0) + pow(xs[k][1]-75.0,2.0)) - 15.0;
+		    //ls[k] = sqrt(pow(xs[k][0]-50.0,2.0) + pow(xs[k][1]-50.0,2.0)) - 15.0;
 		}
 		else
 		{

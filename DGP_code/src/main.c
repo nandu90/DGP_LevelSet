@@ -258,6 +258,11 @@ int main(int argc, char **argv)
     if(time_control == 2)
     {
 	deltat = advect_deltat;
+	if(case_tog == 6 || case_tog == 3)
+	{
+	    deltat = 2.0*PI*25.0/(PI*25.0/314.0);
+	    deltat = deltat * advect_deltat;
+	}
     }
     else
     {
@@ -522,8 +527,11 @@ int main(int argc, char **argv)
 	    double eps=1.0*max(xlen/(gxelem), ylen/(gyelem));
 	    
 	    heavy_funcDG(H, elem.phi, eps);
+
+	    double **inv;
+	    allocator2(&inv, 2, 2);
 	    
-	    double jacobian = mappingJacobianDeterminant(2, 2, 0.0, 0.0, x, y);
+	    double jacobian = mappingJacobianDeterminant(2, 2, 0.0, 0.0, x, y, inv);
 	    
 	    //printf("Jacobian is %.4e and area is %.4e\n", jacobian, area[2][2][0][0]*area[2][2][1][1]);
 
@@ -541,14 +549,14 @@ int main(int argc, char **argv)
 	    }
 	    
 	    //exit(1);
-	    
+	    deallocator2(&inv, 2, 2);
 	    deallocator3(&H, xelem, yelem, tgauss);
 	}
 	//------------------------------------------------------------------------//
 
 	//------------------------------------------------------------------------//
 	//Active error norm calc
-	if(case_tog == 1)
+	if(case_tog == 1 || case_tog == 6)
 	{
 	    errorGaussian(elem.phi, time, x, y);
 	}
@@ -643,6 +651,8 @@ int main(int argc, char **argv)
     deallocator1(&basisR, ncoeff);
 
     deallocator3(&iniphi, xelem, yelem, ncoeff);
+
+    
     //------------------------------------------------------------------------//
 
     

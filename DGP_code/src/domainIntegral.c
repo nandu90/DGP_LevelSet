@@ -40,10 +40,15 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
     double recv;
     double *basis;
     allocator1(&basis, ncoeff);
+
+    double **inv;
+    allocator2(&inv, 2, 2);
+
+    double dBdx, dBdy;
     //------------------------------------------------------------------------//
 
-    
-    
+    double detJ;
+    double F2 = 2.0;
     //------------------------------------------------------------------------//
     //Loop over the elements
     for(ielem = 1; ielem<xelem-1; ielem++)
@@ -95,8 +100,18 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
 		    //------------------------------------------------------------------------//
 		    
 		    //------------------------------------------------------------------------//
-		   
-		    integral[ielem][jelem][icoeff] += weights[igauss][0]*weights[igauss][1]*recphi*(recu*dBdz1[icoeff] + recv*dBdz2[icoeff]);
+		    //get the matrix inverse
+		    detJ = mappingJacobianDeterminant(ielem, jelem, zeta[igauss][0], zeta[igauss][1], x, y, inv);
+		    //------------------------------------------------------------------------//
+
+		    //------------------------------------------------------------------------//
+		    //Get the zeta1, zeta2 components of basis
+		    dBdx = dBdz1[icoeff] * inv[0][0] + dBdz2[icoeff] * inv[0][1];
+		    dBdy = dBdz1[icoeff] * inv[1][0] + dBdz2[icoeff] * inv[1][1];
+
+		    integral[ielem][jelem][icoeff] +=weights[igauss][0]*weights[igauss][1]*recphi*(dBdx*recu + dBdy*recv)*detJ;
+		    
+		    //integral[ielem][jelem][icoeff] += weights[igauss][0]*weights[igauss][1]*recphi*(recu*dBdz1[icoeff] + recv*dBdz2[icoeff]);// * detJ;
 
 		    /*if(icoeff == 1)
 		    {
@@ -131,9 +146,10 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
     }
 
     /*double sum = 0.0;
-    for(ielem = 2; ielem<xelem-2; ielem++)
+    printf("Domain\n");
+    for(ielem = 2; ielem<3; ielem++)
     {
-	for(jelem=2; jelem<yelem-2; jelem++)
+	for(jelem=2; jelem<3; jelem++)
 	{
 	    printf("%d %d ",ielem,jelem);
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
@@ -150,6 +166,7 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
     deallocator1(&dBdz1, ncoeff);
     deallocator1(&dBdz2, ncoeff);
     deallocator1(&basis, ncoeff);
+    deallocator2(&inv, 2, 2);
     //------------------------------------------------------------------------//
 
 }

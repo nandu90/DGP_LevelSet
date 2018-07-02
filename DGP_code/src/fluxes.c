@@ -184,7 +184,19 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
     upwind(recTflux, recTu, tflux, ygpts, 2);
     //------------------------------------------------------------------------//
 
-    
+    //------------------------------------------------------------------------//
+    //check
+    /*ielem = 2;
+    jelem = 2;
+   
+    printf("%d %d ",ielem,jelem);
+    for(ixgauss=0; ixgauss<xgpts; ixgauss++)
+    {
+	printf("%.4f ",tflux[ielem][jelem][ixgauss]);
+    }
+    printf("\n");
+    exit(1);*/
+    //------------------------------------------------------------------------//
 
 
     //------------------------------------------------------------------------//
@@ -348,6 +360,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
     allocator1(&topInt, ncoeff);
     allocator1(&bottomInt, ncoeff);
 
+    double F1 = 1.0;
     //------------------------------------------------------------------------//
     //Loop over the elements
     for(ielem = 1; ielem<xelem-1; ielem++)
@@ -376,7 +389,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		    }
 		    else
 		    {
-			rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss];
+			rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss]*F1 * lineJacobian(ielem, jelem, 0.0, y, 2);
 		    }
 		    
 		}
@@ -393,7 +406,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		    }
 		    else
 		    {
-			leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss];
+			leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss]*F1 * lineJacobian(ielem, jelem, 0.0, y, 2);
 		    }
 		}
 		
@@ -412,7 +425,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		    }
 		    else
 		    {
-			topInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss];
+			topInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss]*F1 * lineJacobian(ielem, jelem, 0.0, x, 1);
 		    }
 		    
 		}
@@ -430,7 +443,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 		    }
 		    else
 		    {
-			bottomInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem-1][ixgauss];
+			bottomInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem-1][ixgauss]*F1 * lineJacobian(ielem, jelem, 0.0, x, 1);
 		    }
 		    
 		}
@@ -462,6 +475,17 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 
     //------------------------------------------------------------------------//
     //Check
+    /*ielem = 2;
+    jelem = 2;
+    printf("Boundary \n");
+    for(icoeff=0; icoeff<ncoeff; icoeff++)
+    {
+	printf("%.4e ",integral[ielem][jelem][icoeff]);
+    }
+    printf("\n");*/
+    
+
+    
     /*for(ielem = 2; ielem<xelem-2; ielem++)
     {
 	for(jelem =2; jelem<yelem-2; jelem++)

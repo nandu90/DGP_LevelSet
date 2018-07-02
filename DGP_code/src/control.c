@@ -268,6 +268,10 @@ void control()
 		    {
 			case_tog=5;
 		    }
+		    else if(strcmp(word,"Circle_vortex\n") == 0)
+		    {
+			case_tog=6;
+		    }
 		}
 		word = strtok(NULL,delim);
 	    }
