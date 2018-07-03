@@ -10,6 +10,8 @@ Created: 2018-03-11
 
 #include "common.h"
 
+void itrdrv(struct elemsclr ,double **, double **, double **, double **, double ** ,double ****);
+
 void solveSystem( double **, double *, double *);
 
 void dgesv_ (int *, int *, double *, int *, int *, double *, int *, int *);

@@ -20,7 +20,7 @@ Notes:
 
 
 
-void domainIntegral(double **x , double **y, struct elemsclr elem, double ***integral)
+void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs)
 {
     //------------------------------------------------------------------------//
     //Loop Indexes
@@ -41,14 +41,14 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
     double *basis;
     allocator1(&basis, ncoeff);
 
-    double **inv;
-    allocator2(&inv, 2, 2);
+    double *inv;
+    allocator1(&inv, 4);
 
     double dBdx, dBdy;
+    double detJ;
     //------------------------------------------------------------------------//
 
-    double detJ;
-    double F2 = 2.0;
+   
     //------------------------------------------------------------------------//
     //Loop over the elements
     for(ielem = 1; ielem<xelem-1; ielem++)
@@ -58,7 +58,7 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
 	    //Initialize integral to 0
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
-		integral[ielem][jelem][icoeff] = 0.0;
+		rhs[ielem][jelem][icoeff] = 0.0;
 	    }
 	    
 	    //Loop over the gauss quadrature points
@@ -66,7 +66,7 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
 	    {
 		for(igauss=0; igauss<tgauss; igauss++)
 		{
-		    //printf("here %d\n",icoeff);
+		    
 		    //------------------------------------------------------------------------//
 		    //Get the basis and differential vectors
 		    //w.r.t. zeta1
@@ -106,22 +106,17 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
 
 		    //------------------------------------------------------------------------//
 		    //Get the zeta1, zeta2 components of basis
-		    dBdx = dBdz1[icoeff] * inv[0][0] + dBdz2[icoeff] * inv[0][1];
-		    dBdy = dBdz1[icoeff] * inv[1][0] + dBdz2[icoeff] * inv[1][1];
+		    dBdx = dBdz1[icoeff] * inv[0] + dBdz2[icoeff] * inv[1];
+		    dBdy = dBdz1[icoeff] * inv[2] + dBdz2[icoeff] * inv[3];
 
-		    integral[ielem][jelem][icoeff] +=weights[igauss][0]*weights[igauss][1]*recphi*(dBdx*recu + dBdy*recv)*detJ;
+		    rhs[ielem][jelem][icoeff] +=weights[igauss][0]*weights[igauss][1]*recphi*(dBdx*recu + dBdy*recv)*detJ;
 		    
-		    //integral[ielem][jelem][icoeff] += weights[igauss][0]*weights[igauss][1]*recphi*(recu*dBdz1[icoeff] + recv*dBdz2[icoeff]);// * detJ;
-
-		    /*if(icoeff == 1)
-		    {
-			printf("Integral for 1 is %.4f\n",integral[ielem][jelem][icoeff]);
-			}*/
 		    //------------------------------------------------------------------------//
 		    
 		}
 	    }
-	    //integral[ielem][jelem][icoeff] = fabs(integral[ielem][jelem][icoeff]);
+
+	    
 	    //------------------------------------------------------------------------//
 	    //Check the integral
 	    /*if(ielem == 75 && jelem == 25)
@@ -166,7 +161,7 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***int
     deallocator1(&dBdz1, ncoeff);
     deallocator1(&dBdz2, ncoeff);
     deallocator1(&basis, ncoeff);
-    deallocator2(&inv, 2, 2);
+    deallocator1(&inv, 4);
     //------------------------------------------------------------------------//
 
 }

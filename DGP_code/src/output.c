@@ -55,7 +55,6 @@ void output_xml(struct elemsclr elem, int iter , double **x, double **y)
     zs[3][0] = 1.0;
     zs[3][1] = 1.0;
 
-    double detJ;
     
     for(i=0; i<xelem; i++)
     {

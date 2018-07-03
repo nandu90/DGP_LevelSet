@@ -34,7 +34,7 @@ double lineJacobian(int i, int j, double zeta, double **x, int dircode)
     return J;
 }
 
-double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, double **x, double **y, double **inv)
+double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, double **x, double **y, double *inv)
 {
     double x1, x2, x3, x4;
     double y1, y2, y3, y4;
@@ -60,10 +60,10 @@ double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, doub
     detJ = (dxdz1*dydz2-dxdz2*dydz1);
 
 
-    inv[0][0] = dydz2/detJ;
-    inv[0][1] = -dxdz2/detJ;
-    inv[1][0] = -dydz1/detJ;
-    inv[1][1] = dxdz1/detJ;
+    inv[0] = dydz2/detJ;
+    inv[1] = -dxdz2/detJ;
+    inv[2] = -dydz1/detJ;
+    inv[3] = dxdz1/detJ;
     
     return detJ;
 
@@ -74,88 +74,48 @@ double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, doub
 
 void massmatrix(double **x, double **y, double ****mass)
 {
-    int i,j,k,l;
+    //------------------------------------------------------------------------//
+    //Temporary variables
+    int ielem,jelem;
+    int igauss;
     double detJ;
     
     int Bi, Bj;
     
-    int npz1 = xgpts;
-    int npz2 = ygpts;
-    
-    // Get the Gauss Quadrature zeros and weights
-    
-    double *z1g, *z2g; //zeta1 and zeta2 Gauss zeros
-    double *w1g, *w2g; //Gauss weights
-    
-    allocator1(&z1g, npz1);
-    allocator1(&z2g, npz2);
-    allocator1(&w1g, npz1);
-    allocator1(&w2g, npz2);
-    
-   
-    if(quadtype == 1) //Gauss-Legendre-Lobatto
-    {
-	zwgll(z1g,w1g,npz1);
-	zwgll(z2g,w2g,npz2);
-    }
-    else if(quadtype == 2) //Gauss-Legendre
-    {
-	if(xgpts == 1)
-	{
-	    z1g[0] = 0.0;
-	    w1g[0] = 1.0;
-	}
-	else
-	{
-	    zwgl(z1g,w1g,xgpts);
-	}
-	if(ygpts == 1)
-	{
-	    z2g[0] = 0.0;
-	    w2g[0] = 1.0;
-	}
-	else
-	{
-	    zwgl(z2g,w2g,ygpts);
-	}
-    }
-    //
-
     double *basis;
-    allocator1(&basis, tgauss);
+    allocator1(&basis, ncoeff);
 
-    double **inv;
-    allocator2(&inv, 2, 2);
+    double *inv;
+    allocator1(&inv, 4);
+
+    //------------------------------------------------------------------------//
+
     
-    for(i=0; i<xelem; i++)
+    for(ielem=0; ielem<xelem; ielem++)
     {
-	for(j=0; j<yelem; j++)
+	for(jelem=0; jelem<yelem; jelem++)
 	{
 	    //Loop over the quadrature points
-	    for(k=0; k<npz1; k++)
+	    for(igauss=0; igauss<tgauss; igauss++)
 	    {
-		for(l=0; l<npz2; l++)
+		// Get the 2D Basis vector
+		basis2D(zeta[igauss][0], zeta[igauss][1], basis);
+		// Get the value of determinant
+		detJ = mappingJacobianDeterminant(ielem,jelem, zeta[igauss][0], zeta[igauss][1], x, y, inv);
+		
+		//Loop over the Basis matrix
+		for(Bi=0; Bi<ncoeff; Bi++)
 		{
-		    // Get the 2D Basis vector
-		    basis2D(z1g[k], z2g[l], basis);
-		    // Get the value of determinant
-		    detJ = mappingJacobianDeterminant(i,j, z1g[k], z2g[l], x, y, inv);
-		    
-		    //Loop over the Basis matrix
-		    for(Bi=0; Bi<(int)pow(polyorder+1,2.0); Bi++)
+		    for(Bj=0; Bj<ncoeff; Bj++)
 		    {
-			for(Bj=0; Bj<(int)pow(polyorder+1,2.0); Bj++)
-			{
-			    mass[i][j][Bi][Bj] += basis[Bi]*basis[Bj]*w1g[k]*w2g[l]*detJ;
-			    //mass[i][j][Bi][Bj] += basis[Bi]*basis[Bj]*w1g[k]*w2g[l];
-			}
+			mass[ielem][jelem][Bi][Bj] += basis[Bi]*basis[Bj]*weights[igauss][0]*weights[igauss][1]*detJ;
 		    }
-		    
-		}
+		}		
 	    }
 	}
     }
 
+    //------------------------------------------------------------------------//
     //Check
     /*printf("The mass matrix is\n");
     for(i=0; i<1; i++)
@@ -179,12 +139,13 @@ void massmatrix(double **x, double **y, double ****mass)
     }
 
     exit(1);*/
-    
-    deallocator1(&basis, (int)pow(tgauss,2.0));
-    deallocator1(&z1g, npz1);
-    deallocator1(&z2g, npz2);
-    deallocator1(&w1g, npz1);
-    deallocator1(&w2g, npz2);
+    //------------------------------------------------------------------------//
 
-    deallocator2(&inv, 2, 2);
+    //------------------------------------------------------------------------//
+    //Deallocators
+    deallocator1(&basis, ncoeff);
+
+    deallocator1(&inv, 4);
+    //------------------------------------------------------------------------//
+
 }

@@ -37,7 +37,7 @@ RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 5000
+Max_Iterations 1000
 print_gap 10
 
 /***************Particular CASES***************/

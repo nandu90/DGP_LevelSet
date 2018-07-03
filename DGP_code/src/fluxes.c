@@ -64,14 +64,10 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //
-    double ****recRflux, ****recTflux;      //Reconstructed fluxes at the right and top faces
-    double ****recRu,  ****recTu;            //Reconstructed wall normal velocities at the right and top face
-
-    allocator4(&recRflux, xelem, yelem, ygpts,2);
-    allocator4(&recTflux, xelem, yelem, xgpts,2);
-    allocator4(&recRu, xelem, yelem, ygpts,2);
-    allocator4(&recTu, xelem, yelem, xgpts,2);
+    double Rflux, Lflux;
+    double Tflux, Bflux;
+    double Ru, Lu;
+    double Tv, Bv;
     //------------------------------------------------------------------------//
 
 
@@ -79,225 +75,126 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
     //Reconstruct the face normal velocities and the fluxes at the Gauss Quadrature
     //points on the top and right face of each cell
     //Upwinding will be done later - so that its easier to change the flux scheme if i have to
-    for(ielem=0; ielem<xelem; ielem++)
+    for(ielem=0; ielem<xelem-1; ielem++)
     {
-	for(jelem=0; jelem<yelem; jelem++)
+	for(jelem=0; jelem<yelem-1; jelem++)
 	{
-	    //Loop over the Gauss Quadrature points on the right AND LEFT FACES
+	    //Loop over the Gauss Quadrature points on the right face of cell
 	    for(iygauss=0; iygauss < ygpts; iygauss++)
 	    {
+		//Reconstruct the solution at the left side
 		//Get the basis
-		basis2D(1.0, zy[iygauss], basisy);
-
-		//Get the flux vector
-		//Reconstruct the solution at the quadrature point
-		recphi = 0.0;
-		recu = 0.0;
-		recv = 0.0;
-		for(icoeff = 0; icoeff<ncoeff; icoeff++)
-		{
-		    recphi += basisy[icoeff]*elem.phi[ielem][jelem][icoeff];
-		    recu += basisy[icoeff]*elem.u[ielem][jelem][icoeff];
-		    recv += basisy[icoeff]*elem.v[ielem][jelem][icoeff];
-		}
-
-		recRflux[ielem][jelem][iygauss][0] = recphi*recu;
-		//Will have to have face normals here if the mesh is not cartesian - BE CAREFUL
-		recRu[ielem][jelem][iygauss][0] = recu;
-
-		//------------------------------------------------------------------------//
-		//Now the left face
-		//Get the basis
-		basis2D(-1.0, zy[iygauss], basisy);
-
-		//Get the flux vector
-		//Reconstruct the solution at the quadrature point
-		recphi = 0.0;
-		recu = 0.0;
-		recv = 0.0;
-		for(icoeff = 0; icoeff<ncoeff; icoeff++)
-		{
-		    recphi += basisy[icoeff]*elem.phi[ielem][jelem][icoeff];
-		    recu += basisy[icoeff]*elem.u[ielem][jelem][icoeff];
-		    recv += basisy[icoeff]*elem.v[ielem][jelem][icoeff];
-		}
-
-		recRflux[ielem][jelem][iygauss][1] = recphi*recu;
-		//Will have to have face normals here if the mesh is not cartesian - BE CAREFUL
-		recRu[ielem][jelem][iygauss][1] = recu;
+		basis2D(1.0, zy[iygauss], basisy);		
 		
-	    }
+		recphi = 0.0;
+		recu = 0.0;
+		for(icoeff = 0; icoeff<ncoeff; icoeff++)
+		{
+		    recphi += basisy[icoeff]*elem.phi[ielem][jelem][icoeff];
+		    recu += basisy[icoeff]*elem.u[ielem][jelem][icoeff];
+		}
+		Lflux = recphi * recu;
+		Lu = recu;
 
-	    //Loop over the Gauss Quadrature points on the top face AND BOTTOM FACES
+		//Reconstruct the solution at the right side
+		//Get the basis
+		basis2D(-1.0, zy[iygauss], basisy);		
+		
+		recphi = 0.0;
+		recu = 0.0;
+		for(icoeff = 0; icoeff<ncoeff; icoeff++)
+		{
+		    recphi += basisy[icoeff]*elem.phi[ielem+1][jelem][icoeff];
+		    recu += basisy[icoeff]*elem.u[ielem+1][jelem][icoeff];
+		}
+		Rflux = recphi * recu;
+		Ru = recu;
+
+		rflux[ielem][jelem][iygauss] = upwind(Lflux, Rflux, Lu, Ru);
+	    }	    
+
+	    //Loop over the Gauss Quadrature points on the top face of the cell
 	    for(ixgauss=0; ixgauss<xgpts; ixgauss++)
 	    {
+		//Recontruct the solution at the bottom
 		//Get the basis
 		basis2D(zx[ixgauss], 1.0, basisx);
 		
-		//Get the flux vector
-		//Reconstruct the solution at the quadrature point
 		recphi = 0.0;
-		recu = 0.0;
 		recv = 0.0;
 		for(icoeff = 0; icoeff<ncoeff; icoeff++)
 		{
 		    recphi += basisx[icoeff]*elem.phi[ielem][jelem][icoeff];
-		    recu += basisx[icoeff]*elem.u[ielem][jelem][icoeff];
 		    recv += basisx[icoeff]*elem.v[ielem][jelem][icoeff];
 		}
+		Bflux = recphi * recv;
+		Bv = recv;
 
-		recTflux[ielem][jelem][ixgauss][0] = recphi*recv;
-		//Will have to have face normals here if the mesh is not cartesian - BE CAREFUL
-		recTu[ielem][jelem][ixgauss][0] = recv;
-
-		//------------------------------------------------------------------------//
-		//Now the bottom face
+		//Recontruct the solution at the top
 		//Get the basis
 		basis2D(zx[ixgauss], -1.0, basisx);
 		
-		//Get the flux vector
-		//Reconstruct the solution at the quadrature point
 		recphi = 0.0;
-		recu = 0.0;
 		recv = 0.0;
 		for(icoeff = 0; icoeff<ncoeff; icoeff++)
 		{
-		    recphi += basisx[icoeff]*elem.phi[ielem][jelem][icoeff];
-		    recu += basisx[icoeff]*elem.u[ielem][jelem][icoeff];
-		    recv += basisx[icoeff]*elem.v[ielem][jelem][icoeff];
+		    recphi += basisx[icoeff]*elem.phi[ielem][jelem+1][icoeff];
+		    recv += basisx[icoeff]*elem.v[ielem][jelem+1][icoeff];
 		}
+		Tflux = recphi * recv;
+		Tv = recv;
 
-		recTflux[ielem][jelem][ixgauss][1] = recphi*recv;
-		//Will have to have face normals here if the mesh is not cartesian - BE CAREFUL
-		recTu[ielem][jelem][ixgauss][1] = recv;
+		tflux[ielem][jelem][ixgauss] = upwind(Bflux, Tflux, Bv, Tv);
 	    }
 	}
     }
-    //------------------------------------------------------------------------//
-
-
-    //------------------------------------------------------------------------//
-    //The flux scheme is implemented now
-    //On right face
-    upwind(recRflux, recRu, rflux, xgpts, 1);
-    //On top face
-    upwind(recTflux, recTu, tflux, ygpts, 2);
-    //------------------------------------------------------------------------//
-
-    //------------------------------------------------------------------------//
-    //check
-    /*ielem = 2;
-    jelem = 2;
-   
-    printf("%d %d ",ielem,jelem);
-    for(ixgauss=0; ixgauss<xgpts; ixgauss++)
-    {
-	printf("%.4f ",tflux[ielem][jelem][ixgauss]);
-    }
-    printf("\n");
-    exit(1);*/
     //------------------------------------------------------------------------//
 
 
     //------------------------------------------------------------------------//
     //Deallocators
-    deallocator4(&recRflux, xelem, yelem, ygpts,2);
-    deallocator4(&recTflux, xelem, yelem, xgpts,2);
-    deallocator4(&recRu, xelem, yelem, ygpts,2);
-    deallocator4(&recTu, xelem, yelem, xgpts,2);
-    //------------------------------------------------------------------------//
-
-    
-    
-    
+    deallocator1(&zx, xgpts);
+    deallocator1(&zy, ygpts);
+    deallocator1(&wx, xgpts);
+    deallocator1(&wy, ygpts);
+    deallocator1(&basisx, ncoeff);
+    deallocator1(&basisy, ncoeff);
+    //------------------------------------------------------------------------//   
 }
 
-void upwind(double ****recflux, double ****recu, double ***flux, int ngauss, int dircode)
+double upwind(double minusFlux, double plusFlux, double minusU, double plusU)
 {
-    //------------------------------------------------------------------------//
-    //Temporary variables
-    //Minus values are inside the cell and plus are outside    
-    double minusU, plusU;
-    double minusFlux, plusFlux;
-
-    double Fminus, Fplus;
-    //------------------------------------------------------------------------//
-
-    //------------------------------------------------------------------------//
-    //Loop indexes
-    int ielem, jelem;
-    int igauss;
-    //------------------------------------------------------------------------//
-
-    //------------------------------------------------------------------------//
-    //Accounting for direction code
-    int xinc;
-    int yinc;
-    if(dircode == 1)
+    double Fminus;
+    double Fplus;
+    double flux;
+    
+    //Upwinding
+    if(minusU >= 0.0)
     {
-	xinc = 1;
-	yinc = 0;
-    }
-    else if(dircode == 2)
-    {
-	xinc = 0;
-	yinc = 1;
+	Fminus = minusFlux;
     }
     else
     {
-	xinc = 0;
-	yinc = 0;
-	if(myrank == master)
-	{
-	    printf("Please apply proper direction code for fluxes.\nExiting...");
-	    exit(1);
-	}
+	Fminus = 0.0;
     }
     
-    //------------------------------------------------------------------------//
-    //Loop through elements
-    for(ielem=0; ielem < xelem-1; ielem++)
+    if(plusU > 0.0)
     {
-	for(jelem=0; jelem < yelem-1; jelem++)
-	{
-	    //Loop over Gauss Quadrature points
-	    for(igauss=0; igauss<ngauss; igauss++)
-	    {
-		minusU = recu[ielem][jelem][igauss][0];
-		plusU = recu[ielem+xinc][jelem+yinc][igauss][1];
-
-		minusFlux = recflux[ielem][jelem][igauss][0];
-		plusFlux = recflux[ielem+xinc][jelem+yinc][igauss][1];
-
-		//Upwinding
-		if(minusU >= 0.0)
-		{
-		    Fminus = minusFlux;
-		}
-		else
-		{
-		    Fminus = 0.0;
-		}
-
-		if(plusU > 0.0)
-		{
-		    Fplus = 0.0;
-		}
-		else
-		{
-		    Fplus = plusFlux;
-		}
-
-		flux[ielem][jelem][igauss] = Fminus + Fplus;
-	    }
-	}
+	Fplus = 0.0;
+    }
+    else
+    {
+	Fplus = plusFlux;
     }
 
-    
+    flux = Fminus + Fplus;
+
+    return flux;
 }
 
 
-void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, double **x, double **y, double ****area)
+
+void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **x, double **y, double ****area)
 {
     //------------------------------------------------------------------------//
     /*
@@ -314,10 +211,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 
     //------------------------------------------------------------------------//
     //Temporary Variables
-    double ***rintegral, ***tintegral;
-    allocator3(&rintegral, xelem, yelem, ncoeff);
-    allocator3(&tintegral, xelem, yelem, ncoeff);
-
+    
     double *zx, *zy;
     double *wx, *wy;
     allocator1(&zx, xgpts);
@@ -349,7 +243,8 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
     allocator1(&basisy, ncoeff);
 
     //------------------------------------------------------------------------//
-
+    double rintegral;
+    double tintegral;
     double *rightInt;
     double *leftInt;
     double *topInt;
@@ -360,7 +255,7 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
     allocator1(&topInt, ncoeff);
     allocator1(&bottomInt, ncoeff);
 
-    double F1 = 1.0;
+
     //------------------------------------------------------------------------//
     //Loop over the elements
     for(ielem = 1; ielem<xelem-1; ielem++)
@@ -451,27 +346,15 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
 
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
-		rintegral[ielem][jelem][icoeff] =  rightInt[icoeff] - leftInt[icoeff];
-		tintegral[ielem][jelem][icoeff] = topInt[icoeff] - bottomInt[icoeff];
+		rintegral =  rightInt[icoeff] - leftInt[icoeff];
+		tintegral = topInt[icoeff] - bottomInt[icoeff];
+
+		rhs[ielem][jelem][icoeff] += -(rintegral + tintegral);
 	    }
 	}
     }
     //------------------------------------------------------------------------//
 
-
-    //------------------------------------------------------------------------//
-    //Finally calculate the total integral
-    for(ielem=1; ielem<xelem-1; ielem++)
-    {
-	for(jelem=1; jelem<yelem-1; jelem++)
-	{
-	    for(icoeff=0; icoeff<ncoeff; icoeff++)
-	    {
-		integral[ielem][jelem][icoeff] = rintegral[ielem][jelem][icoeff] + tintegral[ielem][jelem][icoeff];
-	    }
-	}
-    }
-    //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Check
@@ -518,8 +401,6 @@ void boundaryIntegral(double ***integral, double ***rflux, double ***tflux, doub
     
     //------------------------------------------------------------------------//
     //Deallocators
-    deallocator3(&rintegral, xelem, yelem, ncoeff);
-    deallocator3(&tintegral, xelem, yelem, ncoeff);
     deallocator1(&zx, xgpts);
     deallocator1(&zy, ygpts);
     deallocator1(&wx, xgpts);
