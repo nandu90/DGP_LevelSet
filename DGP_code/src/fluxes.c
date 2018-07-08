@@ -284,7 +284,7 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
 		    }
 		    else
 		    {
-			rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss]*F1 * lineJacobian(ielem, jelem, 0.0, y, 2);
+			rightInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem][jelem][iygauss] * lineJacobian(ielem, jelem, basisy[icoeff], x, y, 1);
 		    }
 		    
 		}
@@ -301,7 +301,7 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
 		    }
 		    else
 		    {
-			leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss]*F1 * lineJacobian(ielem, jelem, 0.0, y, 2);
+			leftInt[icoeff] += wy[iygauss]*basisy[icoeff]*rflux[ielem-1][jelem][iygauss] * lineJacobian(ielem, jelem, basisy[icoeff], x, y, 3);
 		    }
 		}
 		
@@ -320,7 +320,7 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
 		    }
 		    else
 		    {
-			topInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss]*F1 * lineJacobian(ielem, jelem, 0.0, x, 1);
+			topInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem][ixgauss] * lineJacobian(ielem, jelem, basisx[icoeff], x, y, 2);
 		    }
 		    
 		}
@@ -338,12 +338,13 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
 		    }
 		    else
 		    {
-			bottomInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem-1][ixgauss]*F1 * lineJacobian(ielem, jelem, 0.0, x, 1);
+			bottomInt[icoeff] += wx[ixgauss]*basisx[icoeff]*tflux[ielem][jelem-1][ixgauss] * lineJacobian(ielem, jelem, basisx[icoeff], x, y, 4);
 		    }
 		    
 		}
 	    }
 
+	    
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
 		rintegral =  rightInt[icoeff] - leftInt[icoeff];

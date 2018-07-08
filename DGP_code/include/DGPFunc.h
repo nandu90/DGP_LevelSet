@@ -15,5 +15,5 @@ void basisDiff2D( double, double, double *, int);
 
 void basisdiff1D(double, double *);
 
-double lineJacobian(int, int, double, double **, int);
+double lineJacobian(int, int, double, double **, double **, int);
 #endif

@@ -3,35 +3,81 @@
 #include "memory.h"
 #include "DGPFunc.h"
 
-double lineJacobian(int i, int j, double zeta, double **x, int dircode)
+double lineJacobian(int ielem, int jelem, double zeta, double **x, double **y, int facecode)
 {
+    //------------------------------------------------------------------------//
+    //Temporary variables
     double x1, x2;
+    double y1, y2;
 
-    int xinc, yinc;
-    
-    if(dircode == 1)
+    double length;
+    double costheta;
+    double sintheta;
+
+    double detJ;
+
+    double dxdz;
+    double dydz;
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    /*CONVENTION: Choose the coordinates such that if you go from 1-2 
+     the right side points outside the cell*/    
+    //------------------------------------------------------------------------//
+    //Choose the coordinates based on facecode
+    if(facecode == 1)
     {
-	xinc = 1;
-	yinc = 0;
+	x1 = x[ielem+1][jelem];
+	y1 = y[ielem+1][jelem];
+
+	x2 = x[ielem+1][jelem+1];
+	y2 = y[ielem+1][jelem+1];
     }
-    else if(dircode == 2)
+    else if(facecode == 2)
     {
-	xinc = 0;
-	yinc = 1;
+	x1 = x[ielem][jelem+1];
+	y1 = y[ielem][jelem+1];
+
+	x2 = x[ielem+1][jelem+1];
+	y2 = y[ielem+1][jelem+1];
+    }
+    else if(facecode == 3)
+    {
+	x1 = x[ielem][jelem];
+	y1 = y[ielem][jelem];
+
+	x2 = x[ielem][jelem+1];
+	y2 = y[ielem][jelem+1];
     }
     else
     {
-	xinc = 0;
-	yinc =0;
-	printf("Please give proper direction code\nExiting...");
-	exit(1);
-    }
-	
-    x1 = x[i][j];
-    x2 = x[i+xinc][j+yinc];
+	x1 = x[ielem][jelem];
+	y1 = y[ielem][jelem];
 
-    double J = fabs((x2-x1)/2.0);
-    return J;
+	x2 = x[ielem+1][jelem];
+	y2 = y[ielem+1][jelem];
+    }
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Get the length
+    length = sqrt(pow(y2-y1,2) + pow(x2-x1,2));
+
+    //Get the slope
+    costheta = (x2-x1)/length;
+    sintheta = (y2-y1)/length;
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Get the components of jacobian matrix
+    dxdz = length*costheta/2.0;
+
+    dydz = length*sintheta/2.0;
+    //------------------------------------------------------------------------//
+
+    detJ = dxdz + dydz;
+
+    return detJ;
 }
 
 double mappingJacobianDeterminant(int i, int j, double zeta1, double zeta2, double **x, double **y, double *inv)
