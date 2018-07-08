@@ -1,2 +1,3 @@
-- Why is it that I need special treatment for DGP0 in fluxes.c in the function boundaryIntegral().
-- There are a lot of places where the speed can be enchanced. Note that allocation and deallocation are time consuming functions.
+- Line Jacobians need to be fixed.
+- Test on a skewed mesh
+- Adaptive p-refinement
