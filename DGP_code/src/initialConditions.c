@@ -180,8 +180,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
     allocator1(&inv, 4);
     allocator1(&jacobian, 4);
 
-    double uxy, vxy, magxy,mag;
-    double detJ;
+    double uxy = 0.0, vxy = 0.0, magxy = 0.0,mag = 0.0;
+    
     
     //Allocate coordinate matrix corresponding to zs - solution points
     double **xs;
@@ -218,7 +218,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		//Get the magnitude in xy coordinates
 		magxy = sqrt(pow(uxy,2.0) + pow(vxy,2.0));
 		
-		detJ = mappingJacobianDeterminant(i, j, zeta[k][0], zeta[k][1], x, y, inv, jacobian);
+		mappingJacobianDeterminant(i, j, zeta[k][0], zeta[k][1], x, y, inv, jacobian);
+		
 		//Use the inverse Jacobian matrix to transform
 		us[k] = uxy * inv[0] + vxy * inv[1];
 		vs[k] = uxy * inv[2] + vxy * inv[3];

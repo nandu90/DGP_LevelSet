@@ -274,9 +274,9 @@ void errorGaussian(double ***phi, double time, double **x, double **y)
     double sigmay;
     double term1;
     double term2;
-    double exact;
+    double exact = 0.0;
 
-    double exactx;
+    double exactx = 0.0;
 
     double sum1 = 0.0;
     double sum2 = 0.0;
@@ -284,7 +284,7 @@ void errorGaussian(double ***phi, double time, double **x, double **y)
     double error1, error2, errorinf;
 
     //Position of center on the circumference
-    double speed, dist,theta,xc,yc;
+    double speed, dist,theta,xc = 0.0,yc = 0.0;
     if(case_tog == 6)
     {
 	 speed = PI*25.0/314.0;

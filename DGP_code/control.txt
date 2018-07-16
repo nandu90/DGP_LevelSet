@@ -7,7 +7,7 @@ xlen 100
 ylen 100
 xelem 50
 yelem 50
-Read_mesh 0
+Read_mesh 1
 
 /***************Gauss Quadrature********************/
 //Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE
@@ -38,7 +38,7 @@ RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 1000
+Max_Iterations 1500
 print_gap 10
 
 /***************Particular CASES***************/

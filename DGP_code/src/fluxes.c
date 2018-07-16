@@ -68,8 +68,8 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
     double Tflux, Bflux;
     double Ru, Lu;
     double Tv, Bv;
-    double normz1, normz2;
-    double normalVel;
+    //double normz1, normz2;
+    //double normalVel;
     //------------------------------------------------------------------------//
 
 
