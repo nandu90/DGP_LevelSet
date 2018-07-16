@@ -176,6 +176,13 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 	}
     }
 
+    double *inv,  *jacobian;
+    allocator1(&inv, 4);
+    allocator1(&jacobian, 4);
+
+    double uxy, vxy, magxy,mag;
+    double detJ;
+    
     //Allocate coordinate matrix corresponding to zs - solution points
     double **xs;
     allocator2(&xs, tgauss, 2);
@@ -192,20 +199,37 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 	    {
 		if(case_tog == 1 || case_tog == 2 || case_tog == 5)
 		{
-		    us[k] = 1.0;
-		    vs[k] = 0.0;
+		    uxy = 1.0;
+		    vxy = 0.0;
 		}
 		else if(case_tog == 3 || case_tog == 6)
 		{
-		    us[k] =  PI*(50.0 - xs[k][1])/314.0;
-		    vs[k] =  PI*(xs[k][0] - 50.0)/314.0;
+		    uxy =  PI*(50.0 - xs[k][1])/314.0;
+		    vxy =  PI*(xs[k][0] - 50.0)/314.0;		    
 		}
 		else
 		{
 		    us[k] = 0.0;
 		    vs[k] = 0.0;
 		}
+	    
+		//------------------------------------------------------------------------//
+		//Transform the velocity vector onto local coordinate
+		//Get the magnitude in xy coordinates
+		magxy = sqrt(pow(uxy,2.0) + pow(vxy,2.0));
+		
+		detJ = mappingJacobianDeterminant(i, j, zeta[k][0], zeta[k][1], x, y, inv, jacobian);
+		//Use the inverse Jacobian matrix to transform
+		us[k] = uxy * inv[0] + vxy * inv[1];
+		vs[k] = uxy * inv[2] + vxy * inv[3];
+		
+		//Rescale the obtained vector to be equal to original vector
+		mag = sqrt(pow(us[k],2.0) + pow(vs[k],2.0));
+		us[k] = us[k]*magxy/mag;
+		vs[k] = vs[k]*magxy/mag;
+		//------------------------------------------------------------------------//
 	    }
+
 	    //Solve the system to get the coefficients
 	    solveSystem(vand, us, elem.u[i][j]);
 	    solveSystem(vand, vs, elem.v[i][j]);
@@ -232,6 +256,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
     deallocator1(&basis, ncoeff);
     deallocator2(&vand, tgauss, ncoeff);
     deallocator2(&xs, tgauss, 2);
+    deallocator1(&inv, 4);
+    deallocator1(&jacobian, 4);
     //------------------------------------------------------------------------//
 
 }

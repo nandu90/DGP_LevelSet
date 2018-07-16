@@ -16,7 +16,9 @@
 #define COMMON_H
 
 ///Standard Libraries to include
+#define _GNU_SOURCE
 #define PI 3.1415926535897
+
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -33,6 +35,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <dirent.h>
+#include <fenv.h>
 
 //------------------------------------------------------------------------//
 

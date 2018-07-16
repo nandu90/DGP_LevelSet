@@ -1,12 +1,13 @@
 /******************Basis Functions*****************/
-Basis_Order 2
+Basis_Order 1
 
 /******************Grid related Inputs*******************//
 
 xlen 100
 ylen 100
-xelem 25
-yelem 25
+xelem 50
+yelem 50
+Read_mesh 0
 
 /***************Gauss Quadrature********************/
 //Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE

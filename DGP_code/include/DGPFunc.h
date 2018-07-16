@@ -1,7 +1,7 @@
 #ifndef DGPFUNC_H
 #define DGPFUNC_H
 
-double mappingJacobianDeterminant(int, int, double, double, double **, double **, double *);
+double mappingJacobianDeterminant(int, int, double, double, double **, double **, double *, double*);
 
 void basis1D(double, double *);
 
@@ -16,4 +16,6 @@ void basisDiff2D( double, double, double *, int);
 void basisdiff1D(double, double *);
 
 double lineJacobian(int, int, double, double **, double **, int);
+
+void lineNormal(int , int , double **, double **, double *, double *, int , double , double );
 #endif

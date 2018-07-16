@@ -7,8 +7,9 @@ Created: 2018-03-04
 
 #include "common.h"
 #include "mesh.h"
+#include "memory.h"
 
-void gridread(double **x, double **y, double ****area, double **vol, double **xc, double **yc)
+void gridgen(double **x, double **y, double ****area, double **vol, double **xc, double **yc)
 {
     int i,j;
     double deltax=xlen/(gxelem);
@@ -16,9 +17,9 @@ void gridread(double **x, double **y, double ****area, double **vol, double **xc
     double firstx = (myrank%procm)*elemm*deltax;
     double firsty = (double)floor(myrank/procm)*elemn*deltay;
     //Assign coordinates
-    for(i=2; i<xnode-2; i++)
+    for(j=2; j<ynode-2; j++)
     {
-        for(j=2; j<ynode-2; j++)
+        for(i=2; i<xnode-2; i++)
         {
             x[i][j] = firstx + (i-2)*deltax;
             y[i][j] = firsty + (j-2)*deltay;
@@ -26,6 +27,126 @@ void gridread(double **x, double **y, double ****area, double **vol, double **xc
         }
     }
 
+    meshOperations(x, y, area, vol, xc, yc);
+    
+
+    //printf("X and y limits in %d with m x n = %d %d are: %.5f %.5f %.5f %.5f\n",myrank+1,xelem-2, yelem-2,x[0][0], x[xnode-1][0], y[0][0],y[0][ynode-1]);
+}
+
+void gridread(double **x, double **y, double ****area, double **vol, double **xc, double **yc)
+{
+    //------------------------------------------------------------------------//
+    //Let only the master processor read the mesh
+    double *xread, *yread;
+    
+    allocator1(&xread, (gxelem+1)*(gyelem+1));
+    allocator1(&yread, (gxelem+1)*(gyelem+1));
+
+    int i,j,k;
+    
+    if(myrank == master)
+    {
+	/*printf("%d %d\n",gxelem,gyelem);
+	  exit(1);*/
+	
+	FILE *gridfile;
+	gridfile = fopen("../../mesh.dat","r");
+	if(gridfile == NULL)
+	{
+	    printf("Error opening mesh.dat!\n");
+	    exit(0);
+	}
+
+	char* line = NULL;
+	ssize_t size;
+	size_t len = 0;
+	
+	char delim [1] = " ";
+	char* word = NULL;
+
+	i = 0;
+	while((size = getline(&line, &len, gridfile)) != -1)
+	{
+	    word = strtok(line, delim);
+	    
+	    xread[i] = atof(word);
+	    word = strtok(NULL,delim);
+	    yread[i] = atof(word);
+	    word = strtok(NULL,delim); 
+	    
+	    i++;
+	}
+	
+	fclose(gridfile);
+	free(word);
+	free(line);
+    }
+
+    //Pass all info to all processors
+    MPI_Bcast(xread, (gxelem+1)*(gyelem+1), MPI_DOUBLE, master, MPI_COMM_WORLD);
+    MPI_Bcast(yread, (gxelem+1)*(gyelem+1), MPI_DOUBLE, master, MPI_COMM_WORLD);
+    
+    //Rearrange in 2D array
+    double **xtemp, **ytemp;
+    allocator2(&xtemp, gxelem+1, gyelem+1);
+    allocator2(&ytemp, gxelem+1, gyelem+1);
+
+    i=0;
+    j=0;
+    k=0;
+    
+    for(j=0; j<gyelem+1; j++)
+    {
+	for(i=0; i<gxelem+1; i++)
+	{
+	    xtemp[i][j] = xread[k];
+	    ytemp[i][j] = yread[k];
+	    k++;
+	}
+    }
+
+    //Now split the mesh
+    int firstx = (myrank%procm)*elemm;
+    int firsty = (double)floor(myrank/procm)*elemn;
+
+    for(j=2; j<ynode-2; j++)
+    {
+        for(i=2; i<xnode-2; i++)
+        {
+            x[i][j] = xtemp[firstx+i-2][firsty+j-2];
+            y[i][j] = ytemp[firstx+i-2][firsty+j-2];
+        }
+    }
+
+    //Now do the rest of mesh operations
+    meshOperations(x, y, area, vol, xc, yc);
+
+    /*FILE *meshcheck;
+    meshcheck = fopen("../../meshcheck.dat","w");
+
+    for(j=0; j<ynode; j++)
+    {
+	for(i=0; i<xnode; i++)
+	{
+	    fprintf(meshcheck,"%12.8f %12.8f\n",x[i][j],y[i][j]);
+	}
+    }
+    
+    fclose(meshcheck);*/
+    //------------------------------------------------------------------------//
+    //Deallocators
+    deallocator1(&xread, (gxelem+1)*(gyelem+1));
+    deallocator1(&yread, (gxelem+1)*(gyelem+1));
+    deallocator2(&xtemp, gxelem+1, gyelem+1);
+    deallocator2(&ytemp, gxelem+1, gyelem+1);
+    //------------------------------------------------------------------------//
+
+}
+
+void meshOperations(double **x, double **y, double ****area, double **vol, double **xc, double **yc)
+{
+    int i,j;
+    
     //Generate ghost nodes
     //Add cells on both sides of x
     for(j=2; j < ynode-2; j++)
@@ -129,9 +250,4 @@ void gridread(double **x, double **y, double ****area, double **vol, double **xc
             yc[i][j]=0.25*(y[i][j]+y[i+1][j]+y[i+1][j+1]+y[i][j+1]);
         }
     }
-
-    //printf("X and y limits in %d with m x n = %d %d are: %.5f %.5f %.5f %.5f\n",myrank+1,xelem-2, yelem-2,x[0][0], x[xnode-1][0], y[0][0],y[0][ynode-1]);
 }
-
-
-

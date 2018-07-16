@@ -12,7 +12,7 @@ Created: 2018-03-28
 #include "polylib.h"
 #include "memory.h"
 
-void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
+void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct elemsclr elem)
 {
     //------------------------------------------------------------------------//
     /*This routine will construct the fluxes at the right and top faces.
@@ -68,6 +68,8 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
     double Tflux, Bflux;
     double Ru, Lu;
     double Tv, Bv;
+    double normz1, normz2;
+    double normalVel;
     //------------------------------------------------------------------------//
 
 
@@ -85,16 +87,25 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
 		//Reconstruct the solution at the left side
 		//Get the basis
 		basis2D(1.0, zy[iygauss], basisy);		
+
+		//get the face normal - deprecated
+		//lineNormal(ielem, jelem, x, y, &normz1, &normz2, 1, 1.0 ,zy[iygauss]);
 		
 		recphi = 0.0;
 		recu = 0.0;
+		recv = 0.0;
 		for(icoeff = 0; icoeff<ncoeff; icoeff++)
 		{
 		    recphi += basisy[icoeff]*elem.phi[ielem][jelem][icoeff];
 		    recu += basisy[icoeff]*elem.u[ielem][jelem][icoeff];
+		    recv += basisy[icoeff]*elem.v[ielem][jelem][icoeff];
 		}
-		Lflux = recphi * recu;
+				
+		//normalVel = recu*normz1 + recv*normz2; - deprecated
+		Lflux = recphi*recu;
 		Lu = recu;
+		//Lflux = recphi*normalVel; - deprecated
+		//Lu = normalVel; - deprecated
 
 		//Reconstruct the solution at the right side
 		//Get the basis
@@ -102,33 +113,50 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
 		
 		recphi = 0.0;
 		recu = 0.0;
+		recv = 0.0;
 		for(icoeff = 0; icoeff<ncoeff; icoeff++)
 		{
 		    recphi += basisy[icoeff]*elem.phi[ielem+1][jelem][icoeff];
 		    recu += basisy[icoeff]*elem.u[ielem+1][jelem][icoeff];
+		    recv += basisy[icoeff]*elem.v[ielem+1][jelem][icoeff];
 		}
+		
+	        //normalVel = recu*normz1 + recv*normz2; - deprecated
 		Rflux = recphi * recu;
 		Ru = recu;
+		//Rflux = recphi*normalVel; - deprecated
+		//Ru = normalVel; - deprecated
+
 
 		rflux[ielem][jelem][iygauss] = upwind(Lflux, Rflux, Lu, Ru);
 	    }	    
 
+	    
 	    //Loop over the Gauss Quadrature points on the top face of the cell
 	    for(ixgauss=0; ixgauss<xgpts; ixgauss++)
 	    {
 		//Recontruct the solution at the bottom
 		//Get the basis
 		basis2D(zx[ixgauss], 1.0, basisx);
+
+		//get the face normal - deprecated
+		//lineNormal(ielem, jelem, x, y, &normz1, &normz2, 2, zx[ixgauss] ,1.0);
 		
 		recphi = 0.0;
+		recu = 0.0;
 		recv = 0.0;
 		for(icoeff = 0; icoeff<ncoeff; icoeff++)
 		{
 		    recphi += basisx[icoeff]*elem.phi[ielem][jelem][icoeff];
+		    recu += basisx[icoeff]*elem.u[ielem][jelem][icoeff];
 		    recv += basisx[icoeff]*elem.v[ielem][jelem][icoeff];
 		}
+		//normalVel = recu*normz1 + recv*normz2; - deprecated
 		Bflux = recphi * recv;
 		Bv = recv;
+		//Bflux = recphi*normalVel; - deprecated
+		//Bv = normalVel; - deprecated
+
 
 		//Recontruct the solution at the top
 		//Get the basis
@@ -136,16 +164,22 @@ void fluxes(double ***rflux, double ***tflux, struct elemsclr elem)
 		
 		recphi = 0.0;
 		recv = 0.0;
+		recu = 0.0;
 		for(icoeff = 0; icoeff<ncoeff; icoeff++)
 		{
 		    recphi += basisx[icoeff]*elem.phi[ielem][jelem+1][icoeff];
+		    recu += basisx[icoeff]*elem.u[ielem][jelem+1][icoeff];
 		    recv += basisx[icoeff]*elem.v[ielem][jelem+1][icoeff];
 		}
+		//normalVel = recu*normz1 + recv*normz2; - deprecated
 		Tflux = recphi * recv;
 		Tv = recv;
+		//Tflux = recphi*normalVel; - deprecated
+		//Tv = normalVel; - dprecated
 
 		tflux[ielem][jelem][ixgauss] = upwind(Bflux, Tflux, Bv, Tv);
 	    }
+
 	}
     }
     //------------------------------------------------------------------------//
@@ -343,7 +377,6 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
 		    
 		}
 	    }
-
 	    
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {

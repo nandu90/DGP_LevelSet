@@ -27,6 +27,7 @@ Notes:
 #include "solvers.h"
 #include "INS.h"
 
+
 /*#include "partition.h"
 #include "grid.h"
 #include "commu.h"
@@ -36,6 +37,11 @@ Notes:
 
 int main(int argc, char **argv)
 {
+    feenableexcept(FE_INVALID   | 
+                   FE_DIVBYZERO | 
+                   FE_OVERFLOW  | 
+                   FE_UNDERFLOW);
+    
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
@@ -63,7 +69,6 @@ int main(int argc, char **argv)
 	free(path);
     }
     //------------------------------------------------------------------------//
-
   
     //------------------------------------------------------------------------//
     //Read control file
@@ -98,7 +103,14 @@ int main(int argc, char **argv)
 
     //------------------------------------------------------------------------//
     //Read grid
-    gridread(x,y,area, vol, xc, yc);
+    if(meshread == 0)
+    {
+	gridgen(x,y,area, vol, xc, yc);
+    }
+    else
+    {
+	gridread(x,y,area,vol,xc,yc);
+    }
     //------------------------------------------------------------------------//
 
       

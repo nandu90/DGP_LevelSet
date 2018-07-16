@@ -12,7 +12,7 @@ void getRHS(struct elemsclr, double **, double **, double ***, double ****);
 
 void domainIntegral(double **, double **, struct elemsclr, double ***);
 
-void fluxes(double ***, double ***, struct elemsclr);
+void fluxes(double ***, double ***, double **, double **, struct elemsclr);
 
 double upwind(double , double , double , double);
 

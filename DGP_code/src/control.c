@@ -59,6 +59,11 @@ void control()
 		    word = strtok(NULL,delim);
 		    gyelem = atoi(word);
 		}
+		if(strcmp(word,"Read_mesh") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    meshread= atoi(word);
+		}
 		if(strcmp(word,"Bubble_radius") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -273,6 +278,7 @@ void control()
 			case_tog=6;
 		    }
 		}
+		
 		word = strtok(NULL,delim);
 	    }
 	    
@@ -290,6 +296,7 @@ void control()
   
   MPI_Bcast(&gxelem,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&gyelem,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&meshread,1,MPI_INT,master,MPI_COMM_WORLD);
   
   MPI_Bcast(&rb_in,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   MPI_Bcast(&xb_in,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
