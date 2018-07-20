@@ -112,7 +112,7 @@ void naturalToCartesian(double **xs, double **x, double **y, int i, int j)
 }
 
 
-void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr)
+void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, double **x, double **y)
 {
     int ielem, jelem, icoeff;
     int igauss;
@@ -129,12 +129,20 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr)
     double sum1 = 0.0;
 
     double elemsum = 0.0;
+    double elemsum1 = 0.0;
+
+    double *inv,  *jacobian;
+    allocator1(&inv, 4);
+    allocator1(&jacobian, 4);
+
+    double detJ;
     
     for(ielem =2; ielem<xelem-2; ielem++)
     {
 	for(jelem=2; jelem<yelem-2; jelem++)
 	{
 	    elemsum = 0.0;
+	    elemsum1 = 0.0;
 	    for(igauss=0; igauss<tgauss; igauss++)
 	    {
 		recini = 0.0;
@@ -145,30 +153,43 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr)
 		    recini += basis[icoeff]*iniphi[ielem][jelem][icoeff];
 		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
 		}
-		elemsum += pow(recini-rec,2.0)*weights[igauss][0]*weights[igauss][1];
-		sum1 += pow(recini,2.0);
+		detJ = mappingJacobianDeterminant(ielem, jelem, zeta[igauss][0], zeta[igauss][1], x, y, inv, jacobian);
+		if(recini <= 2.0)
+		{
+		    elemsum += pow(recini-rec,2.0)*weights[igauss][0]*weights[igauss][1]*detJ;
+		    elemsum1 += pow(recini,2.0)*weights[igauss][0]*weights[igauss][1]*detJ;
+		}
+		else
+		{
+		    elemsum = 0.0;
+		    elemsum1 = 0.0;
+		    break;
+		}
 	    }
 	    sum += elemsum;
+	    sum1 += elemsum1;
 	}
     }
 
     MPI_Allreduce(&sum, err, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    double result;
+    double exact;
 
-    MPI_Allreduce(&sum1, &result, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&sum1, &exact, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		  
-    (*err) = sqrt((*err));
+    (*err) = sqrt((*err))/sqrt(exact);
 
     (*lerr) = log(*err);
     
 
     deallocator1(&basis, ncoeff);
+    deallocator1(&inv, 4);
+    deallocator1(&jacobian, 4);
     
 }
 
 
-void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr)
+void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, double **x, double **y)
 {
     int ielem, jelem, icoeff;
     int igauss;
@@ -183,11 +204,21 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr)
 
     double sum = 0.0;
     double sum1 = 0.0;
+    double elemsum = 0.0;
+    double elemsum1 = 0.0;
+    
+    double *inv,  *jacobian;
+    allocator1(&inv, 4);
+    allocator1(&jacobian, 4);
+
+    double detJ;
     
     for(ielem =2; ielem<xelem-2; ielem++)
     {
 	for(jelem=2; jelem<yelem-2; jelem++)
 	{
+	    elemsum = 0.0;
+	    elemsum1 = 0.0;
 	    for(igauss=0; igauss<tgauss; igauss++)
 	    {
 		recini = 0.0;
@@ -198,26 +229,35 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr)
 		    recini += basis[icoeff]*iniphi[ielem][jelem][icoeff];
 		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
 		}
-		sum += fabs(recini-rec);
-		sum1 += fabs(recini);
+		detJ = mappingJacobianDeterminant(ielem, jelem, zeta[igauss][0], zeta[igauss][1], x, y, inv, jacobian);
+		if(recini <= 2.0)
+		{
+		    elemsum += fabs(recini-rec)*weights[igauss][0]*weights[igauss][1]*detJ;
+		    elemsum1 += fabs(recini)*weights[igauss][0]*weights[igauss][1]*detJ;
+		}
+		else
+		{
+		    elemsum = 0.0;
+		    elemsum1 = 0.0;
+		    break;
+		}
 	    }
-	    
+	    sum += elemsum;
+	    sum1 += elemsum1;
 	}
     }
 
     MPI_Allreduce(&sum, err, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    double result;
+    double exact;
+     
+    MPI_Allreduce(&sum1, &exact, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    MPI_Allreduce(&sum1, &result, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-		  
-    (*err) = sqrt((*err));
-
-    (*lerr) = log(*err);
-    
+    (*err) = ((*err))/(exact);
 
     deallocator1(&basis, ncoeff);
-    
+    deallocator1(&inv, 4);
+    deallocator1(&jacobian, 4);
 }
 
 

@@ -38,11 +38,11 @@ void lineNormal(int ielem, int jelem, double **x, double **y, double *normz1, do
     }
     else
     {
-	xa = x[ielem][jelem];
-	ya = y[ielem][jelem];
+	xb = x[ielem][jelem];
+	yb = y[ielem][jelem];
 
-	xb = x[ielem+1][jelem];
-	yb = y[ielem+1][jelem];
+	xa = x[ielem+1][jelem];
+	ya = y[ielem+1][jelem];
     }
 
     
@@ -75,19 +75,19 @@ void lineNormal(int ielem, int jelem, double **x, double **y, double *normz1, do
 
     //------------------------------------------------------------------------//
     //Get the differential of equation of line w.r.t zeta1, zeta2
-    /*double dfdz1, dfdz2;
+    double dfdz1, dfdz2;
     
     dfdz1 = b * jacobian[2] + a*jacobian[0];
-    dfdz2 = b * jacobian[3] + a*jacobian[1];*/
+    dfdz2 = b * jacobian[3] + a*jacobian[1];
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Get the normal components in zeta1, zeta2 space
-    //(*normz1) = dfdz1*(inv[0] + inv[1]);
-    //(*normz2) = dfdz2*(inv[2] + inv[3]);
+    (*normz1) = dfdz1*(inv[0] + inv[1]);
+    (*normz2) = dfdz2*(inv[2] + inv[3]);
 
-    (*normz1) = a*inv[0] + b*inv[1];
-    (*normz2) = a*inv[2] + b*inv[3];
+    //(*normz1) = a*inv[0] + b*inv[1];
+    //(*normz2) = a*inv[2] + b*inv[3];
 
     double mag = sqrt(pow((*normz1),2.0) + pow((*normz2),2.0));
 
@@ -101,8 +101,9 @@ void lineNormal(int ielem, int jelem, double **x, double **y, double *normz1, do
 
     //printf("%.4e %.4e %.4e %.4e\n", xa, xb, ya, yb);
     //printf("Here1 %.4e %.4e %.4e\n",m, dfdz1, dfdz2);
-    //printf("Here %.4e %.4e\n",a,b);
-    //printf("Here %.4e %.4e %.4e\n\n", xcomp, ycomp, mag);
+    /*printf("facecode is %d\n",facecode);
+    printf("Here %.4e %.4e\n",a,b);
+    printf("Here %.4e %.4e %.4e\n\n", xcomp, ycomp, mag);*/
     //exit(1);
     
     //------------------------------------------------------------------------//

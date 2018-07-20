@@ -1,13 +1,13 @@
 /******************Basis Functions*****************/
-Basis_Order 1
+Basis_Order 2
 
 /******************Grid related Inputs*******************//
 
 xlen 100
 ylen 100
-xelem 50
-yelem 50
-Read_mesh 1
+xelem 25
+yelem 25
+Read_mesh 0
 
 /***************Gauss Quadrature********************/
 //Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE
@@ -33,21 +33,21 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.001            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
+advect_deltat 0.0001            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
 RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 1500
+Max_Iterations 2000
 print_gap 10
 
 /***************Particular CASES***************/
 //Case Gaussian_Wave
 //Case Circle
-Case zalesak
+//Case zalesak
 //Case bubble_break
 //Case Gaussian_Step
-//Case Circle_vortex
+Case Circle_vortex
 
 /*****************************************For INS*********************/
 /******************Multiphase Parameters*****************//

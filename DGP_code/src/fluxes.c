@@ -68,8 +68,8 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
     double Tflux, Bflux;
     double Ru, Lu;
     double Tv, Bv;
-    //double normz1, normz2;
-    //double normalVel;
+    double normz1, normz2;
+    double normalVel;
     //------------------------------------------------------------------------//
 
 
@@ -89,7 +89,7 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		basis2D(1.0, zy[iygauss], basisy);		
 
 		//get the face normal - deprecated
-		//lineNormal(ielem, jelem, x, y, &normz1, &normz2, 1, 1.0 ,zy[iygauss]);
+		lineNormal(ielem, jelem, x, y, &normz1, &normz2, 1, 1.0 ,zy[iygauss]);
 		
 		recphi = 0.0;
 		recu = 0.0;
@@ -101,15 +101,18 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		    recv += basisy[icoeff]*elem.v[ielem][jelem][icoeff];
 		}
 				
-		//normalVel = recu*normz1 + recv*normz2; - deprecated
+		normalVel = recu*normz1 + recv*normz2;// - deprecated
 		Lflux = recphi*recu;
 		Lu = recu;
-		//Lflux = recphi*normalVel; - deprecated
-		//Lu = normalVel; - deprecated
+		Lflux = recphi*normalVel;// - deprecated
+		Lu = normalVel;// - deprecated
 
 		//Reconstruct the solution at the right side
 		//Get the basis
 		basis2D(-1.0, zy[iygauss], basisy);		
+
+		//get the face normal - deprecated
+		lineNormal(ielem, jelem, x, y, &normz1, &normz2, 3, 1.0 ,zy[iygauss]);
 		
 		recphi = 0.0;
 		recu = 0.0;
@@ -121,11 +124,11 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		    recv += basisy[icoeff]*elem.v[ielem+1][jelem][icoeff];
 		}
 		
-	        //normalVel = recu*normz1 + recv*normz2; - deprecated
+	        normalVel = recu*normz1 + recv*normz2;// - deprecated
 		Rflux = recphi * recu;
 		Ru = recu;
-		//Rflux = recphi*normalVel; - deprecated
-		//Ru = normalVel; - deprecated
+		Rflux = recphi*normalVel;// - deprecated
+		Ru = normalVel;// - deprecated
 
 
 		rflux[ielem][jelem][iygauss] = upwind(Lflux, Rflux, Lu, Ru);
@@ -140,7 +143,7 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		basis2D(zx[ixgauss], 1.0, basisx);
 
 		//get the face normal - deprecated
-		//lineNormal(ielem, jelem, x, y, &normz1, &normz2, 2, zx[ixgauss] ,1.0);
+		lineNormal(ielem, jelem, x, y, &normz1, &normz2, 4, zx[ixgauss] ,1.0);
 		
 		recphi = 0.0;
 		recu = 0.0;
@@ -151,16 +154,19 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		    recu += basisx[icoeff]*elem.u[ielem][jelem][icoeff];
 		    recv += basisx[icoeff]*elem.v[ielem][jelem][icoeff];
 		}
-		//normalVel = recu*normz1 + recv*normz2; - deprecated
+		normalVel = recu*normz1 + recv*normz2;// - deprecated
 		Bflux = recphi * recv;
 		Bv = recv;
-		//Bflux = recphi*normalVel; - deprecated
-		//Bv = normalVel; - deprecated
+		Bflux = recphi*normalVel;// - deprecated
+		Bv = normalVel;// - deprecated
 
 
 		//Recontruct the solution at the top
 		//Get the basis
 		basis2D(zx[ixgauss], -1.0, basisx);
+
+		//get the face normal - deprecated
+		lineNormal(ielem, jelem, x, y, &normz1, &normz2, 2, zx[ixgauss] ,1.0);
 		
 		recphi = 0.0;
 		recv = 0.0;
@@ -171,15 +177,16 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		    recu += basisx[icoeff]*elem.u[ielem][jelem+1][icoeff];
 		    recv += basisx[icoeff]*elem.v[ielem][jelem+1][icoeff];
 		}
-		//normalVel = recu*normz1 + recv*normz2; - deprecated
+		normalVel = recu*normz1 + recv*normz2;// - deprecated
 		Tflux = recphi * recv;
 		Tv = recv;
-		//Tflux = recphi*normalVel; - deprecated
-		//Tv = normalVel; - dprecated
+		Tflux = recphi*normalVel;// - deprecated
+		Tv = normalVel;// - dprecated
 
 		tflux[ielem][jelem][ixgauss] = upwind(Bflux, Tflux, Bv, Tv);
 	    }
 
+	    //exit(1);
 	}
     }
     //------------------------------------------------------------------------//

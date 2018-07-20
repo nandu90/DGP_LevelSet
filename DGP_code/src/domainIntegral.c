@@ -49,6 +49,7 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
     double detJ;
     //------------------------------------------------------------------------//
 
+    
    
     //------------------------------------------------------------------------//
     //Loop over the elements

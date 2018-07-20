@@ -20,7 +20,7 @@ void euler(double ***scalar, double ****mass, double ***rhs, double deltat)
     int ielem, jelem;
     int icoeff;
     //------------------------------------------------------------------------//
-
+    
     for(ielem = 1; ielem < xelem-1; ielem++)
     {
 	for(jelem = 1; jelem < yelem-1; jelem++)

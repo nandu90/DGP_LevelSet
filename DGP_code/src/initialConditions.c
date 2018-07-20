@@ -191,6 +191,7 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
     {
         for (j=0; j<yelem; j++)
         {
+	    
 	    //Convert natural coordinates at quadrature points to Cartesian
 	    naturalToCartesian(xs, x, y, i, j);
 	    
@@ -216,6 +217,7 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		//------------------------------------------------------------------------//
 		//Transform the velocity vector onto local coordinate
 		//Get the magnitude in xy coordinates
+		
 		magxy = sqrt(pow(uxy,2.0) + pow(vxy,2.0));
 		
 		mappingJacobianDeterminant(i, j, zeta[k][0], zeta[k][1], x, y, inv, jacobian);
@@ -226,11 +228,19 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		
 		//Rescale the obtained vector to be equal to original vector
 		mag = sqrt(pow(us[k],2.0) + pow(vs[k],2.0));
-		us[k] = us[k]*magxy/mag;
-		vs[k] = vs[k]*magxy/mag;
+		if(mag == 0.0)
+		{
+		    us[k] = 0.0;
+		    vs[k] = 0.0;
+		}
+		else
+		{
+		    us[k] = us[k]*magxy/mag;
+		    vs[k] = vs[k]*magxy/mag;
+		}
 		//------------------------------------------------------------------------//
 	    }
-
+	    
 	    //Solve the system to get the coefficients
 	    solveSystem(vand, us, elem.u[i][j]);
 	    solveSystem(vand, vs, elem.v[i][j]);
@@ -414,7 +424,7 @@ void initialize(struct elemsclr elem, double **x, double **y)
     //Initialize Velocities
     initializeVel(elem, x, y);
     //Apply BC
-
+    
     //Communicate
     commu2(elem.u);
     commu2(elem.v);
