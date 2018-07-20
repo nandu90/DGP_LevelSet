@@ -5,5 +5,5 @@
 *.pvsm
 */caseLog/*
 */plots/*
-**/DGP*
 *.dat
+**/testCases/
