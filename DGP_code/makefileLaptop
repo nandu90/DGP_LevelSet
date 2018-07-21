@@ -16,8 +16,8 @@ OBJEXT      := o
 
 #Flags, Libraries and Includes
 CFLAGS      := -fopenmp -Wall -O3
-LIB         := -L/home/nsaini3/lib -llapack -lblas -lgfortran -lm -fopenmp
-INC         := -I$(INCDIR) -I/usr/local/include -I/home/nsaini3/include
+LIB         := -fopenmp -lm -llapack
+INC         := -I$(INCDIR) -I/usr/local/include
 INCDEP      := -I$(INCDIR)
 
 #---------------------------------------------------------------------------------

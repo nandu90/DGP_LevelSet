@@ -1,12 +1,12 @@
 /******************Basis Functions*****************/
-Basis_Order 2
+Basis_Order 1
 
 /******************Grid related Inputs*******************//
 
-xlen 100
-ylen 100
-xelem 25
-yelem 25
+xlen 150
+ylen 50
+xelem 50
+yelem 50
 Read_mesh 0
 
 /***************Gauss Quadrature********************/
@@ -20,9 +20,9 @@ y_pos_of_bubble 25
 
 
 /****************Boundary Conditions**************/
-x-boundary no-slip
+//x-boundary no-slip
 //x-boundary slip
-//x-boundary periodic
+x-boundary periodic
 
 y-boundary no-slip
 //y-boundary slip
@@ -33,21 +33,21 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.0002            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
+advect_deltat 0.1            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
 RK_Stages 3
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 5000
+Max_Iterations 1500
 print_gap 100
 
 /***************Particular CASES***************/
-//Case Gaussian_Wave
+Case Gaussian_Wave
 //Case Circle
 //Case zalesak
 //Case bubble_break
 //Case Gaussian_Step
-Case Circle_vortex
+//Case Circle_vortex
 
 /*****************************************For INS*********************/
 /******************Multiphase Parameters*****************//

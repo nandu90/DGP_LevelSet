@@ -63,9 +63,10 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
 		rhs[ielem][jelem][icoeff] = 0.0;
 	    }
 	    
-	    //Loop over the gauss quadrature points
+	    //Loop over the test functions
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
+	      //Loop over the Gauss quadrature points
 		for(igauss=0; igauss<tgauss; igauss++)
 		{
 		    
@@ -77,12 +78,13 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
 		    basisDiff2D(zeta[igauss][1], zeta[igauss][0],dBdz2, 2);
 		    
 		    //check
-		    /*printf("The natural coordinates are: %.4f %.4f\n",zeta[igauss][0],zeta[igauss][1]);
-		      for(icoeff= 0; icoeff < ncoeff; icoeff++)
+		    /*printf("The natural coordinates are: %.4f %.4f %d\n",zeta[igauss][0],zeta[igauss][1], ncoeff);
+		      for(icoeff1= 0; icoeff1 < ncoeff; icoeff1++)
 		      {
-		      printf("%.4f %.4f\n",dBdz1[icoeff], dBdz2[icoeff]);
+			printf("%.4f %.4f\n",dBdz1[icoeff1], dBdz2[icoeff1]);
 		      }
 		      printf("\n");*/
+		     
 		    //------------------------------------------------------------------------//
 		    
 		    //------------------------------------------------------------------------//
@@ -107,6 +109,7 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
 		    //------------------------------------------------------------------------//
 
 		    //------------------------------------------------------------------------//
+		    //printf("%.4e %.4e %.4e %.4e\n",inv[0], inv[1], inv[2], inv[3]);
 		    //Get the zeta1, zeta2 components of basis
 		    gradBz1 = dBdz1[icoeff] * inv[0] + dBdz1[icoeff] * inv[1];
 		    gradBz2 = dBdz2[icoeff] * inv[2] + dBdz2[icoeff] * inv[3];
@@ -114,14 +117,14 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
 		    rhs[ielem][jelem][icoeff] +=weights[igauss][0]*weights[igauss][1]*recphi*(gradBz1*recu + gradBz2*recv)*detJ;
 		    
 		    //------------------------------------------------------------------------//
-		    
+		    //exit(1);
 		}
 	    }
 
 	    
 	    //------------------------------------------------------------------------//
 	    //Check the integral
-	    /* if(ielem == 2 && jelem == 2)
+	    /*if(ielem == 2 && jelem == 2)
 	    { 
 		for(icoeff=0; icoeff<ncoeff; icoeff++)
 		{
@@ -135,8 +138,8 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
 		printf("%.4f %.4f\n",x[ielem+1][jelem], y[ielem+1][jelem]);
 		printf("%.4f %.4f\n",x[ielem][jelem+1], y[ielem][jelem+1]);
 		printf("%.4f %.4f\n",x[ielem+1][jelem+1], y[ielem+1][jelem+1]);
-	    exit(1);
-	    }*/
+		exit(1);
+		}*/
 	    //------------------------------------------------------------------------//
 
 	}

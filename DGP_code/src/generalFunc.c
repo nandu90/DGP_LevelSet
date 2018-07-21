@@ -154,17 +154,11 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
 		}
 		detJ = mappingJacobianDeterminant(ielem, jelem, zeta[igauss][0], zeta[igauss][1], x, y, inv, jacobian);
-		if(recini <= 2.0)
-		{
-		    elemsum += pow(recini-rec,2.0)*weights[igauss][0]*weights[igauss][1]*detJ;
-		    elemsum1 += pow(recini,2.0)*weights[igauss][0]*weights[igauss][1]*detJ;
-		}
-		else
-		{
-		    elemsum = 0.0;
-		    elemsum1 = 0.0;
-		    break;
-		}
+		
+		elemsum += pow(recini-rec,2.0)*weights[igauss][0]*weights[igauss][1]*detJ;
+		elemsum1 += pow(recini,2.0)*weights[igauss][0]*weights[igauss][1]*detJ;
+		
+		
 	    }
 	    sum += elemsum;
 	    sum1 += elemsum1;
@@ -177,7 +171,7 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 
     MPI_Allreduce(&sum1, &exact, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		  
-    (*err) = sqrt((*err))/sqrt(exact);
+    (*err) = sqrt((*err));///sqrt(exact);
 
     (*lerr) = log(*err);
     
@@ -230,17 +224,12 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
 		}
 		detJ = mappingJacobianDeterminant(ielem, jelem, zeta[igauss][0], zeta[igauss][1], x, y, inv, jacobian);
-		if(recini <= 2.0)
-		{
-		    elemsum += fabs(recini-rec)*weights[igauss][0]*weights[igauss][1]*detJ;
-		    elemsum1 += fabs(recini)*weights[igauss][0]*weights[igauss][1]*detJ;
-		}
-		else
-		{
-		    elemsum = 0.0;
-		    elemsum1 = 0.0;
-		    break;
-		}
+		//if(recini <= 2.0)
+		//{
+		elemsum += fabs(recini-rec)*weights[igauss][0]*weights[igauss][1]*detJ;
+		elemsum1 += fabs(recini)*weights[igauss][0]*weights[igauss][1]*detJ;
+		    //}
+		
 	    }
 	    sum += elemsum;
 	    sum1 += elemsum1;
@@ -253,7 +242,7 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
      
     MPI_Allreduce(&sum1, &exact, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    (*err) = ((*err))/(exact);
+    (*err) = ((*err));///(exact);
 
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 4);

@@ -367,7 +367,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 
     //------------------------------------------------------------------------//
     //Calculate Error Norms
-    if(case_tog == 3 || case_tog == 6)
+    if(case_tog == 3 || case_tog == 6 || case_tog == 1)
     {
 	double err1, lerr1;
 	errorNormL1(iniphi, elem.phi, &err1, &lerr1, x, y);
