@@ -6,7 +6,7 @@ Created: 2018-03-11
 ***************************************************************************/
 
 
-#include "solvers.h"
+#include "functions.h"
 #include "common.h"
 #include "memory.h"
 
@@ -46,20 +46,15 @@ void solveSystem(double **vand, double *rhs, double *soln)
     int LDB = M;
     int INFO;
 
-    int LWORK = -1;
-    double WORK[1];
-    char TRANS = 'N';
-
+    //int LWORK = -1;
+    //double WORK[1];
+    //char TRANS = 'N';
+    
     //------------------------------------------------------------------------//
     //Solve the system to get the coefficients
-    if(quadtype == 2)
-    {
-	dgesv_(&N, &NRHS, A, &LDA, IPIV, B, &LDB, &INFO);
-    }
-    else if(quadtype == 1)
-    {
-	dgels_(&TRANS,&M,&N,&NRHS,A,&LDA,B,&LDB,WORK,&LWORK,&INFO);
-    }
+    
+    dgesv_(&N, &NRHS, A, &LDA, IPIV, B, &LDB, &INFO);
+   
 
     //Assign to the soln array
     for(i=0; i<ncoeff; i++)

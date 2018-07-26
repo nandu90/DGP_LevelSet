@@ -47,7 +47,7 @@ void eulerIncrement(double ***inc, double ****mass, double ***rhs, double deltat
 	{
 	    for(icoeff = 0; icoeff< ncoeff; icoeff++)
 	    {
-		inc[ielem][jelem][icoeff] += deltat*rhs[ielem][jelem][icoeff]/mass[ielem][jelem][icoeff][icoeff];
+		inc[ielem][jelem][icoeff] = deltat*rhs[ielem][jelem][icoeff]/mass[ielem][jelem][icoeff][icoeff];
 	    }
 	}
     }
