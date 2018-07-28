@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
     //INput Section
     polyorder = 1;
-    xelem = 25;
+    xelem = 10;
     deltat = 0.1;
     
     xlen = 150.0;
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     allocator1(&zeta, tgauss);
     allocator1(&weights, tgauss);
 
-    zwgl(zeta, weights, tgauss);
+    zwgll(zeta, weights, tgauss);
 
     printf("The Gauss points and weights are:\n");
     for(igauss=0; igauss<tgauss; igauss++)
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
     //Get the mass Matrix
     massmatrix(elem.mass, x);
     //------------------------------------------------------------------------//
-    
+   
     //------------------------------------------------------------------------//
     //Time loop
     double **rhs;

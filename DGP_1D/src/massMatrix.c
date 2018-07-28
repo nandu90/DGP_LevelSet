@@ -8,6 +8,7 @@ Created: 2018-07-24
 #include "common.h"
 #include "memory.h"
 #include "functions.h"
+#include "polylib.h"
 
 void naturalToCartesian(double *xs, double *x, int ielem)
 {
@@ -89,30 +90,45 @@ void massmatrix(double ***mass, double *x)
     allocator1(&jacobian, 1);
 
     double detJ;
+
+    int ngauss = polyorder+1;
+    double *z, *w;
+    allocator1(&z, ngauss);
+    allocator1(&w, ngauss);
+    
+    zwgl(z, w, ngauss);
+
+    printf("The Gauss points and weights in mass matrix are:\n");
+    for(igauss=0; igauss<ngauss; igauss++)
+    {
+	printf("%.8e %.8e\n",z[igauss],w[igauss]);
+    }
+    printf("\n");
     //------------------------------------------------------------------------//
 
     for(ielem=0; ielem<xelem; ielem++)
     {
 	//Loop over the Gauss quadrature points
-	for(igauss=0; igauss<tgauss; igauss++)
+	for(igauss=0; igauss<ngauss; igauss++)
 	{
 	    //Get the basis vector
-	    basis1D(zeta[igauss], basis);
+	    basis1D(z[igauss], basis);
 
 	    //Get the determinant
-	    detJ = mappingJacobianDeterminant(ielem, zeta[igauss], x, inv, jacobian);
+	    detJ = mappingJacobianDeterminant(ielem, z[igauss], x, inv, jacobian);
 	    
 	    //Loop over the mass matrix
 	    for(Bi = 0; Bi<ncoeff; Bi++)
 	    {
 		for(Bj = 0; Bj<ncoeff; Bj++)
 		{
-		    mass[ielem][Bi][Bj] += basis[Bj]*basis[Bi]*weights[igauss]*detJ;
+		    mass[ielem][Bi][Bj] += basis[Bj]*basis[Bi]*w[igauss]*detJ;
 		}
 	    }
 	}
     }
 
+    printf("Mass matrix\n");
     for(Bi = 0; Bi<ncoeff; Bi++)
     {
 	for(Bj = 0; Bj<ncoeff; Bj++)
@@ -121,11 +137,14 @@ void massmatrix(double ***mass, double *x)
 	}
 	printf("\n");
     }
+    printf("\n");
     //------------------------------------------------------------------------//
     //Dellocators
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 1);
     deallocator1(&jacobian, 1);
+    deallocator1(&z, ngauss);
+    deallocator1(&w, ngauss);
     //------------------------------------------------------------------------//
 
 }

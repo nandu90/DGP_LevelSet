@@ -8,6 +8,7 @@ Created: 2018-07-24
 #include "common.h"
 #include "memory.h"
 #include "functions.h"
+#include "polylib.h"
 
 double max(double a, double b)
 {
@@ -77,6 +78,12 @@ void errorNormL2(double **iniphi, double **phi, double *err, double *lerr, doubl
     double elemsum = 0.0;
     double elemsum1 = 0.0;
 
+    int ngauss = polyorder+10;
+    double *z, *w;
+    allocator1(&z, ngauss);
+    allocator1(&w, ngauss);
+    zwgll(z, w, ngauss);
+    
     double *inv,  *jacobian;
     allocator1(&inv, 1);
     allocator1(&jacobian, 1);
@@ -87,20 +94,20 @@ void errorNormL2(double **iniphi, double **phi, double *err, double *lerr, doubl
     {
 	elemsum = 0.0;
 	elemsum1 = 0.0;
-	for(igauss=0; igauss<tgauss; igauss++)
+	for(igauss=0; igauss<ngauss; igauss++)
 	{
 	    recini = 0.0;
 	    rec = 0.0;
-	    basis1D(zeta[igauss], basis);
+	    basis1D(z[igauss], basis);
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
 		recini += basis[icoeff]*iniphi[ielem][icoeff];
 		rec += basis[icoeff]*phi[ielem][icoeff];
 	    }
-	    detJ = mappingJacobianDeterminant(ielem, zeta[igauss], x, inv, jacobian);
+	    detJ = mappingJacobianDeterminant(ielem, z[igauss], x, inv, jacobian);
 	    
-	    elemsum += pow(recini-rec,2.0)*weights[igauss]*detJ;
-	    elemsum1 += pow(recini,2.0)*weights[igauss]*detJ;
+	    elemsum += pow(recini-rec,2.0)*w[igauss]*detJ;
+	    elemsum1 += pow(recini,2.0)*w[igauss]*detJ;
 		
 	    
 	}
@@ -118,7 +125,8 @@ void errorNormL2(double **iniphi, double **phi, double *err, double *lerr, doubl
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 1);
     deallocator1(&jacobian, 1);
-    
+    deallocator1(&z, ngauss);
+    deallocator1(&w, ngauss);
     
 }
 
@@ -140,6 +148,12 @@ void errorNormL1(double **iniphi, double **phi, double *err, double *lerr, doubl
     double sum1 = 0.0;
     double elemsum = 0.0;
     double elemsum1 = 0.0;
+
+    int ngauss = polyorder+10;
+    double *z, *w;
+    allocator1(&z, ngauss);
+    allocator1(&w, ngauss);
+    zwgll(z, w, ngauss);
     
     double *inv,  *jacobian;
     allocator1(&inv, 1);
@@ -151,21 +165,21 @@ void errorNormL1(double **iniphi, double **phi, double *err, double *lerr, doubl
     {
 	elemsum = 0.0;
 	elemsum1 = 0.0;
-	for(igauss=0; igauss<tgauss; igauss++)
+	for(igauss=0; igauss<ngauss; igauss++)
 	{
 	    recini = 0.0;
 	    rec = 0.0;
-	    basis1D(zeta[igauss], basis);
+	    basis1D(z[igauss], basis);
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
 		recini += basis[icoeff]*iniphi[ielem][icoeff];
 		rec += basis[icoeff]*phi[ielem][icoeff];
 	    }
-	    detJ = mappingJacobianDeterminant(ielem, zeta[igauss], x, inv, jacobian);
+	    detJ = mappingJacobianDeterminant(ielem, z[igauss], x, inv, jacobian);
 	    //if(recini <= 2.0)
 	    //{
-	    elemsum += fabs(recini-rec)*weights[igauss]*detJ;
-	    elemsum1 += fabs(recini)*weights[igauss]*detJ;
+	    elemsum += fabs(recini-rec)*w[igauss]*detJ;
+	    elemsum1 += fabs(recini)*w[igauss]*detJ;
 	    //}
 	    
 	}
@@ -180,4 +194,6 @@ void errorNormL1(double **iniphi, double **phi, double *err, double *lerr, doubl
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 1);
     deallocator1(&jacobian, 1);
+    deallocator1(&z, ngauss);
+    deallocator1(&w, ngauss);
 }
