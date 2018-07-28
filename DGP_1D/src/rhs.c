@@ -13,7 +13,9 @@ void getRHS(struct elemsclr elem, double *x, double **rhs)
 {
     //------------------------------------------------------------------------//
     //get the contribution from domain integral
+    
     domainIntegral(x, elem, rhs);
+    
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
@@ -21,9 +23,10 @@ void getRHS(struct elemsclr elem, double *x, double **rhs)
     allocator1(&flux, xelem);
 
     fluxes(flux, x, elem);
-
+    
     //get the contribution from boundary integral
     boundaryIntegral(rhs, flux, x);
+    
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//

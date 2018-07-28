@@ -20,10 +20,11 @@ void eulerIncrement(double **inc, double ***mass, double **rhs, double deltat)
 
     for(ielem = 1; ielem<xelem-1; ielem++)
     {
-	    for(icoeff = 0; icoeff< ncoeff; icoeff++)
-	    {
-		inc[ielem][icoeff] = deltat*rhs[ielem][icoeff]/mass[ielem][icoeff][icoeff];
-	    }
+	solveSystem(mass[ielem], rhs[ielem], inc[ielem], ncoeff, ncoeff);
+	for(icoeff = 0; icoeff< ncoeff; icoeff++)
+	{
+	    inc[ielem][icoeff] *= deltat;//*rhs[ielem][icoeff]/mass[ielem][icoeff][icoeff];
+	}
     }
 }
 
@@ -119,7 +120,7 @@ void Runge_Kutta(struct elemsclr elem, double *x, double deltat, double **rhs)
     //Apply BC
     level_setBC(elem.phi);
     //------------------------------------------------------------------------//
-
+    
 	    
     deallocator2(&tempphi, xelem, ncoeff);
     deallocator2(&k1, xelem, ncoeff);

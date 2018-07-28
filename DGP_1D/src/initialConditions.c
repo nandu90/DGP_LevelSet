@@ -54,7 +54,7 @@ void initializeVel(struct elemsclr elem, double *x)
 	    us[igauss] = 1.0;
 	}
 
-	solveSystem(vand, us, elem.u[ielem]);
+	solveSystem(vand, us, elem.u[ielem], tgauss, ncoeff);
     }
     
     
@@ -114,7 +114,7 @@ void initializeLS(struct elemsclr elem, double *x)
 	    phis[igauss] = 1.0*exp(-(term1));
 	}
 
-	solveSystem(vand, phis, elem.phi[ielem]);
+	solveSystem(vand, phis, elem.phi[ielem], tgauss, ncoeff);
     }
     
     

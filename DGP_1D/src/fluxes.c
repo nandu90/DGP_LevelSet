@@ -58,6 +58,13 @@ void fluxes(double *flux, double *x, struct elemsclr elem)
 
 	//Do upwinding
 	flux[ielem] = upwind(Lflux, Rflux, Lu, Ru);
+
+	/*if(ielem == xelem/2)
+	{
+	    printf("%.4e %.4e %.4e %.4e\n",Lflux, Lu, Rflux, Ru);
+	    printf("%.4e\n",flux);
+	    exit(1);
+	    }*/
     }
 
     //------------------------------------------------------------------------//
@@ -109,7 +116,16 @@ void boundaryIntegral(double **rhs, double *flux, double *x)
     double *rightInt, *leftInt;
     allocator1(&rightInt, ncoeff);
     allocator1(&leftInt, ncoeff);
-    
+
+    /*ielem = xelem/2;
+    if(ielem==xelem/2)
+    {
+	printf("boundary\n");
+	for(icoeff=0; icoeff<ncoeff; icoeff++)
+	{
+	    printf("%.4e %.4e %.4e\n", rightInt[icoeff], leftInt[icoeff], rhs[ielem][icoeff]);
+	}
+	}*/
     for(ielem=1; ielem<xelem-1; ielem++)
     {
 	basis1D(1.0, basis);
@@ -128,6 +144,16 @@ void boundaryIntegral(double **rhs, double *flux, double *x)
 	{
 	    rhs[ielem][icoeff] += -(rightInt[icoeff] - leftInt[icoeff]);
 	}
+
+	/*if(ielem==xelem/2)
+	{
+	    printf("boundary\n");
+	    for(icoeff=0; icoeff<ncoeff; icoeff++)
+	    {
+		printf("%.4e %.4e %.4e\n", rightInt[icoeff], leftInt[icoeff], rhs[ielem][icoeff]);
+	    }
+	    exit(1);
+	    }*/
     }
 
     deallocator1(&basis, ncoeff);

@@ -181,3 +181,71 @@ void errorNormL1(double **iniphi, double **phi, double *err, double *lerr, doubl
     deallocator1(&inv, 1);
     deallocator1(&jacobian, 1);
 }
+
+
+void errExact(double **phi, double *x, double time, int iter)
+{
+    int ielem, icoeff;
+    int igauss;
+
+    double *basis;
+    allocator1(&basis, ncoeff);
+
+    double rec;
+        
+    double sum = 0.0;
+    double elemsum = 0.0;
+    
+    double *inv,  *jacobian;
+    allocator1(&inv, 1);
+    allocator1(&jacobian, 1);
+
+    //double detJ;
+
+    double exact;
+
+    double *xs;
+    allocator1(&xs, tgauss);
+
+    double xtemp;
+
+    for(ielem = 1; ielem<xelem-1; ielem++)
+    {
+	elemsum = 0.0;
+	
+	naturalToCartesian(xs,x,ielem);
+	
+	for(igauss =0; igauss<tgauss; igauss++)
+	{
+	    rec = 0.0;
+	    basis1D(zeta[igauss], basis);
+	    for(icoeff=0; icoeff<ncoeff; icoeff++)
+	    {
+		rec += basis[icoeff]*phi[ielem][icoeff];
+	    }
+
+	    xtemp = xs[igauss] - time;
+	    if(xtemp < 0.0)
+	    {
+		xtemp = xlen + xtemp;
+	    }
+	    else if(xtemp > xlen)
+	    {
+		xtemp = xtemp - xlen;
+	    }
+	    double sigmax = 25.0;
+	    double term1 = 0.5*pow((xtemp - xb_in)/sigmax,2.0);
+	    exact = 1.0*exp(-(term1));
+	    
+	    elemsum += fabs(rec - exact);
+	}
+
+	sum += elemsum;
+    }
+
+    printf("The L1 norm at time %d is %.4e\n\n",iter,sum);
+    
+    deallocator1(&basis, ncoeff);
+    deallocator1(&inv, 1);
+    deallocator1(&jacobian, 1);
+}

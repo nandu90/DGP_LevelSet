@@ -8,6 +8,7 @@ Created: 2018-07-24
 #include "common.h"
 #include "memory.h"
 #include "functions.h"
+#include "polylib.h"
 
 void naturalToCartesian(double *xs, double *x, int ielem)
 {
@@ -29,20 +30,51 @@ void naturalToCartesian(double *xs, double *x, int ielem)
 
 void basisdiff1D(double z, double *b)
 {
-    double barray[4] = {0.0, 1.0, 3.0*z, 0.5*(15.0*z*z - 3.0)};
+    //double barray[4] = {0.0, 1.0, 3.0*z, 0.5*(15.0*z*z - 3.0)};
 
+    double *barray;
+    allocator1(&barray, polyorder+1);
+
+    if(polyorder == 1)
+    {
+	barray[0] = 0.5;
+	barray[1] = 0.5;
+    }
+    else if(polyorder == 2)
+    {
+	barray[0] = 0.5*(2.0*z - 1.0);
+	barray[1] = -2.0*z;
+	barray[2] = 0.5*(2.0*z + 1.0);
+    }
+    
     int i;
 
     for(i=0; i<polyorder+1; i++)
     {
 	b[i] = barray[i];
     }
+    deallocator1(&barray, polyorder+1);
 }
 
 void basis1D(double z, double *basis)
 {
     // Upto P = 3 at the moment
-    double barray[4] = {1.0, z, 0.5*(3.0*z*z - 1.0), 0.5*(5*pow(z,3.0)-3.0*z)};
+    //double barray[4] = {1.0, z, 0.5*(3.0*z*z - 1.0), 0.5*(5*pow(z,3.0)-3.0*z)};
+
+    double *barray;
+    allocator1(&barray, polyorder+1);
+    
+    if(polyorder == 1)
+    {
+	barray[0] = 0.5*(1.0-z);
+	barray[1] = 0.5*(1.0+z);
+    }
+    else if(polyorder == 2)
+    {
+	barray[0] = z*(z-1.0)/2.0;
+	barray[1] = (1.0-z)*(1.0+z);
+	barray[2] = z*(z+1.0)/2.0;
+    }
     
     int i;
 
@@ -50,6 +82,8 @@ void basis1D(double z, double *basis)
     {
 	basis[i] = barray[i];
     }
+
+    deallocator1(&barray, polyorder+1);
 }
 
 double mappingJacobianDeterminant(int ielem, double z, double *x, double *inv, double *jacobian)
@@ -75,6 +109,7 @@ double mappingJacobianDeterminant(int ielem, double z, double *x, double *inv, d
 
 void massmatrix(double ***mass, double *x)
 {
+    
     //------------------------------------------------------------------------//
     //Temporary variables
     int ielem;
@@ -89,30 +124,38 @@ void massmatrix(double ***mass, double *x)
     allocator1(&jacobian, 1);
 
     double detJ;
+
+    int ngauss = polyorder+1;
+    double *z, *w;
+    allocator1(&z, ngauss);
+    allocator1(&w, ngauss);
+
+    zwgl(z, w, ngauss);
     //------------------------------------------------------------------------//
 
     for(ielem=0; ielem<xelem; ielem++)
     {
 	//Loop over the Gauss quadrature points
-	for(igauss=0; igauss<tgauss; igauss++)
+	for(igauss=0; igauss<ngauss; igauss++)
 	{
 	    //Get the basis vector
-	    basis1D(zeta[igauss], basis);
+	    basis1D(z[igauss], basis);
 
 	    //Get the determinant
-	    detJ = mappingJacobianDeterminant(ielem, zeta[igauss], x, inv, jacobian);
+	    detJ = mappingJacobianDeterminant(ielem, z[igauss], x, inv, jacobian);
 	    
 	    //Loop over the mass matrix
 	    for(Bi = 0; Bi<ncoeff; Bi++)
 	    {
 		for(Bj = 0; Bj<ncoeff; Bj++)
 		{
-		    mass[ielem][Bi][Bj] += basis[Bj]*basis[Bi]*weights[igauss]*detJ;
+		    mass[ielem][Bi][Bj] += basis[Bj]*basis[Bi]*w[igauss]*detJ;
 		}
 	    }
 	}
     }
 
+    printf("Mass Matrix: \n");
     for(Bi = 0; Bi<ncoeff; Bi++)
     {
 	for(Bj = 0; Bj<ncoeff; Bj++)
@@ -126,6 +169,8 @@ void massmatrix(double ***mass, double *x)
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 1);
     deallocator1(&jacobian, 1);
+    deallocator1(&z, ngauss);
+    deallocator1(&w, ngauss);
     //------------------------------------------------------------------------//
 
 }

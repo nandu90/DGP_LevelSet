@@ -18,7 +18,7 @@ double mappingJacobianDeterminant(int, double, double *, double *, double *);
 
 void massmatrix(double ***, double *);
 
-void solveSystem(double **, double *, double *);
+void solveSystem(double **, double *, double *, int, int);
 
 void level_setBC(double **);
 
@@ -59,5 +59,7 @@ void boundaryIntegral(double **, double *, double *);
 void errorNormL1(double **, double **, double *, double *, double *);
 
 void errorNormL2(double **, double **, double *, double *, double *);
+
+void errExact(double **, double *, double ,int);
 
 #endif

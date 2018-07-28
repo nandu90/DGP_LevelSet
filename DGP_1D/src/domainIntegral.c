@@ -95,7 +95,7 @@ void domainIntegral(double *x, struct elemsclr elem, double **rhs)
 
     }
 
-    printf("\nxs recphi recu\n");
+     printf("\nxs recphi recu\n");
     double *xs;
     allocator1(&xs, tgauss);
     naturalToCartesian(xs, x, ielem);

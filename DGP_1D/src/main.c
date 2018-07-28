@@ -19,13 +19,13 @@ int main(int argc, char **argv)
     
     //------------------------------------------------------------------------//
     //INput Section
-    polyorder = 1;
-    xelem = 25;
+    polyorder = 2;
+    xelem = 100;
     deltat = 0.1;
     
     xlen = 150.0;
     xb_in = 75.0;
-    int maxiter = 1500;
+    int maxiter = 1;
     int print_gap = 10;
     //------------------------------------------------------------------------//
 
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     allocator1(&zeta, tgauss);
     allocator1(&weights, tgauss);
 
-    zwgl(zeta, weights, tgauss);
+    zwgll(zeta, weights, tgauss);
 
     printf("The Gauss points and weights are:\n");
     for(igauss=0; igauss<tgauss; igauss++)
@@ -117,9 +117,10 @@ int main(int argc, char **argv)
     }
     printf("\n");
     //------------------------------------------------------------------------//
-    
+   
     //------------------------------------------------------------------------//
     //Get the mass Matrix
+    
     massmatrix(elem.mass, x);
     //------------------------------------------------------------------------//
     
@@ -129,10 +130,14 @@ int main(int argc, char **argv)
     allocator2(&rhs, xelem, ncoeff);
 
     int print_count = 0;
+
+    double time = 0.0;
     for(iter=0; iter<maxiter; iter++)
     {
+	
 	Runge_Kutta(elem, x, deltat, rhs);
-
+	
+	time += deltat;
 	//------------------------------------------------------------------------//
 	//Print out the paraview output
 	print_count++;
@@ -145,6 +150,8 @@ int main(int argc, char **argv)
             print_count = 0;
         }
 	//------------------------------------------------------------------------//
+
+	errExact(elem.phi, x, time ,iter);
     }
 
     output(elem, x,iter);
