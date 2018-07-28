@@ -40,8 +40,8 @@ void fluxes(double *flux, double *x, struct elemsclr elem)
 	    recphi += basis[icoeff]*elem.phi[ielem][icoeff];
 	    recu += basis[icoeff]*elem.u[ielem][icoeff];
 	}
-	Lflux = recphi*recu;
-	Lu = recu;
+	Lflux = recphi*2.0*PI;
+	Lu = 2.0*PI;
 
 	//Recontruct the solution at the right side of face
 	basis1D(-1.0, basis);
@@ -53,8 +53,8 @@ void fluxes(double *flux, double *x, struct elemsclr elem)
 	    recphi += basis[icoeff]*elem.phi[ielem+1][icoeff];
 	    recu += basis[icoeff]*elem.u[ielem+1][icoeff];
 	}
-	Rflux = recphi*recu;
-	Ru = recu;
+	Rflux = recphi*2.0*PI;
+	Ru = 2.0*PI;
 
 	//Do upwinding
 	flux[ielem] = upwind(Lflux, Rflux, Lu, Ru);

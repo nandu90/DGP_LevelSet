@@ -71,7 +71,7 @@ void domainIntegral(double *x, struct elemsclr elem, double **rhs)
 
 		gradBz = dBdz[icoeff] * inv[0];
 
-		rhs[ielem][icoeff] += weights[igauss]*recphi*gradBz*recu*detJ;
+		rhs[ielem][icoeff] += weights[igauss]*recphi*gradBz*2.0*PI*detJ;
 	    }
 	}
     }

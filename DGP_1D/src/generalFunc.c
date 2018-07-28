@@ -224,7 +224,7 @@ void errExact(double **phi, double *x, double time, int iter)
 		rec += basis[icoeff]*phi[ielem][icoeff];
 	    }
 
-	    xtemp = xs[igauss] - time;
+	    xtemp = xs[igauss] + time;
 	    if(xtemp < 0.0)
 	    {
 		xtemp = xlen + xtemp;
@@ -233,9 +233,8 @@ void errExact(double **phi, double *x, double time, int iter)
 	    {
 		xtemp = xtemp - xlen;
 	    }
-	    double sigmax = 25.0;
-	    double term1 = 0.5*pow((xtemp - xb_in)/sigmax,2.0);
-	    exact = 1.0*exp(-(term1));
+	    
+	    exact = sin(xtemp);
 	    
 	    elemsum += fabs(rec - exact);
 	}

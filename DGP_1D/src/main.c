@@ -19,13 +19,13 @@ int main(int argc, char **argv)
     
     //------------------------------------------------------------------------//
     //INput Section
-    polyorder = 2;
-    xelem = 100;
-    deltat = 0.1;
+    polyorder = 3;
+    xelem = 25;
+    deltat = 0.0005;
     
-    xlen = 150.0;
-    xb_in = 75.0;
-    int maxiter = 1;
+    xlen = 2.0*PI;
+    //xb_in = 75.0;
+    int maxiter = 2000;
     int print_gap = 10;
     //------------------------------------------------------------------------//
 
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
         }
 	//------------------------------------------------------------------------//
 
-	errExact(elem.phi, x, time ,iter);
+	//errExact(elem.phi, x, time ,iter);
     }
 
     output(elem, x,iter);
