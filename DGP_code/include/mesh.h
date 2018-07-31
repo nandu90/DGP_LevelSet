@@ -6,7 +6,8 @@
 #define MESH_H
 
 void partition();
-void gridread();
-
+void gridgen(double **, double **, double ****, double **, double **, double **);
+void gridread(double **, double **, double ****, double **, double **, double **);
+void meshOperations(double **, double **, double ****, double **, double **, double **);
 
 #endif 

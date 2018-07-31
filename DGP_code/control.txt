@@ -1,27 +1,28 @@
 /******************Basis Functions*****************/
-Basis_Order 1
+Basis_Order 2
 
 /******************Grid related Inputs*******************//
 
-xlen 100
-ylen 100
-xelem 100
-yelem 100
+xlen 1.0
+ylen 0.5
+xelem 50
+yelem 25
+Read_mesh 0
 
 /***************Gauss Quadrature********************/
-//Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE
-Gauss_Quadrature_Type Gauss-Legendre
+Gauss_Quadrature_Type Gauss-Lobatto-Legendre
+//Gauss_Quadrature_Type Gauss-Legendre
 
 /***************Initial Conditions******************/
 Bubble_radius 10
-x_pos_of_bubble 75
-y_pos_of_bubble 25
+x_pos_of_bubble 0.5
+y_pos_of_bubble 0.25
 
 
 /****************Boundary Conditions**************/
-x-boundary no-slip
+//x-boundary no-slip
 //x-boundary slip
-//x-boundary periodic
+x-boundary periodic
 
 y-boundary no-slip
 //y-boundary slip
@@ -32,32 +33,24 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.25
-RK_Stages 3
+advect_deltat 0.001            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
+RK_Stages 4
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 100
-print_gap 10
+Max_Iterations 1000
+print_gap 100
 
 /***************Particular CASES***************/
-//Case Gaussian_Wave
+Case Gaussian_Wave
 //Case Circle
-Case zalesak
+//Case zalesak
+//Case bubble_break
+//Case Gaussian_Step
+//Case Circle_vortex
+//Case SineWave
 
-/*****************Old Inputs*********************/
-Start_step 0
-Kinematic_viscosity 10e-5
-Tolerance_x 1e-2
-Tolerance_p 1e-2
-
-advect_steps 100
-bub_advect_scheme book
-//bub_advect_scheme HJ-WENO !Do not use this for now. BC are not adapted to this scheme
-
-/****************************
-GS_relaxation_factor 0.5
-
+/*****************************************For INS*********************/
 /******************Multiphase Parameters*****************//
 Liquid_density 1000.0    //958.349
 Gas_density 500.0
@@ -66,33 +59,26 @@ Gas_viscosity 0.5
 Epsilon 1.2
 Surface_tension_coefficient 1.0
 
-/******************Re-Distance Parameters****************//
-Re_distance_timestep 0.005
-Re_distance_loops 15
-
-
-
-/***************Other Control Parameters**************/
-//Solver_type steady-state
-Solver_type transient
-Solve_flow 1
-Variable_density_pressure_solver 2    #0 - off; 1 - constant density; 2 - variable density
-Surface_tension 1
-Advect_bubble 1
-Void_fraction_control 1
-Re-distance_method 1               #0 - off; 1 - hyperbolic; 2 - fastmarch; 3 - direct
-
-
-
+/***************INS Solver Control*******************/
+Solve_flow 0
+Surface_tension 0
 
 /******Buoyancy Force Accelerations******/
 /**Give sign according to gravity direction**/
 gx 0.0
 gy -9.81
 
-/*****Case control for specific Initial Conditions and BC's*/
-//Case vortex
-//Case bubble_rise
-Case bubble_break
-//Case zalesak
-//Case homework
+/********************Pressure Solver Control***********/
+Tolerance_p 1e-2
+
+/*****************Re-distancing control*****************/
+Re-distance_method 0               #0 - off; 1 - hyperbolic; 2 - fastmarch; 3 - direct
+Re_distance_timestep 1.0E-03
+Re_distance_loops 30
+
+
+
+
+
+
+

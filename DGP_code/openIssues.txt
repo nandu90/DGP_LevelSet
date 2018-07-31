@@ -1,0 +1,3 @@
+- Line Jacobians need to be fixed.
+- Test on a skewed mesh
+- Adaptive p-refinement

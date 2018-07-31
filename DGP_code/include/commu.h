@@ -17,4 +17,14 @@ void commu2 (double ***);
 
 void destroycommu();
 
+//------------------------------------------------------------------------//
+//INS Comm
+void INSsetupcommu();
+
+void INScommu2 (double **);
+
+void INSdestroycommu();
+//------------------------------------------------------------------------//
+
+
 #endif

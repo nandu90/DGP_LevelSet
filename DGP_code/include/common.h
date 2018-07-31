@@ -16,7 +16,9 @@
 #define COMMON_H
 
 ///Standard Libraries to include
+#define _GNU_SOURCE
 #define PI 3.1415926535897
+
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -33,6 +35,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <dirent.h>
+#include <fenv.h>
 
 //------------------------------------------------------------------------//
 
@@ -73,6 +76,9 @@ double **sendptr;
 double **recvptr;
 int **io_info;
 
+double **INSsendptr;
+double **INSrecvptr;
+
 struct bhaiarray
 {
     double *sendrbuf;
@@ -86,7 +92,7 @@ struct bhaiarray
     
     double *senddbuf;
     double *recvdbuf;
-}bhai;
+}bhai, INSbhai;
 
 
 //------------------------------------------------------------------------//
@@ -101,9 +107,10 @@ struct elemsclr
     double ***phi;
     double ****mass;
     int **iBC;
-    /*double ***p;
-    double ***rho;
-    double ***mu;*/
+    double **p;
+    double **rho;
+    double **mu;
+    double **phi2;
 };
 
 
@@ -119,60 +126,6 @@ int ygpts;        //Number of Gauss Points in y
 int ncoeff;       //Number of coefficients in the solution expansion
                   //The above is equal to the number of basis functions
 //------------------------------------------------------------------------//
-
-
-
-/*int debug;
-
-///Global Variable declaration (so that we do not have to pass around information between functions)
-double nu;
-double cfl;
-double tol;
-int itermax;
-
-
-    
-int advect_steps;
-double advect_deltat;
-int solnread;
-int bub_conv_scheme;
-double rhof;
-double rhog;
-double muf;
-double mug;
-double epsilon;
-double sf_coeff;
-double relax;
-double ptol;
-double re_time;
-int re_loops;
-int print_gap;
-int startstep;
-double gx;
-double gy;
-
-
-//Some Simulation Control variables/
-int sf_toggle;
-int flow_solve;
-int p_solver;
-int advect_solve;
-int sol_type;
-int vf_control;
-int time_control;
-double max_cfl;
-int redist_method;
-int case_tog;*/
-
-
-
-
-
-
-
-
-
-
 
 
 #endif /* COMMON_H */

@@ -128,10 +128,29 @@ double zalesak(double x, double y)
     return phi;
 }
 
+
+void GaussianStep(double x, double y, double *ls)
+{
+    double xmin = 90.0;
+    double xmax = 110.0;
+    double ymin = 15.0;
+    double ymax = 35.0;
+
+    if(x >= xmin && x <= xmax)
+    {
+	if(y >= ymin && y<=ymax)
+	{
+	    (*ls) = 1.0;
+	}
+    }
+}
+
 void initializeVel(struct elemsclr elem, double **x, double **y)
 {
     int i,j,k,l;
 
+    int ielem, jelem, icoeff;
+    
     //Allocate solution vector - known soln at Gauss quadrature points
     double *us, *vs;
     allocator1(&us, tgauss);
@@ -157,6 +176,13 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 	}
     }
 
+    double *inv,  *jacobian;
+    allocator1(&inv, 4);
+    allocator1(&jacobian, 4);
+
+    double uxy = 0.0, vxy = 0.0, magxy = 0.0,mag = 0.0;
+    
+    
     //Allocate coordinate matrix corresponding to zs - solution points
     double **xs;
     allocator2(&xs, tgauss, 2);
@@ -165,23 +191,61 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
     {
         for (j=0; j<yelem; j++)
         {
+	    
 	    //Convert natural coordinates at quadrature points to Cartesian
 	    naturalToCartesian(xs, x, y, i, j);
 	    
 	    //Get the vel values at the Cartesian Quadrature points
 	    for(k=0; k<tgauss; k++)
 	    {
-		if(case_tog == 1 || case_tog == 2)
+		if(case_tog == 1 || case_tog == 2 || case_tog == 5)
 		{
-		    us[k] = 1.0;
+		    uxy = 1.0;
+		    vxy = 0.0;
+		}
+		else if(case_tog == 3 || case_tog == 6)
+		{
+		    uxy =  PI*(50.0 - xs[k][1])/314.0;
+		    vxy =  PI*(xs[k][0] - 50.0)/314.0;		    
+		}
+		else if(case_tog == 7)
+		{
+		    uxy = 0.0;
+		    vxy = 1.0;
+		}
+		else
+		{
+		    us[k] = 0.0;
 		    vs[k] = 0.0;
 		}
-		else if(case_tog == 3)
+	    
+		//------------------------------------------------------------------------//
+		//Transform the velocity vector onto local coordinate
+		//Get the magnitude in xy coordinates
+		
+		magxy = sqrt(pow(uxy,2.0) + pow(vxy,2.0));
+		
+		mappingJacobianDeterminant(i, j, zeta[k][0], zeta[k][1], x, y, inv, jacobian);
+		
+		//Use the inverse Jacobian matrix to transform
+		us[k] = uxy * inv[0] + vxy * inv[1];
+		vs[k] = uxy * inv[2] + vxy * inv[3];
+		
+		//Rescale the obtained vector to be equal to original vector
+		mag = sqrt(pow(us[k],2.0) + pow(vs[k],2.0));
+		if(mag == 0.0)
 		{
-		    us[k] = PI*(50.0 - xs[k][1])/314.0;
-		    vs[k] = PI*(xs[k][0] - 50.0)/314.0;
+		    us[k] = 0.0;
+		    vs[k] = 0.0;
 		}
+		else
+		{
+		    us[k] = us[k]*magxy/mag;
+		    vs[k] = vs[k]*magxy/mag;
+		}
+		//------------------------------------------------------------------------//
 	    }
+	    
 	    //Solve the system to get the coefficients
 	    solveSystem(vand, us, elem.u[i][j]);
 	    solveSystem(vand, vs, elem.v[i][j]);
@@ -189,12 +253,27 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
     }
 
     //------------------------------------------------------------------------//
+    //For now we consider velocities to be of finite volume nature. Cancel out the gradients
+    for(ielem=0; ielem<xelem; ielem++)
+    {
+	for(jelem=0; jelem<yelem; jelem++)
+	{
+	    for(icoeff=1; icoeff<ncoeff; icoeff++)
+	    {
+		elem.u[ielem][jelem][icoeff] = 0.0;
+		elem.v[ielem][jelem][icoeff] = 0.0;
+	    }
+	}
+    }	    
+    //------------------------------------------------------------------------//
     //Deallocators
     deallocator1(&us, tgauss);
     deallocator1(&vs, tgauss);
     deallocator1(&basis, ncoeff);
     deallocator2(&vand, tgauss, ncoeff);
     deallocator2(&xs, tgauss, 2);
+    deallocator1(&inv, 4);
+    deallocator1(&jacobian, 4);
     //------------------------------------------------------------------------//
 
 }
@@ -216,6 +295,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     allocator2(&vand, tgauss, ncoeff);
 
     //Loop over the quadrature points to fill the Vandermonde Matrix
+    printf("vandermonde matrix\n");
     for(k=0; k<tgauss; k++)
     {
 	//Get the basis vector
@@ -230,6 +310,16 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     //Allocate coordinate matrix corresponding to zs - solution points
     double **xs;
     allocator2(&xs, tgauss, 2);
+
+    //------------------------------------------------------------------------//
+    double line = 2.5*2.0*rb_in;
+    double temp;
+    double sigmax;
+    double sigmay;
+    double term1;
+    double term2; 
+    //------------------------------------------------------------------------//
+
     
         
     for (i=0; i<xelem; i++)
@@ -238,7 +328,9 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
         {
 	    //Convert natural coordinates at quadrature points to Cartesian
 	    naturalToCartesian(xs, x, y, i, j);
-		
+
+	    
+	    
 	    //Get the LS value at the Cartesian Quadrature points
 	    for(k=0; k<tgauss; k++)
 	    {
@@ -247,13 +339,14 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		//Gaussian Wave
 		if(case_tog == 1)
 		{
-		    	double sigmax = 25.0;
-			double sigmay = 25.0;
-			double term1 = 0.5*pow((xs[k][0] - xb_in)/sigmax,2.0);
-			double term2 = 0.5*pow((xs[k][1] - yb_in)/sigmay,2.0);
-			ls[k] = 1.0*exp(-(term1 + term2));
+		    	sigmax = 0.05;
+			sigmay = 0.05;
+			term1 = 500.0*pow((xs[k][0] - xb_in),2.0);
+			term2 = 500.0*pow((xs[k][1] - yb_in),2.0);
+			ls[k] = exp(-(term1 + term2));// + term2));
+			//exit(1);
 		}
-		else if(case_tog == 2)
+		else if(case_tog == 2 || case_tog == 4)
 		{
 		    ls[k] = sqrt(pow(xb_in - xs[k][0],2.0) + pow(yb_in - xs[k][1],2.0)) - rb_in;
 		}
@@ -261,33 +354,83 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		{
 		    ls[k] = zalesak(xs[k][0], xs[k][1]);
 		}
-	       
+		else if(case_tog == 5)
+		{
+		    sigmax = 10.0;
+		    sigmay = 10.0;
+		    term1 = 100.0*pow((xs[k][0] - xb_in),2.0);
+		    term2 = 100.0*pow((xs[k][1] - yb_in),2.0);
+		    ls[k] = exp(-(term1));// + term2));
+		    /*double xmin = 100.0;
+		    double xmax = 120.0;
+		    double ymin = 15.0;
+		    double ymax = 35.0;
+		    
+		    if(xs[k][0] >= xmin && xs[k][0] <= xmax)
+		    {
+			if(xs[k][1] >= ymin && xs[k][1]<=ymax)
+			{
+			    ls[k] = 1.0;
+			}
+		    }
+		    //GaussianStep(xs[k][0], xs[k][1], &ls[k]);*/
+		}
+		else if(case_tog == 6)
+		{
+		    //ls[k] = 1.0;
+		    ls[k] = sqrt(pow(xs[k][0]-50.0,2.0) + pow(xs[k][1]-75.0,2.0)) - 15.0;
+		    //ls[k] = sqrt(pow(xs[k][0]-50.0,2.0) + pow(xs[k][1]-50.0,2.0)) - 15.0;
+		}
+		else if(case_tog == 7)
+		{
+		    ls[k] = sin(xs[k][1]);
+		}
+		else
+		{
+		    if(myrank == master)printf("Please enter a valid case number. Exiting...\n");
+		}
+
+		//Bubble breakup case
+		if(case_tog == 4)
+		{
+		    temp = line - xs[k][1];
+		    if(temp < ls[k])
+		    {
+			ls[k] = temp;
+		    }
+		}
 		//------------------------------------------------------------------------//
 
 	    }
+
+	    
 	    //Solve the system to get the coefficients
 	    solveSystem(vand, ls, elem.phi[i][j]);
-
+	    //exit(1);
 	    /*//------------------------------------------------------------------------//
 	    //Reconstruct the solution - check
-	    printf("\nReconstructed soln at gauss pts is\n");
-	    for(k=0; k<tgauss; k++)
+	    if(i == 2 && j == 2)
 	    {
-		ls[k] = 0.0;
-		basis2D(zeta[k][0], zeta[k][1], basis);
-		for(l=0; l<pow(polyorder+1,2); l++)
+		printf("\nReconstructed soln at gauss pts is\n");
+		for(k=0; k<tgauss; k++)
 		{
-		    ls[k] += basis[l]*elem.phi[i][j][l];
+		    ls[k] = 0.0;
+		    basis2D(zeta[k][0], zeta[k][1], basis);
+		    for(l=0; l<pow(polyorder+1,2); l++)
+		    {
+			ls[k] += basis[l]*elem.phi[i][j][l];
+		    }
+		    
+		    printf("%.4f %.4f %.4f\n",zeta[k][0], zeta[k][1], ls[k]);
 		}
-
-		printf("%.4f\n",ls[k]);
+		exit(1);
 	    }
-	    exit(1);
+	    
+	    
 	    //------------------------------------------------------------------------//*/
 
 	}
     }
-    
     deallocator1(&basis, ncoeff);
     deallocator2(&vand,tgauss, ncoeff);
     deallocator2(&xs,tgauss,2);
@@ -300,7 +443,7 @@ void initialize(struct elemsclr elem, double **x, double **y)
     //Initialize Velocities
     initializeVel(elem, x, y);
     //Apply BC
-
+    
     //Communicate
     commu2(elem.u);
     commu2(elem.v);

@@ -25,6 +25,9 @@ Notes:
 #include "commu.h"
 #include "rhs.h"
 #include "solvers.h"
+#include "INS.h"
+
+
 /*#include "partition.h"
 #include "grid.h"
 #include "commu.h"
@@ -34,6 +37,11 @@ Notes:
 
 int main(int argc, char **argv)
 {
+    feenableexcept(FE_INVALID   | 
+                   FE_DIVBYZERO | 
+                   FE_OVERFLOW  | 
+                   FE_UNDERFLOW);
+    
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
@@ -46,8 +54,7 @@ int main(int argc, char **argv)
 	printf("---------------------------------------\n");
     }
     int i,j,k;
-    double time1 = MPI_Wtime();
-
+    
     //------------------------------------------------------------------------//
     //Create necessary output directories//
     //Let only the master create directory
@@ -62,7 +69,6 @@ int main(int argc, char **argv)
 	free(path);
     }
     //------------------------------------------------------------------------//
-
   
     //------------------------------------------------------------------------//
     //Read control file
@@ -71,6 +77,15 @@ int main(int argc, char **argv)
     if(myrank == master)printf("Read the input file\n\n");
     //------------------------------------------------------------------------//
 
+    //------------------------------------------------------------------------//
+    if(case_tog == 7)
+    {
+	xlen = 1.0;
+	ylen = 2.0*PI;
+    }
+    //------------------------------------------------------------------------//
+    
+    
     //------------------------------------------------------------------------//
     //Routine to partition the mesh
     iallocator2(&io_info,nprocs,4);  //needed inside partition. Takes care of output IO
@@ -86,15 +101,25 @@ int main(int argc, char **argv)
     allocator2(&y,xnode,ynode);
 
     //Use the following if required
-    /*allocator2(&xc,xelem,yelem);
+    double **xc, **yc;
+    double **vol;
+    double ****area;
+    allocator2(&xc,xelem,yelem);
     allocator2(&yc,xelem,yelem);
     allocator2(&vol,xelem,yelem);
-    allocator4(&area,xelem,yelem,2,2);*/
+    allocator4(&area,xelem,yelem,2,2);
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Read grid
-    gridread(x,y);
+    if(meshread == 0)
+    {
+	gridgen(x,y,area, vol, xc, yc);
+    }
+    else
+    {
+	gridread(x,y,area,vol,xc,yc);
+    }
     //------------------------------------------------------------------------//
 
       
@@ -104,22 +129,20 @@ int main(int argc, char **argv)
 
     ncoeff = (int)pow(polyorder+1,2.0); //Number of coefficients = number of basis
     
-    if(quadtype == 1)
-    {
-	xgpts=polyorder+2;
-	ygpts=polyorder+2;
-    }
-    else if(quadtype == 2)
-    {
-	xgpts = polyorder+1;
-	ygpts = polyorder+1;
-    }
+   
+    xgpts = polyorder+1;
+    ygpts = polyorder+1;
+    
     tgauss = xgpts*ygpts;
     
     allocator3(&elem.u,xelem,yelem,ncoeff);
     allocator3(&elem.v,xelem,yelem,ncoeff);
     allocator3(&elem.phi,xelem,yelem,ncoeff);
-    allocator4(&elem.mass,xelem,yelem,tgauss,tgauss);
+    allocator2(&elem.p,xelem,yelem);
+    allocator2(&elem.rho,xelem,yelem);
+    allocator2(&elem.mu,xelem,yelem);
+    allocator2(&elem.phi2,xelem,yelem);
+    allocator4(&elem.mass,xelem,yelem,ncoeff,ncoeff);
     iallocator2(&elem.iBC,xelem,yelem);
 
     //Uncomment when you need them
@@ -129,14 +152,13 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //For Gauss-Lobatto-Legendre Quadrature we need two points at the end + polyorder
     double *zeta1, *zeta2;
     double *weight1, *weight2;
     allocator1(&zeta1, xgpts);
     allocator1(&zeta2, ygpts);
     allocator1(&weight1, xgpts);
     allocator1(&weight2, ygpts);
-    if(quadtype == 1) //Gauss-Legendre-Lobatto
+    if(quadtype == 1) //Gauss-Legendre-Lobatto - Deprecated
     {
 	zwgll(zeta1,weight1,xgpts);
 	zwgll(zeta2,weight2,ygpts);
@@ -190,7 +212,9 @@ int main(int argc, char **argv)
     }
     
     //Get the mass matrix
-    massmatrix(x,y,elem.mass); 
+    
+    massmatrix(x,y,elem.mass);
+    
     //------------------------------------------------------------------------//
 
    
@@ -201,6 +225,10 @@ int main(int argc, char **argv)
     sendptr = (double **) malloc(4 * sizeof(double *));
     recvptr = (double **) malloc(4 * sizeof(double *));
     setupcommu();
+
+    INSsendptr = (double **) malloc(4 * sizeof(double *));
+    INSrecvptr = (double **) malloc(4 * sizeof(double *));
+    INSsetupcommu();
     /*for(i=0; i<yelem; i++)
     {
       if(myrank == master)printf("%d %.4f\n",i,bhai.sendrbuf[i]);
@@ -211,83 +239,25 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
     //Initialize solution vectors
     //Arrange quadratures in an array for easy access
+
     
-    initialize(elem, x, y); 
+    initialize(elem, x, y);
+
+    
+    
+    if(flow_solve == 1)
+    {
+	INSinitialize(elem);
+    }
     //------------------------------------------------------------------------//
 
     
-    
     //------------------------------------------------------------------------//
-    //Preliminaries before time loop
-    double deltat = 0.0;
-    double time = deltat*startstep;
-    if(time_control == 2)
-    {
-	deltat = advect_deltat;
-    }
-    else
-    {
-	if(myrank == master)
-	{
-	    printf("Time control is not constant time.\nExiting...");
-	    exit(1);
-	}
-    }
-   
-
-    int iter = startstep;
-    int print_count = 1;
-
-    FILE *out;
-    if(myrank == master)
-    {
-	out = fopen("sim_out.txt","w");
-	if(out == NULL)
-	{
-	    printf("Error opening sim_out.txt!\n");
-	    exit(0);
-	}
-    }
-
-    
-    //Print out the paraview output if startstep == 0 i.e., initial conditions
-    if(startstep == 0)
-    {
-	output_xml(elem,startstep,x,y);
-    }
-
-    double ***rhs;
-    allocator3(&rhs, xelem, yelem, ncoeff);
-    
-    //Time loop
-    for(iter = startstep; iter < itermax; iter++)
-    {
-	time += deltat;
-	
-	if(myrank == master)
-	{
-	    printf("Step: %d Time: %.4f\n",iter+1, time);
-	    fprintf(out,"Step: %d Time: %.4f\n",iter+1, time);
-	}
-
-	//Time Integration
-	Runge_Kutta(elem, x, y,deltat,rhs);
-	
-	//Print out the paraview output
-	print_count++;
-        if(print_count == 1)
-        {
-            output_xml(elem,iter+1,x,y);
-        }
-        if(print_count == print_gap)
-        {
-            print_count = 0;
-        }
-    }
-    
-    
+    //The time loop routine
+    itrdrv(elem, x, y, xc, yc, vol, area);
     //------------------------------------------------------------------------//
 
+    
     
     
     
@@ -307,20 +277,20 @@ int main(int argc, char **argv)
     deallocator4(&elem.mass,xelem,yelem,tgauss,tgauss); //Should this be ncoeff? - Yes it should be
     ideallocator2(&elem.iBC,xelem,yelem);
 
-    //Uncomment when you need them
-    /*deallocator3(&elem.p,xelem,yelem,zelem);
-    deallocator3(&elem.rho,xelem,yelem,zelem);
-    deallocator3(&elem.mu,xelem,yelem,zelem);*/
+    deallocator2(&elem.p,xelem,yelem);
+    deallocator2(&elem.rho,xelem,yelem);
+    deallocator2(&elem.mu,xelem,yelem);
+    deallocator2(&elem.phi2,xelem,yelem);
 
     //Mesh
     deallocator2(&x,xnode,ynode);
     deallocator2(&y,xnode,ynode);
 
     //Use the following if required
-    /*deallocator2(&xc,xelem,yelem);
+    deallocator2(&xc,xelem,yelem);
     deallocator2(&yc,xelem,yelem);
     deallocator2(&vol,xelem,yelem);
-    deallocator4(&area,xelem,yelem,2,2);*/
+    deallocator4(&area,xelem,yelem,2,2);
 
     //IO array
     ideallocator2(&io_info,nprocs,4);
@@ -330,21 +300,16 @@ int main(int argc, char **argv)
     free(sendptr);
     free(recvptr);
 
-    //Time arrays
-    deallocator3(&rhs, xelem, yelem, ncoeff);
+    INSdestroycommu();
+    free(INSsendptr);
+    free(INSrecvptr);
+   
     //------------------------------------------------------------------------//
 
     
     
     
-    double time2 = MPI_Wtime();
-    double secs = time2-time1;
-    if(myrank == master)
-    {
-	printf("Total run time: %.6f secs\n",secs);
-	fprintf(out,"Total run time: %.6f secs\n",secs);
-	fclose(out);
-    }
+    
     
     if(myrank == master)
     {

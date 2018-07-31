@@ -12,4 +12,13 @@ double min(double, double);
 
 void naturalToCartesian(double **, double **, double **, int, int);
 
+void errorNormL2(double ***, double ***, double *, double *, double **, double **);
+
+void errorNormL1(double ***, double ***, double *, double *, double **, double **);
+
+void calc_vf(double ***, double, double *);
+
+void errorGaussian(double ***, double, double **, double **);
+
+double remainder(double, double);
 #endif

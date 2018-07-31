@@ -1,3 +1,4 @@
+clear all
 syms zeta1 zeta2 
 syms x1 x2 x3 x4
 syms y1 y2 y3 y4
@@ -5,8 +6,8 @@ syms y1 y2 y3 y4
 %%%%%%%Shape Function for Mapping quads%%%%%%%%%
 N1 = (1-zeta1)*(1-zeta2)/4;
 N2 = (1+zeta1)*(1-zeta2)/4;
-N3 = (1+zeta1)*(1+zeta2)/4;
-N4 = (1-zeta1)*(1+zeta2)/4;
+N3 = (1-zeta1)*(1+zeta2)/4;
+N4 = (1+zeta1)*(1+zeta2)/4;
 
 
 %%%Mapping Function%%%
@@ -33,5 +34,5 @@ for i=1:4
 end
 
 M
-ccode(detJ)
+ccode(dxdz2)
 

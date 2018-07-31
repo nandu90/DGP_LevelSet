@@ -25,7 +25,7 @@ double *dvector(int np);
 main()
 {
 
-    int np = 8;
+    int np = 2;
     
   
 
@@ -115,9 +115,9 @@ main()
 	  
 	  for(j=0; j<np; j++)
 	  {	  
-	      sum += Dmat[ig][j]*pow(z1[j],7.0);
+	    sum += Dmat[ig][j]*z1[j];//pow(z1[j],7.0);
 	  }
-	  sum = sum * pow(n2,6.0);
+	  sum = sum * n2;// pow(n2,6.0);
 	  
 	  cout<<"The differential for point "<<n1<<", "<<n2<<" is "<<sum<<endl;
 	  

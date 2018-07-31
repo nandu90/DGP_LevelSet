@@ -59,17 +59,11 @@ void control()
 		    word = strtok(NULL,delim);
 		    gyelem = atoi(word);
 		}
-		/*
-		if(strcmp(word,"Kinematic_viscosity") == 0)
+		if(strcmp(word,"Read_mesh") == 0)
 		{
 		    word = strtok(NULL,delim);
-		    nu = atof(word);
+		    meshread= atoi(word);
 		}
-		if(strcmp(word,"Tolerance_x") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    tol = atof(word);
-		    }*/
 		if(strcmp(word,"Bubble_radius") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -108,16 +102,10 @@ void control()
 		    word = strtok(NULL,delim);
 		    RKstages = atoi(word);
 		}
-		/*if(strcmp(word,"advect_steps") == 0)
+		if(strcmp(word,"Epsilon") == 0)
 		{
 		    word = strtok(NULL,delim);
-		    advect_steps = atoi(word);
-		    }*/
-		
-		/*if(strcmp(word,"Solution_read") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    solnread = atoi(word);
+		    epsilon = atof(word);
 		}
 		if(strcmp(word,"Liquid_density") == 0)
 		{
@@ -139,26 +127,48 @@ void control()
 		    word = strtok(NULL,delim);
 		    mug = atof(word);
 		}
-		if(strcmp(word,"Epsilon") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    epsilon = atof(word);
-		}
+		
 		if(strcmp(word,"Surface_tension_coefficient") == 0)
 		{
 		    word = strtok(NULL,delim);
 		    sf_coeff = atof(word);
 		}
-		if(strcmp(word,"GS_relaxation_factor") == 0)
+		if(strcmp(word,"Solve_flow") == 0)
 		{
 		    word = strtok(NULL,delim);
-		    relax = atof(word);
+		    flow_solve = atoi(word);
+		}
+		if(strcmp(word,"Surface_tension") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    sf_toggle = atoi(word);
+		}
+		if(strcmp(word,"gx") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    gx = atof(word);
+		}
+		if(strcmp(word,"gy") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    gy = atof(word);
 		}
 		if(strcmp(word,"Tolerance_p") == 0)
 		{
 		    word = strtok(NULL,delim);
 		    ptol = atof(word);
 		}
+		
+		/*if(strcmp(word,"Solution_read") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    solnread = atoi(word);
+		}
+	        
+		
+		*/
+	        
+	        
 		if(strcmp(word,"Re_distance_timestep") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -169,67 +179,11 @@ void control()
 		    word = strtok(NULL,delim);
 		    re_loops = atoi(word);
 		}
-		
-		if(strcmp(word,"Start_step") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    startstep = atoi(word);
-		}
-		if(strcmp(word,"Surface_tension") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    sf_toggle = atoi(word);
-		}
-		if(strcmp(word,"Solve_flow") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    flow_solve = atoi(word);
-		}
-		if(strcmp(word,"Variable_density_pressure_solver") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    p_solver = atoi(word);
-		}
-		if(strcmp(word,"Advect_bubble") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    advect_solve = atoi(word);
-		}
-		if(strcmp(word,"Void_fraction_control") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    vf_control = atoi(word);
-		}
 		if(strcmp(word,"Re-distance_method") == 0)
 		{
 		    word = strtok(NULL,delim);
 		    redist_method = atoi(word);
-		    }*/
-		
-		/*if(strcmp(word,"gx") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    gx = atof(word);
 		}
-		if(strcmp(word,"gy") == 0)
-		{
-		    word = strtok(NULL,delim);
-		    gy = atof(word);
-		}
-		
-		if(strcmp(word,"bub_advect_scheme") == 0)
-		{
-		    word = strtok(NULL, delim);
-		    if(strcmp(word,"book\n") == 0)
-		    {
-			bub_conv_scheme=1;
-		    }
-		    else if(strcmp(word,"HJ-WENO\n") == 0)
-		    {
-			bub_conv_scheme=2;
-		    }
-		    }*/
-		
 		if(strcmp(word,"x-boundary") == 0)
 		{
 		    word = strtok(NULL, delim);
@@ -263,18 +217,7 @@ void control()
 			y_bound=3;
 		    }
 		}
-		/*if(strcmp(word,"Solver_type") == 0)
-		{
-		    word = strtok(NULL, delim);
-		    if(strcmp(word,"steady-state\n") == 0)
-		    {
-			sol_type=0;
-		    }
-		    else if(strcmp(word,"transient\n") == 0)
-		    {
-			sol_type=1;
-		    }
-		    }*/
+		
 		if(strcmp(word,"advect_deltat") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -322,15 +265,24 @@ void control()
 		    {
 			case_tog=3;
 		    }
-		    /*else if(strcmp(word,"zalesak\n") == 0)
+		    else if(strcmp(word,"bubble_break\n") == 0)
 		    {
 			case_tog=4;
 		    }
-		    else if(strcmp(word,"homework\n") == 0)
+		    else if(strcmp(word,"Gaussian_Step\n") == 0)
 		    {
 			case_tog=5;
-			}*/
+		    }
+		    else if(strcmp(word,"Circle_vortex\n") == 0)
+		    {
+			case_tog=6;
+		    }
+		    else if(strcmp(word,"SineWave\n") == 0)
+		    {
+			case_tog=7;
+		    }
 		}
+		
 		word = strtok(NULL,delim);
 	    }
 	    
@@ -348,6 +300,7 @@ void control()
   
   MPI_Bcast(&gxelem,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&gyelem,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&meshread,1,MPI_INT,master,MPI_COMM_WORLD);
   
   MPI_Bcast(&rb_in,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   MPI_Bcast(&xb_in,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
@@ -370,43 +323,37 @@ void control()
 
   MPI_Bcast(&case_tog,1,MPI_INT,master,MPI_COMM_WORLD);
   
-/*MPI_Bcast(&nu,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   
-	MPI_Bcast(&advect_steps,1,MPI_INT,master,MPI_COMM_WORLD);
-	
-	
+
+  //------------------------------------------------------------------------//
+  //FOR INS
+  MPI_Bcast(&epsilon,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&rhof,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&rhog,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&muf,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&mug,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&sf_coeff,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+
+  MPI_Bcast(&flow_solve,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&sf_toggle,1,MPI_INT,master,MPI_COMM_WORLD);
+
+  MPI_Bcast(&gx,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&gy,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+
+  MPI_Bcast(&ptol,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  //------------------------------------------------------------------------//
+
+  //------------------------------------------------------------------------//
+  //Re-distancing
+  MPI_Bcast(&re_time,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&re_loops,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&redist_method,1,MPI_INT,master,MPI_COMM_WORLD);
+  //------------------------------------------------------------------------//
+
+/*
 	MPI_Bcast(&solnread,1,MPI_INT,master,MPI_COMM_WORLD);
-	
-	MPI_Bcast(&rhof,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&rhog,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&muf,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&mug,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	
-	MPI_Bcast(&epsilon,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&sf_coeff,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	
-	MPI_Bcast(&relax,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&ptol,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	
-	MPI_Bcast(&re_time,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&re_loops,1,MPI_INT,master,MPI_COMM_WORLD);
-	
-	
-	
-	MPI_Bcast(&sf_toggle,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&flow_solve,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&p_solver,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&advect_solve,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&vf_control,1,MPI_INT,master,MPI_COMM_WORLD);
-	MPI_Bcast(&redist_method,1,MPI_INT,master,MPI_COMM_WORLD);
-	
-	
-	MPI_Bcast(&gx,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	MPI_Bcast(&gy,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
-	
-	MPI_Bcast(&bub_conv_scheme,1,MPI_INT,master,MPI_COMM_WORLD);
-	
-	MPI_Bcast(&sol_type,1,MPI_INT,master,MPI_COMM_WORLD);
+        
+        
 	
 	*/
 	
