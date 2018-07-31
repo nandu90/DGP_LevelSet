@@ -208,6 +208,11 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		    uxy =  PI*(50.0 - xs[k][1])/314.0;
 		    vxy =  PI*(xs[k][0] - 50.0)/314.0;		    
 		}
+		else if(case_tog == 7)
+		{
+		    uxy = 0.0;
+		    vxy = 1.0;
+		}
 		else
 		{
 		    us[k] = 0.0;
@@ -290,6 +295,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     allocator2(&vand, tgauss, ncoeff);
 
     //Loop over the quadrature points to fill the Vandermonde Matrix
+    printf("vandermonde matrix\n");
     for(k=0; k<tgauss; k++)
     {
 	//Get the basis vector
@@ -322,7 +328,9 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
         {
 	    //Convert natural coordinates at quadrature points to Cartesian
 	    naturalToCartesian(xs, x, y, i, j);
-		
+
+	    
+	    
 	    //Get the LS value at the Cartesian Quadrature points
 	    for(k=0; k<tgauss; k++)
 	    {
@@ -331,11 +339,12 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		//Gaussian Wave
 		if(case_tog == 1)
 		{
-		    	sigmax = 25.0;
-			sigmay = 25.0;
-			term1 = 0.5*pow((xs[k][0] - xb_in)/sigmax,2.0);
-			term2 = 0.5*pow((xs[k][1] - yb_in)/sigmay,2.0);
-			ls[k] = 1.0*exp(-(term1 + term2));
+		    	sigmax = 0.05;
+			sigmay = 0.05;
+			term1 = 500.0*pow((xs[k][0] - xb_in),2.0);
+			term2 = 500.0*pow((xs[k][1] - yb_in),2.0);
+			ls[k] = exp(-(term1 + term2));// + term2));
+			//exit(1);
 		}
 		else if(case_tog == 2 || case_tog == 4)
 		{
@@ -349,10 +358,10 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		{
 		    sigmax = 10.0;
 		    sigmay = 10.0;
-		    term1 = 0.5*pow((xs[k][0] - xb_in)/sigmax,2.0);
-		    term2 = 0.5*pow((xs[k][1] - yb_in)/sigmay,2.0);
-		    ls[k] = 1.0*exp(-(term1 + term2));
-		    double xmin = 100.0;
+		    term1 = 100.0*pow((xs[k][0] - xb_in),2.0);
+		    term2 = 100.0*pow((xs[k][1] - yb_in),2.0);
+		    ls[k] = exp(-(term1));// + term2));
+		    /*double xmin = 100.0;
 		    double xmax = 120.0;
 		    double ymin = 15.0;
 		    double ymax = 35.0;
@@ -364,13 +373,17 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 			    ls[k] = 1.0;
 			}
 		    }
-		    //GaussianStep(xs[k][0], xs[k][1], &ls[k]);
+		    //GaussianStep(xs[k][0], xs[k][1], &ls[k]);*/
 		}
 		else if(case_tog == 6)
 		{
 		    //ls[k] = 1.0;
 		    ls[k] = sqrt(pow(xs[k][0]-50.0,2.0) + pow(xs[k][1]-75.0,2.0)) - 15.0;
 		    //ls[k] = sqrt(pow(xs[k][0]-50.0,2.0) + pow(xs[k][1]-50.0,2.0)) - 15.0;
+		}
+		else if(case_tog == 7)
+		{
+		    ls[k] = sin(xs[k][1]);
 		}
 		else
 		{
@@ -389,25 +402,31 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		//------------------------------------------------------------------------//
 
 	    }
+
 	    
 	    //Solve the system to get the coefficients
 	    solveSystem(vand, ls, elem.phi[i][j]);
-
+	    //exit(1);
 	    /*//------------------------------------------------------------------------//
 	    //Reconstruct the solution - check
-	    printf("\nReconstructed soln at gauss pts is\n");
-	    for(k=0; k<tgauss; k++)
+	    if(i == 2 && j == 2)
 	    {
-		ls[k] = 0.0;
-		basis2D(zeta[k][0], zeta[k][1], basis);
-		for(l=0; l<pow(polyorder+1,2); l++)
+		printf("\nReconstructed soln at gauss pts is\n");
+		for(k=0; k<tgauss; k++)
 		{
-		    ls[k] += basis[l]*elem.phi[i][j][l];
+		    ls[k] = 0.0;
+		    basis2D(zeta[k][0], zeta[k][1], basis);
+		    for(l=0; l<pow(polyorder+1,2); l++)
+		    {
+			ls[k] += basis[l]*elem.phi[i][j][l];
+		    }
+		    
+		    printf("%.4f %.4f %.4f\n",zeta[k][0], zeta[k][1], ls[k]);
 		}
-
-		printf("%.4f\n",ls[k]);
+		exit(1);
 	    }
-	    exit(1);
+	    
+	    
 	    //------------------------------------------------------------------------//*/
 
 	}

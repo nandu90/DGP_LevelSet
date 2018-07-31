@@ -277,6 +277,10 @@ void control()
 		    {
 			case_tog=6;
 		    }
+		    else if(strcmp(word,"SineWave\n") == 0)
+		    {
+			case_tog=7;
+		    }
 		}
 		
 		word = strtok(NULL,delim);

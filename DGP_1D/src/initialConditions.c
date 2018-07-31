@@ -51,7 +51,7 @@ void initializeVel(struct elemsclr elem, double *x)
 
 	for(igauss=0; igauss<tgauss; igauss++)
 	{
-	    us[igauss] = 1.0;
+	    us[igauss] = 2.0*PI;
 	}
 
 	solveSystem(vand, us, elem.u[ielem]);
@@ -109,9 +109,7 @@ void initializeLS(struct elemsclr elem, double *x)
 
 	for(igauss=0; igauss<tgauss; igauss++)
 	{
-	    double sigmax = 25.0;
-	    double term1 = 0.5*pow((xs[igauss] - xb_in)/sigmax,2.0);
-	    phis[igauss] = 1.0*exp(-(term1));
+	    phis[igauss] = sin(xs[igauss]);
 	}
 
 	solveSystem(vand, phis, elem.phi[ielem]);

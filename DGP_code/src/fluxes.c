@@ -44,7 +44,14 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
     }
     else
     {
-	zwgl(zx,wx,xgpts);
+	if(quadtype == 1)
+	{
+	    zwgll(zx,wx,xgpts);
+	}
+	else if(quadtype == 2)
+	{
+	    zwgl(zx,wx,xgpts);
+	}
     }
     if(ygpts == 1)
     {
@@ -53,7 +60,14 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
     }
     else
     {
-	zwgl(zy,wy,ygpts);
+	if(quadtype == 1)
+	{
+	    zwgll(zy,wy,ygpts);
+	}
+	else if(quadtype == 2)
+	{
+	    zwgl(zy,wy,ygpts);
+	}
     }
 
     double *basisx, *basisy;
@@ -267,7 +281,14 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
     }
     else
     {
-	zwgl(zx,wx,xgpts);
+	if(quadtype == 1)
+	{
+	    zwgll(zx,wx,xgpts);
+	}
+	else if(quadtype == 2)
+	{
+	    zwgl(zx,wx,xgpts);
+	}
     }
     if(ygpts == 1)
     {
@@ -276,8 +297,16 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
     }
     else
     {
-	zwgl(zy,wy,ygpts);
+	if(quadtype == 1)
+	{
+	    zwgll(zy,wy,ygpts);
+	}
+	else if(quadtype == 2)
+	{
+	    zwgl(zy,wy,ygpts);
+	}
     }
+
 
     /*printf("%d %d\n", xgpts, ygpts);
     printf("%.4e %.4e %.4e\n",zx[0], zx[1], zx[2]);

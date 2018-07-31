@@ -46,6 +46,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     }
 
     
+    
     //------------------------------------------------------------------------//
     //Preliminaries before time loop
     double deltat = 0.0;
@@ -57,6 +58,10 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	{
 	    deltat = 2.0*PI*25.0/(PI*25.0/314.0);
 	    deltat = deltat * advect_deltat;
+	}
+	if(case_tog == 7)
+	{
+	    deltat = 2.0*PI*advect_deltat;
 	}
     }
     else
@@ -133,6 +138,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     //------------------------------------------------------------------------//
 
     double inivf;
+
     
     //Time loop
     for(iter = startstep; iter < itermax; iter++)
@@ -364,14 +370,14 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     
     
     //------------------------------------------------------------------------//
-
+    
     //------------------------------------------------------------------------//
     //Calculate Error Norms
-    if(case_tog == 3 || case_tog == 6 || case_tog == 1)
+    if(case_tog == 3 || case_tog == 6 || case_tog == 1 || case_tog == 7)
     {
 	double err1, lerr1;
 	errorNormL1(iniphi, elem.phi, &err1, &lerr1, x, y);
-
+	
 	double err2, lerr2;
 	errorNormL2(iniphi, elem.phi, &err2, &lerr2, x, y);
 	

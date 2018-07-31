@@ -19,13 +19,13 @@ int main(int argc, char **argv)
     
     //------------------------------------------------------------------------//
     //INput Section
-    polyorder = 1;
-    xelem = 10;
-    deltat = 0.1;
+    polyorder = 4;
+    xelem = 100;
+    deltat = 0.001;
     
-    xlen = 150.0;
+    xlen = 2*PI;
     xb_in = 75.0;
-    int maxiter = 1500;
+    int maxiter = 1000;
     int print_gap = 10;
     //------------------------------------------------------------------------//
 

@@ -2,6 +2,7 @@
 #include "common.h"
 #include "DGPFunc.h"
 #include "memory.h"
+#include "polylib.h"
 
 double remainder(double a, double b)
 {
@@ -136,6 +137,37 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
     allocator1(&jacobian, 4);
 
     double detJ;
+
+    int i,j;
+	
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here independent of what is in the rest of the code
+    double *z1, *w1;
+    double *z2, *w2;
+    allocator1(&z1, xgpts);
+    allocator1(&w1, xgpts);
+    allocator1(&z2, ygpts);
+    allocator1(&w2, ygpts);
+    zwgl(z1, w1, xgpts);
+    zwgl(z2, w2, ygpts);
+
+    int ngauss = xgpts*ygpts*2;
+    double **z, **w;
+    allocator2(&z, ngauss, 2);
+    allocator2(&w, ngauss, 2);
+    int k=0;
+    for(j=0; j<ygpts; j++)
+    {
+	for(i=0; i<xgpts; i++)
+	{
+	    z[k][0] = z1[i];
+	    z[k][1] = z2[j];
+	    w[k][0] = w1[i];
+	    w[k][1] = w2[j];
+	    k++;
+	}
+    }
+    //------------------------------------------------------------------------//
     
     for(ielem =2; ielem<xelem-2; ielem++)
     {
@@ -143,20 +175,20 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 	{
 	    elemsum = 0.0;
 	    elemsum1 = 0.0;
-	    for(igauss=0; igauss<tgauss; igauss++)
+	    for(igauss=0; igauss<ngauss; igauss++)
 	    {
 		recini = 0.0;
 		rec = 0.0;
-		basis2D(zeta[igauss][0], zeta[igauss][1], basis);
+		basis2D(z[igauss][0], z[igauss][1], basis);
 		for(icoeff=0; icoeff<ncoeff; icoeff++)
 		{
 		    recini += basis[icoeff]*iniphi[ielem][jelem][icoeff];
 		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
 		}
-		detJ = mappingJacobianDeterminant(ielem, jelem, zeta[igauss][0], zeta[igauss][1], x, y, inv, jacobian);
+		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
 		
-		elemsum += pow(recini-rec,2.0)*weights[igauss][0]*weights[igauss][1]*detJ;
-		elemsum1 += pow(recini,2.0)*weights[igauss][0]*weights[igauss][1]*detJ;
+		elemsum += pow(recini-rec,2.0)*w[igauss][0]*w[igauss][1]*detJ;
+		elemsum1 += pow(recini,2.0)*w[igauss][0]*w[igauss][1]*detJ;
 		
 		
 	    }
@@ -173,13 +205,17 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 		  
     (*err) = sqrt((*err));///sqrt(exact);
 
-    (*lerr) = log(*err);
     
 
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 4);
     deallocator1(&jacobian, 4);
-    
+    deallocator1(&z1, xgpts);
+    deallocator1(&w1, xgpts);
+    deallocator1(&z2, ygpts);
+    deallocator1(&w2, ygpts);
+    deallocator2(&z, ngauss, 2);
+    deallocator2(&w, ngauss, 2);
 }
 
 
@@ -206,6 +242,37 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
     allocator1(&jacobian, 4);
 
     double detJ;
+
+    int i,j;
+    
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here independent of what is in the rest of the code
+    double *z1, *w1;
+    double *z2, *w2;
+    allocator1(&z1, xgpts);
+    allocator1(&w1, xgpts);
+    allocator1(&z2, ygpts);
+    allocator1(&w2, ygpts);
+    zwgl(z1, w1, xgpts);
+    zwgl(z2, w2, ygpts);
+
+    int ngauss = xgpts*ygpts*2;
+    double **z, **w;
+    allocator2(&z, ngauss, 2);
+    allocator2(&w, ngauss, 2);
+    int k=0;
+    for(j=0; j<ygpts; j++)
+    {
+	for(i=0; i<xgpts; i++)
+	{
+	    z[k][0] = z1[i];
+	    z[k][1] = z2[j];
+	    w[k][0] = w1[i];
+	    w[k][1] = w2[j];
+	    k++;
+	}
+    }
+    //------------------------------------------------------------------------//
     
     for(ielem =2; ielem<xelem-2; ielem++)
     {
@@ -213,21 +280,21 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 	{
 	    elemsum = 0.0;
 	    elemsum1 = 0.0;
-	    for(igauss=0; igauss<tgauss; igauss++)
+	    for(igauss=0; igauss<ngauss; igauss++)
 	    {
 		recini = 0.0;
 		rec = 0.0;
-		basis2D(zeta[igauss][0], zeta[igauss][1], basis);
+		basis2D(z[igauss][0], z[igauss][1], basis);
 		for(icoeff=0; icoeff<ncoeff; icoeff++)
 		{
 		    recini += basis[icoeff]*iniphi[ielem][jelem][icoeff];
 		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
 		}
-		detJ = mappingJacobianDeterminant(ielem, jelem, zeta[igauss][0], zeta[igauss][1], x, y, inv, jacobian);
+		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
 		//if(recini <= 2.0)
 		//{
-		elemsum += fabs(recini-rec)*weights[igauss][0]*weights[igauss][1]*detJ;
-		elemsum1 += fabs(recini)*weights[igauss][0]*weights[igauss][1]*detJ;
+		elemsum += fabs(recini-rec)*w[igauss][0]*w[igauss][1]*detJ;
+		elemsum1 += fabs(recini)*w[igauss][0]*w[igauss][1]*detJ;
 		    //}
 		
 	    }
@@ -247,6 +314,12 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 4);
     deallocator1(&jacobian, 4);
+    deallocator1(&z1, xgpts);
+    deallocator1(&w1, xgpts);
+    deallocator1(&z2, ygpts);
+    deallocator1(&w2, ygpts);
+    deallocator2(&z, ngauss, 2);
+    deallocator2(&w, ngauss, 2);
 }
 
 

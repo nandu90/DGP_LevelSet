@@ -78,6 +78,15 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
+    if(case_tog == 7)
+    {
+	xlen = 1.0;
+	ylen = 2.0*PI;
+    }
+    //------------------------------------------------------------------------//
+    
+    
+    //------------------------------------------------------------------------//
     //Routine to partition the mesh
     iallocator2(&io_info,nprocs,4);  //needed inside partition. Takes care of output IO
     partition();
@@ -120,16 +129,10 @@ int main(int argc, char **argv)
 
     ncoeff = (int)pow(polyorder+1,2.0); //Number of coefficients = number of basis
     
-    if(quadtype == 1)
-    {
-	xgpts=polyorder+2;
-	ygpts=polyorder+2;
-    }
-    else if(quadtype == 2)
-    {
-	xgpts = polyorder+1;
-	ygpts = polyorder+1;
-    }
+   
+    xgpts = polyorder+1;
+    ygpts = polyorder+1;
+    
     tgauss = xgpts*ygpts;
     
     allocator3(&elem.u,xelem,yelem,ncoeff);
@@ -209,7 +212,9 @@ int main(int argc, char **argv)
     }
     
     //Get the mass matrix
-    massmatrix(x,y,elem.mass); 
+    
+    massmatrix(x,y,elem.mass);
+    
     //------------------------------------------------------------------------//
 
    
@@ -238,6 +243,8 @@ int main(int argc, char **argv)
     
     initialize(elem, x, y);
 
+    
+    
     if(flow_solve == 1)
     {
 	INSinitialize(elem);

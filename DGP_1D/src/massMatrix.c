@@ -30,7 +30,7 @@ void naturalToCartesian(double *xs, double *x, int ielem)
 
 void basisdiff1D(double z, double *b)
 {
-    double barray[4] = {0.0, 1.0, 3.0*z, 0.5*(15.0*z*z - 3.0)};
+    double barray[5] = {0.0, 1.0, 3.0*z, 0.5*(15.0*z*z - 3.0), (1.0/8.0)*(140.0*z*z*z - 60.0*z)};
 
     int i;
 
@@ -43,7 +43,7 @@ void basisdiff1D(double z, double *b)
 void basis1D(double z, double *basis)
 {
     // Upto P = 3 at the moment
-    double barray[4] = {1.0, z, 0.5*(3.0*z*z - 1.0), 0.5*(5*pow(z,3.0)-3.0*z)};
+    double barray[5] = {1.0, z, 0.5*(3.0*z*z - 1.0), 0.5*(5.0*pow(z,3.0)-3.0*z), (1.0/8.0)*(35.0*z*z*z*z - 30.0*z*z + 3.0)};
     
     int i;
 

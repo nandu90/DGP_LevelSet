@@ -52,14 +52,9 @@ void solveSystem(double **vand, double *rhs, double *soln)
 
     //------------------------------------------------------------------------//
     //Solve the system to get the coefficients
-    if(quadtype == 2)
-    {
-	dgesv_(&N, &NRHS, A, &LDA, IPIV, B, &LDB, &INFO);
-    }
-    else if(quadtype == 1)
-    {
-	dgels_(&TRANS,&M,&N,&NRHS,A,&LDA,B,&LDB,WORK,&LWORK,&INFO);
-    }
+ 
+    dgesv_(&N, &NRHS, A, &LDA, IPIV, B, &LDB, &INFO);
+	
 
     //Assign to the soln array
     for(i=0; i<ncoeff; i++)
