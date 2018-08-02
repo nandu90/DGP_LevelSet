@@ -12,7 +12,7 @@ Created: 2018-03-11
 
 void itrdrv(struct elemsclr ,double **, double **, double **, double **, double ** ,double ****);
 
-void solveSystem( double **, double *, double *);
+void solveSystem( double **, double *, double *, int);
 
 void dgesv_ (int *, int *, double *, int *, int *, double *, int *, int *);
 

@@ -107,10 +107,10 @@ struct elemsclr
     double ***phi;
     double ****mass;
     int **iBC;
-    double **p;
+    /*double **p;
     double **rho;
     double **mu;
-    double **phi2;
+    double **phi2;*/
 };
 
 
@@ -118,11 +118,11 @@ struct elemsclr
 
 //------------------------------------------------------------------------//
 //DGP related Variables
-double **zeta;
+/*double **zeta;
 double **weights;
 int tgauss;       //Total Gauss Quadrature points in the element
 int xgpts;        //Number of Gauss points in x
-int ygpts;        //Number of Gauss Points in y
+int ygpts;        //Number of Gauss Points in y*/
 int ncoeff;       //Number of coefficients in the solution expansion
                   //The above is equal to the number of basis functions
 //------------------------------------------------------------------------//

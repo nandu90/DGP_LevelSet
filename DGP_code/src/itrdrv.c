@@ -109,35 +109,11 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
    
 
     //------------------------------------------------------------------------//
-    //Temporary variables for INS
+    //Temporary variables
     double ***rhs;
     allocator3(&rhs, xelem, yelem, ncoeff);
-    
-    double **uedge, **vedge;
-    allocator2(&uedge, xelem, yelem);
-    allocator2(&vedge, xelem, yelem);
-
-    double **ustar, **vstar;
-    allocator2(&ustar, xelem, yelem);
-    allocator2(&vstar, xelem, yelem);
-    
-    double **rhsx, **rhsy;
-    allocator2(&rhsx, xelem, yelem);
-    allocator2(&rhsy, xelem, yelem);
-
-    double **st_forcex, **st_forcey;
-    allocator2(&st_forcex, xelem, yelem);
-    allocator2(&st_forcey, xelem, yelem);
-
-    double uL, uR, vT, vB;
-    
-    double cellSize = max(xlen/gxelem, ylen/gyelem);
-    double *basisL, *basisR;
-    allocator1(&basisL, ncoeff);
-    allocator1(&basisR, ncoeff);
     //------------------------------------------------------------------------//
 
-    double inivf;
 
     
     //Time loop
@@ -154,107 +130,6 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	if(flow_solve == 1)
 	{
 	    if(myrank == master)printf("Solving Flow\n");
-
-	    //------------------------------------------------------------------------//
-	    //Note that the first coefficient gives the velocity at the centroid
-	    //Upwind and assign velocities to uedge, vedge
-	    for(ielem=1; ielem<xelem-1; ielem++)
-	    {
-		for(jelem=1; jelem<yelem-1; jelem++)
-		{
-		    uL = 0.0;
-		    uR = 0.0;
-		    vT = 0.0;
-		    vB = 0.0;
-		    basis2D(1.0,0.0,basisL);
-		    basis2D(-1.0,0.0,basisR);
-		    for(icoeff=0; icoeff<ncoeff; icoeff++)
-		    {
-			uL += elem.u[ielem][jelem][icoeff]*basisL[icoeff];
-			uR += elem.u[ielem+1][jelem][icoeff]*basisR[icoeff];
-		    }
-		    basis2D(0.0,1.0,basisL);
-		    basis2D(0.0,-1.0,basisR);
-		    for(icoeff=0; icoeff<ncoeff; icoeff++)
-		    {
-			vB += elem.v[ielem][jelem][icoeff]*basisL[icoeff];
-			vT += elem.v[ielem][jelem+1][icoeff]*basisR[icoeff];
-			
-		    }
-		    uedge[ielem][jelem] = 0.5*(uL + uR);
-		    vedge[ielem][jelem] = 0.5*(vB + vT);
-
-		}
-	    }
-	    //------------------------------------------------------------------------//
-
-	    //------------------------------------------------------------------------//
-	    //Get  RHS
-	    rhscalc(elem, rhsx, rhsy, area, vol, elem.iBC, uedge, vedge);
-	    //------------------------------------------------------------------------//
-
-	    //------------------------------------------------------------------------//
-	    //Predictor Step
-	    for(ielem=1; ielem<xelem-1; ielem++)
-	    {
-		for(jelem=1; jelem<yelem-1; jelem++)
-		{
-		    ustar[ielem][jelem] = uedge[ielem][jelem] + deltat*rhsx[ielem][jelem];
-		    vstar[ielem][jelem] = vedge[ielem][jelem] + deltat*rhsy[ielem][jelem];
-		}
-	    }
-	    INScommu2(ustar);
-	    INScommu2(vstar);
-	    vel_BC(ustar, vstar, elem.iBC);
-	    //------------------------------------------------------------------------//
-
-	    //------------------------------------------------------------------------//
-	    //Add in contributions from body and surface tension force
-	    surface(elem, st_forcex, st_forcey, area);
-	    body(elem, st_forcex, st_forcey, vol);	    
-	    //------------------------------------------------------------------------//
-
-	    //------------------------------------------------------------------------//
-	    //Solve the pressure Poisson equation
-	    variable_pressure(ustar, vstar, elem.p, deltat, elem.rho, st_forcex, st_forcey, area, vol, elem.iBC);
-	    //------------------------------------------------------------------------//
-
-	    //------------------------------------------------------------------------//
-	    //Projection Step
-	    for(ielem=2; ielem<xelem-2; ielem++)
-	    {
-		for(jelem=2; jelem<yelem-2; jelem++)
-		{
-		    ustar[ielem][jelem] = ustar[ielem][jelem] - deltat*((2.0/(elem.rho[ielem][jelem]+elem.rho[ielem+1][jelem]))*((elem.p[ielem+1][jelem]-elem.p[ielem][jelem])/area[ielem][jelem][1][1] + 0.5*(st_forcex[ielem+1][jelem]+st_forcex[ielem][jelem])));
-                    vstar[ielem][jelem] = vstar[ielem][jelem] - deltat*((2.0/(elem.rho[ielem][jelem]+elem.rho[ielem][jelem+1]))*((elem.p[ielem][jelem+1]-elem.p[ielem][jelem])/area[ielem][jelem][0][0] + 0.5*(st_forcey[ielem][jelem+1]+st_forcey[ielem][jelem])));
-		}
-	    }
-
-	    INScommu2(ustar);
-	    INScommu2(vstar);
-	    vel_BC(ustar, vstar, elem.iBC);
-
-	    //Assign to elem vectors
-	    for(ielem=1; ielem<xelem; ielem++)
-	    {
-		for(jelem=1; jelem<yelem; jelem++)
-		{
-		    uedge[ielem][jelem] = ustar[ielem][jelem];
-		    vedge[ielem][jelem] = vstar[ielem][jelem];
-
-		    elem.u[ielem][jelem][0] = 0.5*(uedge[ielem][jelem] + uedge[ielem-1][jelem]);
-		    elem.v[ielem][jelem][0] = 0.5*(vedge[ielem][jelem] + vedge[ielem][jelem-1]);
-		    for(icoeff=1; icoeff<ncoeff; icoeff++)
-		    {
-			elem.u[ielem][jelem][icoeff] = 0.0;
-			elem.v[ielem][jelem][icoeff] = 0.0;
-		    }
-		}
-	    }
-	    commu2(elem.u);
-	    commu2(elem.v);
-	    //------------------------------------------------------------------------//
-
 	}
 
 	//------------------------------------------------------------------------//
@@ -267,36 +142,6 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	//Redistancing
 	if(flow_solve == 1 && redist_method == 1)
 	{
-	    //Copy the high order LS field onto the lower order one for re-distancing
-	    for(ielem=0; ielem<xelem; ielem++)
-	    {
-		for(jelem=0; jelem<yelem; jelem++)
-		{
-		    if(fabs(elem.phi2[ielem][jelem]) <  10.0*cellSize)
-		    {
-			elem.phi2[ielem][jelem] = elem.phi[ielem][jelem][0];
-		    }
-		}
-	    }
-	    INScommu2(elem.phi2);
-	    hyperbolic(elem, area);
-
-	    for(ielem=0; ielem<xelem; ielem++)
-	    {
-		for(jelem=0; jelem<yelem; jelem++)
-		{
-		    if(fabs(elem.phi2[ielem][jelem]) > 10.0*cellSize)
-		    {
-			elem.phi[ielem][jelem][0] = elem.phi2[ielem][jelem];
-			for(icoeff=1; icoeff<ncoeff; icoeff++)
-			{
-			    elem.phi[ielem][jelem][icoeff] = 0.0;
-			}
-		    }
-		}
-	    }
-
-	    level_setBC(elem.phi, elem.iBC);
 	    
 	}
 	//------------------------------------------------------------------------//
@@ -396,24 +241,8 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     //------------------------------------------------------------------------//
     //Deallocators
     //Time arrays
-    deallocator3(&rhs, xelem, yelem, ncoeff);
-
-    //INS related
-    deallocator2(&uedge, xelem, yelem);
-    deallocator2(&vedge, xelem, yelem);
-    deallocator2(&ustar, xelem, yelem);
-    deallocator2(&vstar, xelem, yelem);
-    deallocator2(&rhsx, xelem, yelem);
-    deallocator2(&rhsy, xelem, yelem);
-    deallocator2(&st_forcex, xelem, yelem);
-    deallocator2(&st_forcey, xelem, yelem);
-    deallocator1(&basisL, ncoeff);
-    deallocator1(&basisR, ncoeff);
-    
-    
-
     deallocator3(&iniphi, xelem, yelem, ncoeff);
-
+    deallocator3(&rhs, xelem, yelem, ncoeff);
     //------------------------------------------------------------------------//
 
     double time2 = MPI_Wtime();

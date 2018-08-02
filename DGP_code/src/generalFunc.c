@@ -97,6 +97,20 @@ void naturalToCartesian(double **xs, double **x, double **y, int i, int j)
 
        
     double N1, N2, N3, N4;
+
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here independent of what is in the rest of the code
+
+    int extra = 0;
+    
+    double **zeta, **weights;
+    int tgauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&zeta, tgauss,2);
+    allocator2(&weights, tgauss,2);
+    
+    GaussPoints2D(zeta, weights, 0, 2, tgauss); 
+    //------------------------------------------------------------------------//
     
     //Populate the coordinate vector
     for(k=0; k<tgauss; k++)
@@ -110,6 +124,12 @@ void naturalToCartesian(double **xs, double **x, double **y, int i, int j)
 	xs[k][0] = N1*xvertex[0] + N2*xvertex[1] + N3*xvertex[2] + N4*xvertex[3];
 	xs[k][1] = N1*yvertex[0] + N2*yvertex[1] + N3*yvertex[2] + N4*yvertex[3];
     }
+
+    //------------------------------------------------------------------------//
+    deallocator2(&zeta, tgauss, 2);
+    deallocator2(&weights, tgauss, 2);
+    //------------------------------------------------------------------------//
+
 }
 
 
@@ -138,35 +158,19 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 
     double detJ;
 
-    int i,j;
-	
+
     //------------------------------------------------------------------------//
     //Define quad points and weights here independent of what is in the rest of the code
-    double *z1, *w1;
-    double *z2, *w2;
-    allocator1(&z1, xgpts);
-    allocator1(&w1, xgpts);
-    allocator1(&z2, ygpts);
-    allocator1(&w2, ygpts);
-    zwgl(z1, w1, xgpts);
-    zwgl(z2, w2, ygpts);
-
-    int ngauss = xgpts*ygpts*2;
+   
+    int extra = 0;
+    
     double **z, **w;
-    allocator2(&z, ngauss, 2);
-    allocator2(&w, ngauss, 2);
-    int k=0;
-    for(j=0; j<ygpts; j++)
-    {
-	for(i=0; i<xgpts; i++)
-	{
-	    z[k][0] = z1[i];
-	    z[k][1] = z2[j];
-	    w[k][0] = w1[i];
-	    w[k][1] = w2[j];
-	    k++;
-	}
-    }
+    int ngauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&z, ngauss,2);
+    allocator2(&w, ngauss,2);
+    
+    GaussPoints2D(z, w, 0, 2, ngauss); 
     //------------------------------------------------------------------------//
     
     for(ielem =2; ielem<xelem-2; ielem++)
@@ -210,10 +214,6 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 4);
     deallocator1(&jacobian, 4);
-    deallocator1(&z1, xgpts);
-    deallocator1(&w1, xgpts);
-    deallocator1(&z2, ygpts);
-    deallocator1(&w2, ygpts);
     deallocator2(&z, ngauss, 2);
     deallocator2(&w, ngauss, 2);
 }
@@ -243,35 +243,19 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 
     double detJ;
 
-    int i,j;
     
     //------------------------------------------------------------------------//
     //Define quad points and weights here independent of what is in the rest of the code
-    double *z1, *w1;
-    double *z2, *w2;
-    allocator1(&z1, xgpts);
-    allocator1(&w1, xgpts);
-    allocator1(&z2, ygpts);
-    allocator1(&w2, ygpts);
-    zwgl(z1, w1, xgpts);
-    zwgl(z2, w2, ygpts);
-
-    int ngauss = xgpts*ygpts*2;
+   
+    int extra = 0;
+    
     double **z, **w;
-    allocator2(&z, ngauss, 2);
-    allocator2(&w, ngauss, 2);
-    int k=0;
-    for(j=0; j<ygpts; j++)
-    {
-	for(i=0; i<xgpts; i++)
-	{
-	    z[k][0] = z1[i];
-	    z[k][1] = z2[j];
-	    w[k][0] = w1[i];
-	    w[k][1] = w2[j];
-	    k++;
-	}
-    }
+    int ngauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&z, ngauss,2);
+    allocator2(&w, ngauss,2);
+    
+    GaussPoints2D(z, w, 0, 2, ngauss);
     //------------------------------------------------------------------------//
     
     for(ielem =2; ielem<xelem-2; ielem++)
@@ -314,16 +298,12 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 4);
     deallocator1(&jacobian, 4);
-    deallocator1(&z1, xgpts);
-    deallocator1(&w1, xgpts);
-    deallocator1(&z2, ygpts);
-    deallocator1(&w2, ygpts);
     deallocator2(&z, ngauss, 2);
     deallocator2(&w, ngauss, 2);
 }
 
 
-void calc_vf(double ***H, double detJ, double *vf)
+/*void calc_vf(double ***H, double detJ, double *vf)
 {
     //------------------------------------------------------------------------//
     //Loop indexes
@@ -356,10 +336,10 @@ void calc_vf(double ***H, double detJ, double *vf)
     {
 	printf("Total area is %.4e\n",totalvf);
     }
-}
+    }*/
 
 
-void errorGaussian(double ***phi, double time, double **x, double **y)
+/*void errorGaussian(double ***phi, double time, double **x, double **y)
 {
     int ielem, jelem, icoeff;
     int igauss;
@@ -443,11 +423,6 @@ void errorGaussian(double ***phi, double time, double **x, double **y)
 		    {
 			exact = rec;
 		    }
-		    /*else if(exact < 0.0)
-		    {
-			printf("%.4e %.4e %.4e %.4e\n",xs[igauss][0],xs[igauss][1], exact,rec);
-			exit(1);
-			}*/
 		}
 		sum1 += fabs(exact - rec);
 		sum2 += pow(exact - rec, 2.0);
@@ -473,4 +448,4 @@ void errorGaussian(double ***phi, double time, double **x, double **y)
     deallocator2(&xs, tgauss, 2);
     
     //if(myrank == master) exit(1);
-}
+    }*/

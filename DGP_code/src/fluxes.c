@@ -12,7 +12,7 @@ Created: 2018-03-28
 #include "polylib.h"
 #include "memory.h"
 
-void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct elemsclr elem)
+void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct elemsclr elem, double *zx, double *wx, int xgpts, double *zy, double *wy, int ygpts)
 {
     //------------------------------------------------------------------------//
     /*This routine will construct the fluxes at the right and top faces.
@@ -28,48 +28,7 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
     int icoeff;
     //------------------------------------------------------------------------//
 
-    //------------------------------------------------------------------------//
-    //Temporary variables
-    double *zx, *zy;
-    double *wx, *wy;
-    allocator1(&zx, xgpts);
-    allocator1(&zy, ygpts);
-    allocator1(&wx, xgpts);
-    allocator1(&wy, ygpts);
-    //Get the quadrature points and weights
-    if(xgpts == 1)
-    {
-	zx[0] = 0.0;
-	wx[0] = 1.0;
-    }
-    else
-    {
-	if(quadtype == 1)
-	{
-	    zwgll(zx,wx,xgpts);
-	}
-	else if(quadtype == 2)
-	{
-	    zwgl(zx,wx,xgpts);
-	}
-    }
-    if(ygpts == 1)
-    {
-	zy[0] = 0.0;
-	wy[0] = 1.0;
-    }
-    else
-    {
-	if(quadtype == 1)
-	{
-	    zwgll(zy,wy,ygpts);
-	}
-	else if(quadtype == 2)
-	{
-	    zwgl(zy,wy,ygpts);
-	}
-    }
-
+    
     double *basisx, *basisy;
     allocator1(&basisx, ncoeff);
     allocator1(&basisy, ncoeff);
@@ -82,10 +41,9 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
     double Tflux, Bflux;
     double Ru, Lu;
     double Tv, Bv;
-    double normz1, normz2;
-    double normalVel;
     //------------------------------------------------------------------------//
 
+    
 
     //------------------------------------------------------------------------//
     //Reconstruct the face normal velocities and the fluxes at the Gauss Quadrature
@@ -100,8 +58,8 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 	    {
 		//Reconstruct the solution at the left side
 		//Get the basis
-		basis2D(1.0, zy[iygauss], basisy);		
-
+		basis2D(1.0, zy[iygauss], basisy);
+		
 		//get the face normal - deprecated
 		//lineNormal(ielem, jelem, x, y, &normz1, &normz2, 1, 1.0 ,zy[iygauss]);
 		
@@ -148,7 +106,7 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		rflux[ielem][jelem][iygauss] = upwind(Lflux, Rflux, Lu, Ru);
 	    }	    
 
-	    
+	   
 	    //Loop over the Gauss Quadrature points on the top face of the cell
 	    for(ixgauss=0; ixgauss<xgpts; ixgauss++)
 	    {
@@ -208,10 +166,6 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 
     //------------------------------------------------------------------------//
     //Deallocators
-    deallocator1(&zx, xgpts);
-    deallocator1(&zy, ygpts);
-    deallocator1(&wx, xgpts);
-    deallocator1(&wy, ygpts);
     deallocator1(&basisx, ncoeff);
     deallocator1(&basisy, ncoeff);
     //------------------------------------------------------------------------//   
@@ -249,7 +203,7 @@ double upwind(double minusFlux, double plusFlux, double minusU, double plusU)
 
 
 
-void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **x, double **y, double ****area)
+void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **x, double **y, double ****area, double *zx, double *wx, int xgpts, double *zy, double *wy, int ygpts)
 {
     //------------------------------------------------------------------------//
     /*
@@ -265,49 +219,7 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //Temporary Variables
     
-    double *zx, *zy;
-    double *wx, *wy;
-    allocator1(&zx, xgpts);
-    allocator1(&zy, ygpts);
-    allocator1(&wx, xgpts);
-    allocator1(&wy, ygpts);
-    //Get the quadrature points and weights
-    if(xgpts == 1)
-    {
-	zx[0] = 0.0;
-	wx[0] = 1.0;
-    }
-    else
-    {
-	if(quadtype == 1)
-	{
-	    zwgll(zx,wx,xgpts);
-	}
-	else if(quadtype == 2)
-	{
-	    zwgl(zx,wx,xgpts);
-	}
-    }
-    if(ygpts == 1)
-    {
-	zy[0] = 0.0;
-	wy[0] = 1.0;
-    }
-    else
-    {
-	if(quadtype == 1)
-	{
-	    zwgll(zy,wy,ygpts);
-	}
-	else if(quadtype == 2)
-	{
-	    zwgl(zy,wy,ygpts);
-	}
-    }
-
-
     /*printf("%d %d\n", xgpts, ygpts);
     printf("%.4e %.4e %.4e\n",zx[0], zx[1], zx[2]);
     printf("%.4e %.4e %.4e\n\n",wx[0], wx[1], wx[2]);
@@ -478,10 +390,6 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
     
     //------------------------------------------------------------------------//
     //Deallocators
-    deallocator1(&zx, xgpts);
-    deallocator1(&zy, ygpts);
-    deallocator1(&wx, xgpts);
-    deallocator1(&wy, ygpts);
     deallocator1(&basisx, ncoeff);
     deallocator1(&basisy, ncoeff);
     deallocator1(&rightInt, ncoeff);

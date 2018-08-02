@@ -37,6 +37,7 @@ double xlen;
 
 int tgauss;
 int ncoeff;
+int case_tog;
 
 double xb_in;
 

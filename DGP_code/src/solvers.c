@@ -10,7 +10,7 @@ Created: 2018-03-11
 #include "common.h"
 #include "memory.h"
 
-void solveSystem(double **vand, double *rhs, double *soln)
+void solveSystem(double **vand, double *rhs, double *soln, int tgauss)
 {
     int i,j,k;
     //------------------------------------------------------------------------//
@@ -46,9 +46,6 @@ void solveSystem(double **vand, double *rhs, double *soln)
     int LDB = M;
     int INFO;
 
-    int LWORK = -1;
-    double WORK[1];
-    char TRANS = 'N';
 
     //------------------------------------------------------------------------//
     //Solve the system to get the coefficients

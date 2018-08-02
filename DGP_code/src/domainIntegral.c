@@ -49,7 +49,17 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
     double detJ;
     //------------------------------------------------------------------------//
 
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here 
+    int extra  = 0;
+    double **zeta, **weights;
+    int tgauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&zeta, tgauss,2);
+    allocator2(&weights, tgauss,2);
     
+    GaussPoints2D(zeta, weights, 0, 2, tgauss); 
+    //------------------------------------------------------------------------//
    
     //------------------------------------------------------------------------//
     //Loop over the elements
@@ -168,6 +178,8 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
     deallocator1(&basis, ncoeff);
     deallocator1(&inv, 4);
     deallocator1(&jacobian, 4);
+    deallocator2(&zeta, tgauss, 2);
+    deallocator2(&weights, tgauss, 2);
     //------------------------------------------------------------------------//
 
 }

@@ -19,14 +19,24 @@ int main(int argc, char **argv)
     
     //------------------------------------------------------------------------//
     //INput Section
-    polyorder = 4;
-    xelem = 100;
-    deltat = 0.001;
-    
-    xlen = 2*PI;
-    xb_in = 75.0;
     int maxiter = 1000;
     int print_gap = 10;
+    case_tog = 2;        //1-Sine; 2-Gaussian
+
+    polyorder = 2;
+    xelem = 50;
+    deltat = 0.001;
+
+    if(case_tog == 1)
+    {
+	xlen = 2*PI;
+	xb_in = 75.0;
+    }
+    else if(case_tog == 2)
+    {
+	xlen = 1.0;
+	xb_in = 0.5;
+    }
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//

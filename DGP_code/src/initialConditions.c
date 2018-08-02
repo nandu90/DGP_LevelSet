@@ -150,6 +150,18 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
     int i,j,k,l;
 
     int ielem, jelem, icoeff;
+
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here 
+    int extra = 0; 
+    double **zeta, **weights;
+    int tgauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&zeta, tgauss,2);
+    allocator2(&weights, tgauss,2);
+    
+    GaussPoints2D(zeta, weights, 0, 2, tgauss); 
+    //------------------------------------------------------------------------//
     
     //Allocate solution vector - known soln at Gauss quadrature points
     double *us, *vs;
@@ -247,8 +259,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 	    }
 	    
 	    //Solve the system to get the coefficients
-	    solveSystem(vand, us, elem.u[i][j]);
-	    solveSystem(vand, vs, elem.v[i][j]);
+	    solveSystem(vand, us, elem.u[i][j], tgauss);
+	    solveSystem(vand, vs, elem.v[i][j], tgauss);
 	}
     }
 
@@ -267,6 +279,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
     }	    
     //------------------------------------------------------------------------//
     //Deallocators
+    deallocator2(&zeta, tgauss, 2);
+    deallocator2(&weights, tgauss, 2);
     deallocator1(&us, tgauss);
     deallocator1(&vs, tgauss);
     deallocator1(&basis, ncoeff);
@@ -282,6 +296,18 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 {
     int i,j,k,l;
 
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here 
+    int extra = 0;
+    double **zeta, **weights;
+    int tgauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&zeta, tgauss,2);
+    allocator2(&weights, tgauss,2);
+    
+    GaussPoints2D(zeta, weights, 0, 2, tgauss); 
+    //------------------------------------------------------------------------//
+    
     //Allocate solution vector - known soln at Gauss quadrature points
     double *ls;
     allocator1(&ls, tgauss);
@@ -314,8 +340,6 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     //------------------------------------------------------------------------//
     double line = 2.5*2.0*rb_in;
     double temp;
-    double sigmax;
-    double sigmay;
     double term1;
     double term2; 
     //------------------------------------------------------------------------//
@@ -338,13 +362,10 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		//Unique initial conditions for different cases
 		//Gaussian Wave
 		if(case_tog == 1)
-		{
-		    	sigmax = 0.05;
-			sigmay = 0.05;
-			term1 = 500.0*pow((xs[k][0] - xb_in),2.0);
-			term2 = 500.0*pow((xs[k][1] - yb_in),2.0);
-			ls[k] = exp(-(term1 + term2));// + term2));
-			//exit(1);
+		{		    	
+			term1 = 200.0*pow((xs[k][0] - xb_in),2.0);
+			term2 = 200.0*pow((xs[k][1] - yb_in),2.0);
+			ls[k] = exp(-(term1 + term2));
 		}
 		else if(case_tog == 2 || case_tog == 4)
 		{
@@ -356,11 +377,10 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		}
 		else if(case_tog == 5)
 		{
-		    sigmax = 10.0;
-		    sigmay = 10.0;
-		    term1 = 100.0*pow((xs[k][0] - xb_in),2.0);
-		    term2 = 100.0*pow((xs[k][1] - yb_in),2.0);
-		    ls[k] = exp(-(term1));// + term2));
+		    
+		    term1 = 200.0*pow((xs[k][0] - xb_in),2.0);
+		    term2 = 200.0*pow((xs[k][1] - yb_in),2.0);
+		    ls[k] = exp(-(term1 + term2));
 		    /*double xmin = 100.0;
 		    double xmax = 120.0;
 		    double ymin = 15.0;
@@ -405,7 +425,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 
 	    
 	    //Solve the system to get the coefficients
-	    solveSystem(vand, ls, elem.phi[i][j]);
+	    solveSystem(vand, ls, elem.phi[i][j], tgauss);
 	    //exit(1);
 	    /*//------------------------------------------------------------------------//
 	    //Reconstruct the solution - check
@@ -435,6 +455,8 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     deallocator2(&vand,tgauss, ncoeff);
     deallocator2(&xs,tgauss,2);
     deallocator1(&ls,tgauss);
+    deallocator2(&zeta, tgauss, 2);
+    deallocator2(&weights, tgauss, 2);
 }
 
 void initialize(struct elemsclr elem, double **x, double **y)

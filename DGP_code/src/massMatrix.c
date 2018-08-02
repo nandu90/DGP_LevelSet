@@ -267,36 +267,23 @@ void massmatrix(double **x, double **y, double ****mass)
     allocator1(&jacobian, 4);
     allocator1(&inv, 4);
 
-    int i,j;
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Define quad points and weights here independent of what is in the rest of the code
-    double *z1, *w1;
-    double *z2, *w2;
-    allocator1(&z1, xgpts);
-    allocator1(&w1, xgpts);
-    allocator1(&z2, ygpts);
-    allocator1(&w2, ygpts);
-    zwgl(z1, w1, xgpts);
-    zwgl(z2, w2, ygpts);
 
-    int ngauss = xgpts*ygpts;
+    int extra = 0;
+    
     double **z, **w;
-    allocator2(&z, ngauss, 2);
-    allocator2(&w, ngauss, 2);
-    int k=0;
-    for(j=0; j<ygpts; j++)
-    {
-	for(i=0; i<xgpts; i++)
-	{
-	    z[k][0] = z1[i];
-	    z[k][1] = z2[j];
-	    w[k][0] = w1[i];
-	    w[k][1] = w2[j];
-	    k++;
-	}
-    }
+    int ngauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&z, ngauss,2);
+    allocator2(&w, ngauss,2);
+    
+    GaussPoints2D(z, w, 0, 2, ngauss);
+    
+    
+	
     //------------------------------------------------------------------------//
 
     
@@ -321,9 +308,9 @@ void massmatrix(double **x, double **y, double ****mass)
 		    }
 		}		
 	    }
+	    
 	}
     }
-
     //------------------------------------------------------------------------//
     //Check
     /*int i,j;
@@ -358,10 +345,6 @@ void massmatrix(double **x, double **y, double ****mass)
     deallocator1(&inv, 4);
     deallocator1(&jacobian, 4);
 
-    deallocator1(&z1, xgpts);
-    deallocator1(&w1, xgpts);
-    deallocator1(&z2, ygpts);
-    deallocator1(&w2, ygpts);
     deallocator2(&z, ngauss, 2);
     deallocator2(&w, ngauss, 2);
     //------------------------------------------------------------------------//

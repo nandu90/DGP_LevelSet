@@ -1,6 +1,92 @@
 #include "common.h"
 #include "DGPFunc.h"
 #include "memory.h"
+#include "polylib.h"
+
+void GaussPoints1D(double *zeta, double *weights, int extra, int quadtype, int total)
+{
+    
+    if(quadtype == 1) //Gauss-Legendre-Lobatto - Deprecated
+    {
+	zwgll(zeta,weights,total);
+    }
+    else if(quadtype == 2) //Gauss-Legendre
+    {
+        if(total == 1)
+	{
+	    zeta[0] = 0.0;
+	    weights[0] = 1.0;
+	}
+	else
+	{
+	    zwgl(zeta,weights,total);
+	}
+
+    }
+}
+
+void GaussPoints2D(double **zeta, double **weights, int extra, int quadtype, int tg)
+{
+    int i,j,k;
+
+    
+    //------------------------------------------------------------------------//
+    int xg = sqrt(tg);
+    int yg = sqrt(tg);
+    
+    double *zeta1, *zeta2;
+    double *weight1, *weight2;
+    allocator1(&zeta1, xg);
+    allocator1(&zeta2, yg);
+    allocator1(&weight1, xg);
+    allocator1(&weight2, yg);
+    if(quadtype == 1) //Gauss-Legendre-Lobatto - Deprecated
+    {
+	zwgll(zeta1,weight1,xg);
+	zwgll(zeta2,weight2,yg);
+    }
+    else if(quadtype == 2) //Gauss-Legendre
+    {
+        if(xg == 1)
+	{
+	    zeta1[0] = 0.0;
+	    weight1[0] = 1.0;
+	}
+	else
+	{
+	    zwgl(zeta1,weight1,xg);
+	}
+	if(yg == 1)
+	{
+	    zeta2[0] = 0.0;
+	    weight2[0] = 1.0;
+	}
+	else
+	{
+	    zwgl(zeta2,weight2,yg);
+	}
+    }
+
+
+    
+    //Arrange quadrature points in a easy to access array
+    
+    k=0;
+    for(j=0; j<yg; j++)
+    {
+	for(i=0; i<xg; i++)
+	{
+	    zeta[k][0] = zeta1[i];
+	    zeta[k][1] = zeta2[j];
+	    weights[k][0] = weight1[i];
+	    weights[k][1] = weight2[j];
+	    k++;
+	}
+    }
+
+    
+}
+
 
 void basisDiff2D(double zdiff, double z, double *basis, int order)
 {
@@ -70,6 +156,7 @@ void basis2D(double z1, double z2, double *basis)
     basis1D(z2, B2);
 
     //Now get the outer product of above two vectors to get the 2D basis
+    
     k=0;
     for(i=0; i<polyorder+1; i++)
     {
@@ -84,7 +171,7 @@ void basis2D(double z1, double z2, double *basis)
 }
 
 
-void mappingFunc(double *scalar, double sc_vertex[])
+void mappingFunc(double *scalar, double sc_vertex[], int tgauss, double **zeta, double **weights)
 {
     int i;
 
