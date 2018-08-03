@@ -22,7 +22,15 @@ void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs, double 
     //Get the fluxes on the right and top face of each element
     double *zx, *wx;
     double *zy, *wy;
-    int extra = 0;
+    int extra;
+    if(quadtype == 1)
+    {
+	extra = 1;
+    }
+    else
+    {
+	extra = 0;
+    }
     int tx = polyorder + 1 + extra;
     int ty = polyorder + 1 + extra;
 
@@ -31,8 +39,8 @@ void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs, double 
     allocator1(&wx, tx);
     allocator1(&wy, ty);
 
-    GaussPoints1D(zx, wx, 0, 2, tx);
-    GaussPoints1D(zy, wy, 0, 2, ty);
+    GaussPoints1D(zx, wx, quadtype, tx);
+    GaussPoints1D(zy, wy, quadtype, ty);
 
     double ***rflux, ***tflux;
     allocator3(&rflux, xelem, yelem, ty);

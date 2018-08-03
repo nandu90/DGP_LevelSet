@@ -10,26 +10,25 @@ Created: 2018-03-11
 #include "common.h"
 #include "memory.h"
 
-void solveSystem(double **vand, double *rhs, double *soln, int tgauss)
+void solveSystem(double **vand, double *rhs, double *soln, int M, int N)
 {
     int i,j,k;
     //------------------------------------------------------------------------//
     //Set up variables for LAPACK
     double *A;
-    allocator1(&A, tgauss*ncoeff);
+    allocator1(&A, M*N);
 
     k=0;
-    for(i=0; i<ncoeff; i++)
+    for(i=0; i<N; i++)
     {
-	for(j=0; j<tgauss; j++)
+	for(j=0; j<M; j++)
 	{
 	    A[k] = vand[j][i];  //Be carefule over here. Store Column-wise for correct result
 	    k++;
 	}
     }
 
-    int M = tgauss; //Rows of matrix
-    int N = ncoeff;        //Columns of matrix
+    
     int NRHS = 1;
     int LDA = M;
     int *IPIV;
@@ -38,7 +37,7 @@ void solveSystem(double **vand, double *rhs, double *soln, int tgauss)
     double *B;
     allocator1(&B, M);
 
-    for(i=0; i<tgauss; i++)
+    for(i=0; i<M; i++)
     {
 	B[i] = rhs[i];
     }
@@ -54,7 +53,7 @@ void solveSystem(double **vand, double *rhs, double *soln, int tgauss)
 	
 
     //Assign to the soln array
-    for(i=0; i<ncoeff; i++)
+    for(i=0; i<M; i++)
     {
 	soln[i] = B[i];
     }
@@ -86,7 +85,7 @@ void solveSystem(double **vand, double *rhs, double *soln, int tgauss)
     
 
 
-    deallocator1(&A, ncoeff*tgauss);
+    deallocator1(&A, M*N);
     ideallocator1(&IPIV, M);
     deallocator1(&B, M);
 }

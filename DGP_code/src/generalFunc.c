@@ -77,7 +77,7 @@ char* concat(char s1[], char s2[])
 }
 
 
-void naturalToCartesian(double **xs, double **x, double **y, int i, int j)
+void naturalToCartesian(double **xs, double **x, double **y, int i, int j, double **zeta, int tgauss)
 {
     int k;
     double xvertex[4];
@@ -98,19 +98,6 @@ void naturalToCartesian(double **xs, double **x, double **y, int i, int j)
        
     double N1, N2, N3, N4;
 
-    //------------------------------------------------------------------------//
-    //Define quad points and weights here independent of what is in the rest of the code
-
-    int extra = 0;
-    
-    double **zeta, **weights;
-    int tgauss = pow(polyorder + 1 + extra, 2);
-
-    allocator2(&zeta, tgauss,2);
-    allocator2(&weights, tgauss,2);
-    
-    GaussPoints2D(zeta, weights, 0, 2, tgauss); 
-    //------------------------------------------------------------------------//
     
     //Populate the coordinate vector
     for(k=0; k<tgauss; k++)
@@ -125,10 +112,6 @@ void naturalToCartesian(double **xs, double **x, double **y, int i, int j)
 	xs[k][1] = N1*yvertex[0] + N2*yvertex[1] + N3*yvertex[2] + N4*yvertex[3];
     }
 
-    //------------------------------------------------------------------------//
-    deallocator2(&zeta, tgauss, 2);
-    deallocator2(&weights, tgauss, 2);
-    //------------------------------------------------------------------------//
 
 }
 
@@ -158,11 +141,12 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 
     double detJ;
 
+   
 
     //------------------------------------------------------------------------//
     //Define quad points and weights here independent of what is in the rest of the code
    
-    int extra = 0;
+    int extra = 4;
     
     double **z, **w;
     int ngauss = pow(polyorder + 1 + extra, 2);
@@ -170,7 +154,10 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
     allocator2(&z, ngauss,2);
     allocator2(&w, ngauss,2);
     
-    GaussPoints2D(z, w, 0, 2, ngauss); 
+    GaussPoints2D(z, w, quadtype, ngauss);
+
+    double **xs;
+    allocator2(&xs, ngauss, 2);
     //------------------------------------------------------------------------//
     
     for(ielem =2; ielem<xelem-2; ielem++)
@@ -179,6 +166,9 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 	{
 	    elemsum = 0.0;
 	    elemsum1 = 0.0;
+	    
+	    naturalToCartesian(xs, x, y, ielem, jelem, z, ngauss);
+	    
 	    for(igauss=0; igauss<ngauss; igauss++)
 	    {
 		recini = 0.0;
@@ -190,10 +180,39 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
 		}
 		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
-		
-		elemsum += pow(recini-rec,2.0)*w[igauss][0]*w[igauss][1]*detJ;
-		elemsum1 += pow(recini,2.0)*w[igauss][0]*w[igauss][1]*detJ;
-		
+		if(case_tog == 3)
+		{
+		    if((xs[igauss][0] >= 0.3) && (xs[igauss][0] <= 0.4) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
+		    {
+			elemsum += pow(recini-rec,2.0)*w[igauss][0]*w[igauss][1]*detJ;
+			elemsum1 += pow(recini,2.0)*w[igauss][0]*w[igauss][1]*detJ;
+		    }
+		    else
+		    {
+			elemsum = 0.0;
+			elemsum1 = 0.0;
+			break;
+		    }
+		}
+		else if(case_tog == 6)
+		{
+		    if((xs[igauss][0] >= 0.3) && (xs[igauss][0] <= 0.7) && (xs[igauss][1] >= 0.5) && (xs[igauss][1] <= 0.7))
+		    {
+			elemsum += pow(recini-rec,2.0)*w[igauss][0]*w[igauss][1]*detJ;
+			elemsum1 += pow(recini,2.0)*w[igauss][0]*w[igauss][1]*detJ;
+		    }
+		    else
+		    {
+			elemsum = 0.0;
+			elemsum1 = 0.0;
+			break;
+		    }
+		}
+		else
+		{
+		    elemsum += pow(recini-rec,2.0)*w[igauss][0]*w[igauss][1]*detJ;
+		    elemsum1 += pow(recini,2.0)*w[igauss][0]*w[igauss][1]*detJ;
+		}
 		
 	    }
 	    sum += elemsum;
@@ -216,6 +235,7 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
     deallocator1(&jacobian, 4);
     deallocator2(&z, ngauss, 2);
     deallocator2(&w, ngauss, 2);
+    deallocator2(&xs, ngauss, 2);
 }
 
 
@@ -243,11 +263,12 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 
     double detJ;
 
+   
     
     //------------------------------------------------------------------------//
     //Define quad points and weights here independent of what is in the rest of the code
    
-    int extra = 0;
+    int extra = 4;
     
     double **z, **w;
     int ngauss = pow(polyorder + 1 + extra, 2);
@@ -255,7 +276,10 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
     allocator2(&z, ngauss,2);
     allocator2(&w, ngauss,2);
     
-    GaussPoints2D(z, w, 0, 2, ngauss);
+    GaussPoints2D(z, w, quadtype, ngauss);
+
+    double **xs;
+    allocator2(&xs, ngauss, 2);
     //------------------------------------------------------------------------//
     
     for(ielem =2; ielem<xelem-2; ielem++)
@@ -264,6 +288,9 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 	{
 	    elemsum = 0.0;
 	    elemsum1 = 0.0;
+	    
+	    naturalToCartesian(xs, x, y, ielem, jelem, z, ngauss);
+	    
 	    for(igauss=0; igauss<ngauss; igauss++)
 	    {
 		recini = 0.0;
@@ -275,11 +302,39 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 		    rec += basis[icoeff]*phi[ielem][jelem][icoeff];
 		}
 		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
-		//if(recini <= 2.0)
-		//{
-		elemsum += fabs(recini-rec)*w[igauss][0]*w[igauss][1]*detJ;
-		elemsum1 += fabs(recini)*w[igauss][0]*w[igauss][1]*detJ;
-		    //}
+		if(case_tog == 3)
+		{
+		    if((xs[igauss][0] >= 0.3) && (xs[igauss][0] <= 0.4) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
+		    {
+			elemsum += fabs(recini-rec)*w[igauss][0]*w[igauss][1]*detJ;
+			elemsum1 += fabs(recini)*w[igauss][0]*w[igauss][1]*detJ;
+		    }
+		    else
+		    {
+			elemsum = 0.0;
+			elemsum1 = 0.0;
+			break;
+		    }
+		}
+		else if(case_tog == 6)
+		{
+		    if((xs[igauss][0] >= 0.3) && (xs[igauss][0] <= 0.7) && (xs[igauss][1] >= 0.5) && (xs[igauss][1] <= 0.7))
+		    {
+			elemsum += fabs(recini-rec)*w[igauss][0]*w[igauss][1]*detJ;
+			elemsum1 += fabs(recini)*w[igauss][0]*w[igauss][1]*detJ;
+		    }
+		    else
+		    {
+			elemsum = 0.0;
+			elemsum1 = 0.0;
+			break;
+		    }
+		}
+		else
+		{
+		    elemsum += fabs(recini-rec)*w[igauss][0]*w[igauss][1]*detJ;
+		    elemsum1 += fabs(recini)*w[igauss][0]*w[igauss][1]*detJ;
+		}
 		
 	    }
 	    sum += elemsum;
@@ -300,6 +355,7 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
     deallocator1(&jacobian, 4);
     deallocator2(&z, ngauss, 2);
     deallocator2(&w, ngauss, 2);
+    deallocator2(&xs, ngauss, 2);
 }
 
 

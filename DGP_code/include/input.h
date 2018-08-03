@@ -24,7 +24,7 @@ double ylen;
 // DGP related
 int polyorder;
 int quadtype;
-
+int basistype;
 
 //------------------------------------------------------------------------//
 

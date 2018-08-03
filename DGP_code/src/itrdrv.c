@@ -56,7 +56,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	deltat = advect_deltat;
 	if(case_tog == 6 || case_tog == 3)
 	{
-	    deltat = 2.0*PI*25.0/(PI*25.0/314.0);
+	    deltat = 2.0*PI*0.25/(PI*0.25/3.14);
 	    deltat = deltat * advect_deltat;
 	}
 	if(case_tog == 7)

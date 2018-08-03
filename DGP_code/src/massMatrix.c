@@ -272,7 +272,16 @@ void massmatrix(double **x, double **y, double ****mass)
     //------------------------------------------------------------------------//
     //Define quad points and weights here independent of what is in the rest of the code
 
-    int extra = 0;
+    int extra;
+
+    if(quadtype == 1)
+    {
+	extra = 1;
+    }
+    else
+    {
+	extra = 0;
+    }
     
     double **z, **w;
     int ngauss = pow(polyorder + 1 + extra, 2);
@@ -280,7 +289,7 @@ void massmatrix(double **x, double **y, double ****mass)
     allocator2(&z, ngauss,2);
     allocator2(&w, ngauss,2);
     
-    GaussPoints2D(z, w, 0, 2, ngauss);
+    GaussPoints2D(z, w, quadtype, ngauss);
     
     
 	

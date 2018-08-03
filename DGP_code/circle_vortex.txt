@@ -3,30 +3,26 @@ Basis_Order 1
 
 /******************Grid related Inputs*******************//
 
-xlen 1.0
-ylen 0.5
-xelem 20
-yelem 10
-Read_mesh 0
+xlen 1
+ylen 1
+xelem 40
+yelem 40
+Read_mesh 1
 
 /***************Gauss Quadrature********************/
-Gauss_Quadrature_Type Gauss-Lobatto-Legendre
-//Gauss_Quadrature_Type Gauss-Legendre
-
-/**************Basis Type*********************/
-//Basis Legendre
-Basis Lagrange
+//Gauss_Quadrature_Type Gauss-Lobatto-Legendre - DO NOT USE
+Gauss_Quadrature_Type Gauss-Legendre
 
 /***************Initial Conditions******************/
 Bubble_radius 10
 x_pos_of_bubble 0.5
-y_pos_of_bubble 0.25
+y_pos_of_bubble 0.75
 
 
 /****************Boundary Conditions**************/
-//x-boundary no-slip
+x-boundary no-slip
 //x-boundary slip
-x-boundary periodic
+//x-boundary periodic
 
 y-boundary no-slip
 //y-boundary slip
@@ -43,16 +39,17 @@ RK_Stages 4
 /***************Simulation Control**************/
 Start_step 0
 Max_Iterations 1000
-print_gap 100
+print_gap 10
 
 /***************Particular CASES***************/
-Case Gaussian_Wave
+//Case Gaussian_Wave
 //Case Circle
 //Case zalesak
 //Case bubble_break
 //Case Gaussian_Step
-//Case Circle_vortex
-//Case SineWave
+Case Circle_vortex
+
+Epsilon 2.0
 
 /*****************************************For INS*********************/
 /******************Multiphase Parameters*****************//
@@ -60,12 +57,12 @@ Liquid_density 1000.0    //958.349
 Gas_density 500.0
 Liquid_viscosity 1.0    //281.742e-6
 Gas_viscosity 0.5
-Epsilon 1.2
+
 Surface_tension_coefficient 1.0
 
 /***************INS Solver Control*******************/
 Solve_flow 0
-Surface_tension 0
+Surface_tension 1
 
 /******Buoyancy Force Accelerations******/
 /**Give sign according to gravity direction**/

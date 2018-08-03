@@ -102,10 +102,14 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		//Rflux = recphi*normalVel;// - deprecated
 		//Ru = normalVel;// - deprecated
 
-
 		rflux[ielem][jelem][iygauss] = upwind(Lflux, Rflux, Lu, Ru);
-	    }	    
 
+		printf("%d %d %.4f %.4f %.4f %.4f %.4f\n",ielem,jelem,Lflux,Lu,Rflux,Ru,rflux[ielem][jelem][iygauss]);
+		
+		//printf("%d %d %.4f %.4f %.4f\n",ielem,jelem,-1.0,zy[iygauss],rflux[ielem][jelem][iygauss]);
+		//exit(1);
+	    }	    
+	    printf("\n");
 	   
 	    //Loop over the Gauss Quadrature points on the top face of the cell
 	    for(ixgauss=0; ixgauss<xgpts; ixgauss++)
@@ -161,6 +165,8 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 	    //exit(1);
 	}
     }
+
+    exit(1);
     //------------------------------------------------------------------------//
 
 
@@ -365,14 +371,14 @@ void boundaryIntegral(double ***rhs, double ***rflux, double ***tflux, double **
 	    printf("%d %d ", ielem, jelem);
 	    for(iygauss=0; iygauss<ygpts; iygauss++)
 	    {
-		//if((integral[ielem][jelem][icoeff]) < 0.0)exit(1);
 		printf("%.4f %.4f %.4f ", rflux[ielem][jelem][iygauss], rflux[ielem-1][jelem][iygauss], rflux[ielem][jelem][iygauss]- rflux[ielem-1][jelem][iygauss]);
 	    }
 	    printf("\n");
 	}
     }
+    exit(1);*/
 
-    for(ielem = 2; ielem<xelem-2; ielem++)
+    /*for(ielem = 2; ielem<xelem-2; ielem++)
     {
 	for(jelem =2; jelem<yelem-2; jelem++)
 	{

@@ -119,6 +119,7 @@ int main(int argc, char **argv)
     {
 	gridread(x,y,area,vol,xc,yc);
     }
+    epsilon *= min(fabs(x[3][2] - x[2][2]), fabs(y[2][3] - y[2][2]));
     //------------------------------------------------------------------------//
 
       

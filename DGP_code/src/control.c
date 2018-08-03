@@ -92,6 +92,18 @@ void control()
 			quadtype=2;
 		    }
 		}
+		if(strcmp(word,"Basis") == 0)
+		{
+		    word = strtok(NULL, delim);
+		    if(strcmp(word,"Legendre\n") == 0)
+		    {
+			basistype=1;
+		    }
+		    else if(strcmp(word,"Lagrange\n") == 0)
+		    {
+			basistype=2;
+		    }
+		}
 		if(strcmp(word,"print_gap") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -307,6 +319,7 @@ void control()
   MPI_Bcast(&yb_in,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
 
   MPI_Bcast(&quadtype,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&basistype,1,MPI_INT,master,MPI_COMM_WORLD);
 
   MPI_Bcast(&x_bound,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&y_bound,1,MPI_INT,master,MPI_COMM_WORLD);

@@ -20,14 +20,18 @@ void euler(double ***scalar, double ****mass, double ***rhs, double deltat)
     int ielem, jelem;
     int icoeff;
     //------------------------------------------------------------------------//
+
+    double *inc;
+    allocator1(&inc, ncoeff);
     
     for(ielem = 1; ielem < xelem-1; ielem++)
     {
 	for(jelem = 1; jelem < yelem-1; jelem++)
 	{
+	    solveSystem(mass[ielem][jelem], rhs[ielem][jelem], inc, ncoeff, ncoeff);
 	    for(icoeff=0; icoeff < ncoeff; icoeff++)
 	    {
-		scalar[ielem][jelem][icoeff] += deltat*rhs[ielem][jelem][icoeff]/mass[ielem][jelem][icoeff][icoeff];
+		scalar[ielem][jelem][icoeff] += deltat*inc[icoeff];//rhs[ielem][jelem][icoeff]/mass[ielem][jelem][icoeff][icoeff];
 	    }
 	}
     }
@@ -45,9 +49,10 @@ void eulerIncrement(double ***inc, double ****mass, double ***rhs, double deltat
     {
 	for(jelem = 1; jelem<yelem-1; jelem++)
 	{
+	    solveSystem(mass[ielem][jelem], rhs[ielem][jelem], inc[ielem][jelem], ncoeff, ncoeff);
 	    for(icoeff = 0; icoeff< ncoeff; icoeff++)
 	    {
-		inc[ielem][jelem][icoeff] = deltat*rhs[ielem][jelem][icoeff]/mass[ielem][jelem][icoeff][icoeff];
+		inc[ielem][jelem][icoeff] *= deltat;//*rhs[ielem][jelem][icoeff]/mass[ielem][jelem][icoeff][icoeff];
 	    }
 	}
     }

@@ -1,11 +1,11 @@
-xlen = 100;
-ylen = 100;
+xlen = 1.0;
+ylen = 0.5;
 
-xelem = 50;
-yelem = 50;
+xelem = 80;
+yelem = 10;
 
 xangle = 5 * pi/180;
-yangle = 85 * pi/180;
+yangle = 95 * pi/180;
 
 edge1 = (xlen/xelem)/cos(xangle)
 edge2 = (ylen/yelem)/cos(pi/2 - yangle)

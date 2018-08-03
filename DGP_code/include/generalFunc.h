@@ -10,7 +10,7 @@ double max(double, double);
 
 double min(double, double);
 
-void naturalToCartesian(double **, double **, double **, int, int);
+void naturalToCartesian(double **, double **, double **, int, int, double **, int);
 
 void errorNormL2(double ***, double ***, double *, double *, double **, double **);
 

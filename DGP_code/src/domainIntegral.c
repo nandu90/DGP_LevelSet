@@ -51,14 +51,22 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
 
     //------------------------------------------------------------------------//
     //Define quad points and weights here 
-    int extra  = 0;
+    int extra;
+    if(quadtype == 1)
+    {
+	extra = 1;
+    }
+    else
+    {
+	extra = 0;
+    }
     double **zeta, **weights;
     int tgauss = pow(polyorder + 1 + extra, 2);
 
     allocator2(&zeta, tgauss,2);
     allocator2(&weights, tgauss,2);
     
-    GaussPoints2D(zeta, weights, 0, 2, tgauss); 
+    GaussPoints2D(zeta, weights, quadtype, tgauss); 
     //------------------------------------------------------------------------//
    
     //------------------------------------------------------------------------//
@@ -89,12 +97,12 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
 		    
 		    //check
 		    /*printf("The natural coordinates are: %.4f %.4f %d\n",zeta[igauss][0],zeta[igauss][1], ncoeff);
-		      for(icoeff1= 0; icoeff1 < ncoeff; icoeff1++)
-		      {
+		    for(icoeff1= 0; icoeff1 < ncoeff; icoeff1++)
+		    {
 			printf("%.4f %.4f\n",dBdz1[icoeff1], dBdz2[icoeff1]);
-		      }
-		      printf("\n");*/
-		     
+		    }
+		    printf("\n");
+		    exit(1);*/
 		    //------------------------------------------------------------------------//
 		    
 		    //------------------------------------------------------------------------//
@@ -124,7 +132,7 @@ void domainIntegral(double **x , double **y, struct elemsclr elem, double ***rhs
 		    gradBz1 = dBdz1[icoeff] * inv[0] + dBdz1[icoeff] * inv[1];
 		    gradBz2 = dBdz2[icoeff] * inv[2] + dBdz2[icoeff] * inv[3];
 
-		    rhs[ielem][jelem][icoeff] +=weights[igauss][0]*weights[igauss][1]*recphi*(gradBz1*recu + gradBz2*recv)*detJ;
+		    rhs[ielem][jelem][icoeff] += weights[igauss][0]*weights[igauss][1]*recphi*(gradBz1*recu + gradBz2*recv)*detJ;
 		    
 		    //------------------------------------------------------------------------//
 		    //exit(1);

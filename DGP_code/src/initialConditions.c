@@ -20,10 +20,10 @@ double zalesak(double x, double y)
     int k;
     
     double a,b,c,d;
-    a=(0.5-0.03)*100.0;
-    b=(0.5+0.03)*100.0;
-    c=(0.75-0.15)*100.0;
-    d=(0.75+0.15-0.06)*100.0;
+    a=(0.5-0.03)*1.0;
+    b=(0.5+0.03)*1.0;
+    c=(0.75-0.15)*1.0;
+    d=(0.75+0.15-0.06)*1.0;
     if(x-a == 0.0 || x-b == 0.0 || y-c == 0.0 || y-d == 0.0)
     {
 	phi =0.0;
@@ -120,7 +120,7 @@ double zalesak(double x, double y)
     }
 
     phi = -phi;
-    double cir = sqrt(pow(x-50.0,2.0) + pow(y-75.0,2.0)) - 15.0;
+    double cir = sqrt(pow(x-0.5,2.0) + pow(y-0.75,2.0)) - 0.15;
     if(phi < 0.0)
     {
 	phi = max(cir,phi);
@@ -160,7 +160,7 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
     allocator2(&zeta, tgauss,2);
     allocator2(&weights, tgauss,2);
     
-    GaussPoints2D(zeta, weights, 0, 2, tgauss); 
+    GaussPoints2D(zeta, weights, quadtype, tgauss); 
     //------------------------------------------------------------------------//
     
     //Allocate solution vector - known soln at Gauss quadrature points
@@ -205,7 +205,7 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
         {
 	    
 	    //Convert natural coordinates at quadrature points to Cartesian
-	    naturalToCartesian(xs, x, y, i, j);
+	    naturalToCartesian(xs, x, y, i, j, zeta, tgauss);
 	    
 	    //Get the vel values at the Cartesian Quadrature points
 	    for(k=0; k<tgauss; k++)
@@ -217,8 +217,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		}
 		else if(case_tog == 3 || case_tog == 6)
 		{
-		    uxy =  PI*(50.0 - xs[k][1])/314.0;
-		    vxy =  PI*(xs[k][0] - 50.0)/314.0;		    
+		    uxy =  PI*(0.5 - xs[k][1])/3.14;
+		    vxy =  PI*(xs[k][0] - 0.5)/3.14;		    
 		}
 		else if(case_tog == 7)
 		{
@@ -259,8 +259,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 	    }
 	    
 	    //Solve the system to get the coefficients
-	    solveSystem(vand, us, elem.u[i][j], tgauss);
-	    solveSystem(vand, vs, elem.v[i][j], tgauss);
+	    solveSystem(vand, us, elem.u[i][j], tgauss, ncoeff);
+	    solveSystem(vand, vs, elem.v[i][j], tgauss, ncoeff);
 	}
     }
 
@@ -305,7 +305,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     allocator2(&zeta, tgauss,2);
     allocator2(&weights, tgauss,2);
     
-    GaussPoints2D(zeta, weights, 0, 2, tgauss); 
+    GaussPoints2D(zeta, weights, quadtype, tgauss); 
     //------------------------------------------------------------------------//
     
     //Allocate solution vector - known soln at Gauss quadrature points
@@ -351,7 +351,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
         for (j=0; j<yelem; j++)
         {
 	    //Convert natural coordinates at quadrature points to Cartesian
-	    naturalToCartesian(xs, x, y, i, j);
+	    naturalToCartesian(xs, x, y, i, j, zeta, tgauss);
 
 	    
 	    
@@ -398,8 +398,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		else if(case_tog == 6)
 		{
 		    //ls[k] = 1.0;
-		    ls[k] = sqrt(pow(xs[k][0]-50.0,2.0) + pow(xs[k][1]-75.0,2.0)) - 15.0;
-		    //ls[k] = sqrt(pow(xs[k][0]-50.0,2.0) + pow(xs[k][1]-50.0,2.0)) - 15.0;
+		    ls[k] = sqrt(pow(xs[k][0]-xb_in,2.0) + pow(xs[k][1]-yb_in,2.0)) - 0.15;
 		}
 		else if(case_tog == 7)
 		{
@@ -425,7 +424,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 
 	    
 	    //Solve the system to get the coefficients
-	    solveSystem(vand, ls, elem.phi[i][j], tgauss);
+	    solveSystem(vand, ls, elem.phi[i][j], tgauss, ncoeff);
 	    //exit(1);
 	    /*//------------------------------------------------------------------------//
 	    //Reconstruct the solution - check

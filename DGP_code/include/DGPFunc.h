@@ -19,8 +19,8 @@ double lineJacobian(int, int, double, double **, double **, int);
 
 void lineNormal(int , int , double **, double **, double *, double *, int , double , double );
 
-void GaussPoints1D(double *, double *, int, int, int);
+void GaussPoints1D(double *, double *, int, int);
 
-void GaussPoints2D(double **, double **, int, int, int);
+void GaussPoints2D(double **, double **, int, int);
 
 #endif

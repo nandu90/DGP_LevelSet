@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "polylib.h"
 
-void GaussPoints1D(double *zeta, double *weights, int extra, int quadtype, int total)
+void GaussPoints1D(double *zeta, double *weights, int quadtype, int total)
 {
     
     if(quadtype == 1) //Gauss-Legendre-Lobatto - Deprecated
@@ -25,7 +25,7 @@ void GaussPoints1D(double *zeta, double *weights, int extra, int quadtype, int t
     }
 }
 
-void GaussPoints2D(double **zeta, double **weights, int extra, int quadtype, int tg)
+void GaussPoints2D(double **zeta, double **weights, int quadtype, int tg)
 {
     int i,j,k;
 
@@ -122,26 +122,75 @@ void basisDiff2D(double zdiff, double z, double *basis, int order)
 
 void basisdiff1D(double z, double *b)
 {
+    //------------------------------------------------------------------------//
+    //Legendre Polynomials
+    //Upto p=3 at the moment
     double barray[4] = {0.0, 1.0, 3.0*z, 0.5*(15.0*z*z - 3.0)};
-
     int i;
-
-    for(i=0; i<polyorder+1; i++)
+    if(basistype == 1)
     {
-	b[i] = barray[i];
+	for(i=0; i<polyorder+1; i++)
+	{
+	    b[i] = barray[i];
+	}
+    }
+    //------------------------------------------------------------------------//
+    //------------------------------------------------------------------------//
+    //Lagrange polynomials
+    else if(basistype == 2)
+    {
+	if(polyorder == 1)
+	{
+	    b[0] = -0.5;
+	    b[1] = 0.5;
+	}
+	else if(polyorder == 2)
+	{
+	    b[0] = 0.5*(2.0*z - 1.0);
+	    b[1] = -2.0*z;
+	    b[2] = 0.5*(2.0*z + 1.0);
+	}
     }
 }
 void basis1D(double z, double *basis)
 {
+    
+
+    //------------------------------------------------------------------------//
+    //Legendre Polynomials
     // Upto P = 3 at the moment
     double barray[4] = {1.0, z, 0.5*(3.0*z*z - 1.0), 0.5*(5*pow(z,3.0)-3.0*z)};
-    
     int i;
-
-    for(i=0; i<polyorder+1; i++)
+    if(basistype == 1)
     {
-	basis[i] = barray[i];
+        for(i=0; i<polyorder+1; i++)
+	{
+	    basis[i] = barray[i];
+	}
     }
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Lagrange Polynomials
+    // Upto p=2 at the moment
+    else if(basistype == 2)
+    {
+	if(polyorder == 1)
+	{
+	    basis[0] = 0.5*(1.0-z);
+	    basis[1] = 0.5*(1.0+z);
+	}
+	else if(polyorder == 2)
+	{
+	    basis[0] = z*(z-1.0)/2.0;
+	    basis[1] = (1.0-z)*(1.0+z);
+	    basis[2] = z*(z+1.0)/2.0;
+	}
+    }
+    //------------------------------------------------------------------------//
+
+
+    
 }
 
 void basis2D(double z1, double z2, double *basis)
