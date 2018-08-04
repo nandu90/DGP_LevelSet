@@ -119,7 +119,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     //Time loop
     for(iter = startstep; iter < itermax; iter++)
     {
-	time += deltat;
+	
 	
 	if(myrank == master)
 	{
@@ -209,7 +209,11 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	    errorGaussian(elem.phi, time, x, y);
 	    }*/
 	//------------------------------------------------------------------------//
-
+	time += deltat;
+	if(time >= totaltime)
+	{
+	    break;
+	}
 	if(myrank == master)printf("\n\n");
     }
     

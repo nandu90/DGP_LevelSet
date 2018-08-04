@@ -226,10 +226,11 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		    uxy = 0.0;
 		    vxy = 1.0;
 		}
-		else
+		else if(case_tog == 8)
 		{
-		    us[k] = 1.0;
-		    vs[k] = 0.0;
+		    uxy = -sin(2.0*PI*xs[k][1])*pow(sin(PI*xs[k][0]),2.0);
+		    vxy = sin(2.0*PI*xs[k][0])*pow(sin(PI*xs[k][1]),2.0);
+		    //printf("%d %d %d %.4f %.4f\n",i,j,k,us[k],vs[k]);
 		}
 	    
 		//------------------------------------------------------------------------//
@@ -392,6 +393,10 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		else if(case_tog == 7)
 		{
 		    ls[k] = sin(xs[k][1]);
+		}
+		else if(case_tog == 8)
+		{
+		    ls[k] = sqrt(pow(xs[k][0]-xb_in,2.0) + pow(xs[k][1]-yb_in,2.0)) - 0.15;
 		}
 		else
 		{

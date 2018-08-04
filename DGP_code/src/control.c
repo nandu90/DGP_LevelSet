@@ -262,6 +262,11 @@ void control()
 		    word = strtok(NULL,delim);
 		    startstep= atoi(word);
 		}
+		if(strcmp(word,"Simulation_time") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    totaltime = atof(word);
+		}
 		if(strcmp(word,"Case") == 0)
 		{
 		    word = strtok(NULL, delim);
@@ -292,6 +297,10 @@ void control()
 		    else if(strcmp(word,"SineWave\n") == 0)
 		    {
 			case_tog=7;
+		    }
+		    else if(strcmp(word,"Non_constant_vortex\n") == 0)
+		    {
+			case_tog=8;
 		    }
 		}
 		
@@ -330,6 +339,7 @@ void control()
 
   MPI_Bcast(&startstep,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&itermax,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&totaltime,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
 
   MPI_Bcast(&print_gap,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&RKstages,1,MPI_INT,master,MPI_COMM_WORLD);
