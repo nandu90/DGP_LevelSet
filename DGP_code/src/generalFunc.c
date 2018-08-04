@@ -182,7 +182,7 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
 		if(case_tog == 3)
 		{
-		    if((xs[igauss][0] >= 0.3) && (xs[igauss][0] <= 0.4) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
+		    if((xs[igauss][0] >= 0.2) && (xs[igauss][0] <= 0.3) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
 		    {
 			elemsum += pow(recini-rec,2.0)*w[igauss][0]*w[igauss][1]*detJ;
 			elemsum1 += pow(recini,2.0)*w[igauss][0]*w[igauss][1]*detJ;
@@ -304,7 +304,7 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
 		if(case_tog == 3)
 		{
-		    if((xs[igauss][0] >= 0.3) && (xs[igauss][0] <= 0.4) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
+		    if((xs[igauss][0] >= 0.2) && (xs[igauss][0] <= 0.3) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
 		    {
 			elemsum += fabs(recini-rec)*w[igauss][0]*w[igauss][1]*detJ;
 			elemsum1 += fabs(recini)*w[igauss][0]*w[igauss][1]*detJ;

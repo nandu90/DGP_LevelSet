@@ -71,6 +71,7 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		    recphi += basisy[icoeff]*elem.phi[ielem][jelem][icoeff];
 		    recu += basisy[icoeff]*elem.u[ielem][jelem][icoeff];
 		    recv += basisy[icoeff]*elem.v[ielem][jelem][icoeff];
+		    //printf("%.4f %.4f %.4f %.4f\n",elem.phi[ielem][jelem][icoeff],elem.u[ielem][jelem][icoeff],basisy[icoeff],zy[iygauss]);
 		}
 				
 		//normalVel = recu*normz1 + recv*normz2;// - deprecated
@@ -78,7 +79,9 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 		Lu = recu;
 		//Lflux = recphi*normalVel;// - deprecated
 		//Lu = normalVel;// - deprecated
-
+		//printf("%d %d %.4f %.4f\n",ielem,jelem,recphi,recu);
+		
+		
 		//Reconstruct the solution at the right side
 		//Get the basis
 		basis2D(-1.0, zy[iygauss], basisy);		
@@ -104,12 +107,12 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 
 		rflux[ielem][jelem][iygauss] = upwind(Lflux, Rflux, Lu, Ru);
 
-		printf("%d %d %.4f %.4f %.4f %.4f %.4f\n",ielem,jelem,Lflux,Lu,Rflux,Ru,rflux[ielem][jelem][iygauss]);
+		//printf("%d %d %.4f %.4f %.4f %.4f %.4f\n",ielem,jelem,Lflux,Lu,Rflux,Ru,rflux[ielem][jelem][iygauss]);
 		
 		//printf("%d %d %.4f %.4f %.4f\n",ielem,jelem,-1.0,zy[iygauss],rflux[ielem][jelem][iygauss]);
 		//exit(1);
 	    }	    
-	    printf("\n");
+	    //printf("\n");
 	   
 	    //Loop over the Gauss Quadrature points on the top face of the cell
 	    for(ixgauss=0; ixgauss<xgpts; ixgauss++)
@@ -166,7 +169,6 @@ void fluxes(double ***rflux, double ***tflux, double **x, double **y,  struct el
 	}
     }
 
-    exit(1);
     //------------------------------------------------------------------------//
 
 

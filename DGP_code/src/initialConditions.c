@@ -149,11 +149,12 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 {
     int i,j,k,l;
 
-    int ielem, jelem, icoeff;
+    //int ielem, jelem, icoeff;
 
     //------------------------------------------------------------------------//
     //Define quad points and weights here 
-    int extra = 0; 
+    int extra = 0;
+    
     double **zeta, **weights;
     int tgauss = pow(polyorder + 1 + extra, 2);
 
@@ -227,7 +228,7 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		}
 		else
 		{
-		    us[k] = 0.0;
+		    us[k] = 1.0;
 		    vs[k] = 0.0;
 		}
 	    
@@ -264,19 +265,7 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 	}
     }
 
-    //------------------------------------------------------------------------//
-    //For now we consider velocities to be of finite volume nature. Cancel out the gradients
-    for(ielem=0; ielem<xelem; ielem++)
-    {
-	for(jelem=0; jelem<yelem; jelem++)
-	{
-	    for(icoeff=1; icoeff<ncoeff; icoeff++)
-	    {
-		elem.u[ielem][jelem][icoeff] = 0.0;
-		elem.v[ielem][jelem][icoeff] = 0.0;
-	    }
-	}
-    }	    
+    
     //------------------------------------------------------------------------//
     //Deallocators
     deallocator2(&zeta, tgauss, 2);

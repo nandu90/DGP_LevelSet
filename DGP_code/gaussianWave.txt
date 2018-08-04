@@ -1,11 +1,11 @@
 /******************Basis Functions*****************/
-Basis_Order 1
+Basis_Order 2
 
 /******************Grid related Inputs*******************//
 
 xlen 1.0
 ylen 0.5
-xelem 80
+xelem 75
 yelem 10
 Read_mesh 0
 
@@ -14,8 +14,8 @@ Gauss_Quadrature_Type Gauss-Lobatto-Legendre
 //Gauss_Quadrature_Type Gauss-Legendre
 
 /**************Basis Type*********************/
-Basis Legendre
-//Basis Lagrange
+//Basis Legendre
+Basis Lagrange
 
 /***************Initial Conditions******************/
 Bubble_radius 10
