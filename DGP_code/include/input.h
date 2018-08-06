@@ -59,6 +59,7 @@ double totaltime;
 int startstep;
 int itermax;
 int print_gap;
+int print_restart_gap;
 //------------------------------------------------------------------------//
 
 

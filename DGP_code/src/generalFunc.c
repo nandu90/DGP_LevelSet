@@ -359,40 +359,85 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 }
 
 
-/*void calc_vf(double ***H, double detJ, double *vf)
+void calc_vf(double ***phi, double **x, double **y)
 {
     //------------------------------------------------------------------------//
     //Loop indexes
     int ielem, jelem;
     int igauss;
+    int icoeff;
     //------------------------------------------------------------------------//
-    *vf = 0.0;
-    double sum = 0.0;
+
+    double *basis;
+    allocator1(&basis, ncoeff);
     
-    for(ielem =2; ielem<xelem-2; ielem++)
+    double *inv,  *jacobian;
+    allocator1(&inv, 4);
+    allocator1(&jacobian, 4);
+
+    double detJ;
+    
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here independent of what is in the rest of the code
+
+    int extra = 4;
+        
+    double **z, **w;
+    int ngauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&z, ngauss,2);
+    allocator2(&w, ngauss,2);
+    
+    GaussPoints2D(z, w, quadtype, ngauss);
+    
+    
+	
+    //------------------------------------------------------------------------//
+    
+    double vf;
+    double totalvf;
+    double recphi;
+
+    vf = 0.0;
+    
+    for(ielem = 2; ielem<xelem-2; ielem++)
     {
-	for(jelem=2; jelem<yelem-2; jelem++)
+	for(jelem = 2; jelem<yelem-2; jelem++)
 	{
-	    sum = 0.0;
-	    for(igauss=0; igauss<tgauss; igauss++)
+	    for(igauss=0; igauss<ngauss; igauss++)
 	    {
-		sum += weights[igauss][0]*weights[igauss][1]*(1.0-H[ielem][jelem][igauss]);
+		basis2D(z[igauss][0], z[igauss][1], basis);
+
+		recphi = 0.0;
+		for(icoeff=0; icoeff<ncoeff; icoeff++)
+		{
+		    recphi += phi[ielem][jelem][icoeff]*basis[icoeff];
+		}
+		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
+		//Interchange sign and normalize
+		recphi = -recphi/fabs(recphi);
+
+		vf += w[igauss][0]*w[igauss][1]*max(0.0,recphi)*detJ;
 	    }
-	    *vf += (sum) * detJ;
 	}
     }
 
-    double totalvf;
+    MPI_Allreduce(&vf, &totalvf, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    MPI_Allreduce(vf, &totalvf, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-
-    *vf = totalvf;
-    
     if(myrank == master)
     {
-	printf("Total area is %.4e\n",totalvf);
+	printf("The internal volume is %.6e\n",totalvf);
     }
-    }*/
+    //------------------------------------------------------------------------//
+    //Deallocators
+    deallocator1(&basis, ncoeff);
+    deallocator1(&inv, 4);
+    deallocator1(&jacobian, 4);
+    deallocator2(&z, ngauss, 2);
+    deallocator2(&w, ngauss, 2);
+    //------------------------------------------------------------------------//
+
+}
 
 
 /*void errorGaussian(double ***phi, double time, double **x, double **y)

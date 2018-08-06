@@ -14,16 +14,15 @@ Gauss_Quadrature_Type Gauss-Lobatto-Legendre
 //Gauss_Quadrature_Type Gauss-Legendre
 
 /**************Basis Type*********************/
-Basis Legendre
-//Basis Lagrange
+//Basis Legendre
+Basis Lagrange
 
 /***************Initial Conditions******************/
-Bubble_radius 10
+Bubble_radius 15
 x_pos_of_bubble 0.5
 y_pos_of_bubble 0.75
 
-
-/****************Boundary Conditions**************/
+/****************Boundary Conditions*****************/
 x-boundary no-slip
 //x-boundary slip
 //x-boundary periodic
@@ -37,14 +36,16 @@ y-boundary no-slip
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.0025            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
+advect_deltat 0.001            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
 RK_Stages 4
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 10000
+Max_Iterations 0
 print_gap 10
-Simulation_time 6.0
+print_restart_gap 500
+
+Simulation_time 7.0
 
 /***************Particular CASES***************/
 //Case Gaussian_Wave

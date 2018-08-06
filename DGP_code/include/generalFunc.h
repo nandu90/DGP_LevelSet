@@ -16,7 +16,7 @@ void errorNormL2(double ***, double ***, double *, double *, double **, double *
 
 void errorNormL1(double ***, double ***, double *, double *, double **, double **);
 
-void calc_vf(double ***, double, double *);
+void calc_vf(double ***, double **, double **);
 
 void errorGaussian(double ***, double, double **, double **);
 

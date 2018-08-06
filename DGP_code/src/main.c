@@ -66,17 +66,16 @@ int main(int argc, char **argv)
 	path = concat(getexepath(),"/laststep");
 	mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	free(path);
+
+	char* dirpath;
+	dirpath = concat(getexepath(), "/laststep/");
+	mkdir(dirpath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	free(dirpath);
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    
 
-    char* dirpath;
-    dirpath = concat(getexepath(), "/laststep/");
-    char buf_dir[12];
-    snprintf(buf_dir,12,"%d",myrank);
-    dirpath = concat(dirpath,buf_dir);
-    mkdir(dirpath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    free(dirpath);
+    
     //------------------------------------------------------------------------//
   
     //------------------------------------------------------------------------//

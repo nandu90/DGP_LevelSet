@@ -228,8 +228,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		}
 		else if(case_tog == 8)
 		{
-		    uxy = -sin(2.0*PI*xs[k][1])*pow(sin(PI*xs[k][0]),2.0);
-		    vxy = sin(2.0*PI*xs[k][0])*pow(sin(PI*xs[k][1]),2.0);
+		    uxy = sin(2.0*PI*xs[k][1])*pow(sin(PI*xs[k][0]),2.0);
+		    vxy = -sin(2.0*PI*xs[k][0])*pow(sin(PI*xs[k][1]),2.0);
 		    //printf("%d %d %d %.4f %.4f\n",i,j,k,us[k],vs[k]);
 		}
 	    

@@ -109,6 +109,11 @@ void control()
 		    word = strtok(NULL,delim);
 		    print_gap = atoi(word);
 		}
+		if(strcmp(word,"print_restart_gap") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    print_restart_gap = atoi(word);
+		}
 		if(strcmp(word,"RK_Stages") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -342,6 +347,7 @@ void control()
   MPI_Bcast(&totaltime,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
 
   MPI_Bcast(&print_gap,1,MPI_INT,master,MPI_COMM_WORLD);
+  MPI_Bcast(&print_restart_gap,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&RKstages,1,MPI_INT,master,MPI_COMM_WORLD);
 
   MPI_Bcast(&case_tog,1,MPI_INT,master,MPI_COMM_WORLD);

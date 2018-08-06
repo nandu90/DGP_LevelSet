@@ -45,7 +45,11 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	}
     }
 
-    
+    if(myrank == master)
+    {
+	printf("The initial internal volume is:\n");
+    }
+    calc_vf(iniphi, x, y);
     
     //------------------------------------------------------------------------//
     //Preliminaries before time loop
@@ -76,6 +80,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 
     int iter = startstep;
     int print_count = 1;
+    int print_restart_count = 1;
 
     FILE *out;
     if(myrank == master)
@@ -105,7 +110,10 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     {
 	output_xml(elem,startstep,x,y);
     }
-
+    if(startstep != 0)
+    {
+	prevfileread(elem, &time, x, y);
+    }
    
 
     //------------------------------------------------------------------------//
@@ -115,7 +123,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     //------------------------------------------------------------------------//
 
 
-    
+    itermax += startstep;
     //Time loop
     for(iter = startstep; iter < itermax; iter++)
     {
@@ -146,12 +154,21 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	}
 	//------------------------------------------------------------------------//
 
-	
-	
+	//------------------------------------------------------------------------//
+	calc_vf(elem.phi, x, y);
+	//------------------------------------------------------------------------//
+
+	time += deltat;
+	if(time >= totaltime)
+	{
+	    break;
+	}
+	if(myrank == master)printf("\n\n");
 
 	//------------------------------------------------------------------------//
 	//Print out the paraview output
 	print_count++;
+	print_restart_count++;
         if(print_count == 1)
         {
             output_xml(elem,iter+1,x,y);
@@ -160,64 +177,21 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
         {
             print_count = 0;
         }
-	//------------------------------------------------------------------------//
-
-
-	//------------------------------------------------------------------------//
-	//Mass Conservation monitoring
-	/*if(case_tog == 3 || case_tog == 4)
+	if(print_restart_count == 1)
 	{
-	    double ***H;
-	    allocator3(&H, xelem, yelem, tgauss);
-
-	    double vf;
-	    
-	    double eps=1.0*max(xlen/(gxelem), ylen/(gyelem));
-	    
-	    heavy_funcDG(H, elem.phi, eps);
-
-	    //double **inv;
-	    //allocator2(&inv, 2, 2);
-	    
-	    //double jacobian = mappingJacobianDeterminant(2, 2, 0.0, 0.0, x, y, inv);
-	    
-	    //printf("Jacobian is %.4e and area is %.4e\n", jacobian, area[2][2][0][0]*area[2][2][1][1]);
-
-	    calc_vf(H, jacobian, &vf);
-
-	    if(iter == 0)
-	    {
-		inivf = vf;
-	    }
-	    
-	    if(myrank == master)
-	    {
-		printf("Void fraction evolution is %.4e\n",vf/inivf);
-		fprintf(vfout,"%d %.4e %.4e\n",iter, time, vf/inivf);
-	    }
-	    
-	    //exit(1);
-	    //deallocator2(&inv, 2, 2);
-	    deallocator3(&H, xelem, yelem, tgauss);
-	}*/
-	//------------------------------------------------------------------------//
-
-	//------------------------------------------------------------------------//
-	//Active error norm calc
-	/*if(case_tog == 1 || case_tog == 6)
-	{
-	    errorGaussian(elem.phi, time, x, y);
-	    }*/
-	//------------------------------------------------------------------------//
-	time += deltat;
-	if(time >= totaltime)
-	{
-	    break;
+	    filewrite(elem, time, iter+1);
 	}
-	if(myrank == master)printf("\n\n");
+	if(print_restart_count == print_restart_gap)
+	{
+	    print_restart_count = 0;
+	}
+	//------------------------------------------------------------------------//
     }
     
-    
+    //------------------------------------------------------------------------//
+    //Write the last output file
+    output_xml(elem, iter, x, y);
+    filewrite(elem, time, iter);
     //------------------------------------------------------------------------//
     
     //------------------------------------------------------------------------//

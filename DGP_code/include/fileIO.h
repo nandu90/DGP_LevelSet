@@ -8,5 +8,9 @@ void control();
 
 void output_xml(struct elemsclr, int, double **, double **);
 
+void prevfileread(struct elemsclr, double *, double **, double **);
+
+void filewrite(struct elemsclr, double, int);
+
 #endif
 
