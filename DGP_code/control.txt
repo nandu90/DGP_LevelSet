@@ -18,7 +18,7 @@ Gauss_Quadrature_Type Gauss-Lobatto-Legendre
 Basis Lagrange
 
 /***************Initial Conditions******************/
-Bubble_radius 15
+Bubble_radius 0.15
 x_pos_of_bubble 0.5
 y_pos_of_bubble 0.75
 

@@ -388,7 +388,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		else if(case_tog == 6)
 		{
 		    //ls[k] = 1.0;
-		    ls[k] = sqrt(pow(xs[k][0]-xb_in,2.0) + pow(xs[k][1]-yb_in,2.0)) - 0.15;
+		    ls[k] = sqrt(pow(xs[k][0]-xb_in,2.0) + pow(xs[k][1]-yb_in,2.0)) - rb_in;
 		}
 		else if(case_tog == 7)
 		{
@@ -396,7 +396,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		}
 		else if(case_tog == 8)
 		{
-		    ls[k] = sqrt(pow(xs[k][0]-xb_in,2.0) + pow(xs[k][1]-yb_in,2.0)) - 0.15;
+		    ls[k] = sqrt(pow(xs[k][0]-xb_in,2.0) + pow(xs[k][1]-yb_in,2.0)) - rb_in;
 		}
 		else
 		{
