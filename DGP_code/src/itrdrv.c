@@ -49,7 +49,10 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     {
 	printf("The initial internal volume is:\n");
     }
-    calc_vf(iniphi, x, y);
+
+    double inivf = 0.0;
+
+    calc_vf(iniphi, x, y, &inivf);
     
     //------------------------------------------------------------------------//
     //Preliminaries before time loop
@@ -155,7 +158,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	//------------------------------------------------------------------------//
 
 	//------------------------------------------------------------------------//
-	calc_vf(elem.phi, x, y);
+	calc_vf(elem.phi, x, y, &inivf);
 	//------------------------------------------------------------------------//
 
 	time += deltat;

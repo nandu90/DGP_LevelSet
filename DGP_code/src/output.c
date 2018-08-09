@@ -145,11 +145,13 @@ void output_xml(struct elemsclr elem, int iter , double **x, double **y)
     fprintf(out,"<CellData></CellData>\n");
     fprintf(out,"<Points>\n");
     fprintf(out,"<DataArray NumberOfComponents=\"3\" format=\"ascii\" type =\"Float32\" Name=\"mesh\">\n");
+
+    double zlen = x[2][2] - x[1][2];
     for(j=2; j<ynode-2; j++)
     {
 	for(i=2; i<xnode-2; i++)
 	{
-	    fprintf(out,"%.6f %.6f 0.0\n",x[i][j],y[i][j]);
+	    fprintf(out,"%.6f %.6f %.6f\n",x[i][j],y[i][j],zlen);
 	}
     }
     fprintf(out,"</DataArray>");

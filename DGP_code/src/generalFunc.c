@@ -182,7 +182,7 @@ void errorNormL2(double ***iniphi, double ***phi, double *err, double *lerr, dou
 		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
 		if(case_tog == 3)
 		{
-		    if((xs[igauss][0] >= 0.2) && (xs[igauss][0] <= 0.3) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
+		    if((xs[igauss][0] >= 0.3) && (xs[igauss][0] <= 0.4) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
 		    {
 			elemsum += pow(recini-rec,2.0)*w[igauss][0]*w[igauss][1]*detJ;
 			elemsum1 += pow(recini,2.0)*w[igauss][0]*w[igauss][1]*detJ;
@@ -304,7 +304,7 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
 		if(case_tog == 3)
 		{
-		    if((xs[igauss][0] >= 0.2) && (xs[igauss][0] <= 0.3) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
+		    if((xs[igauss][0] >= 0.3) && (xs[igauss][0] <= 0.4) && (xs[igauss][1] >= 0.6) && (xs[igauss][1] <= 0.9))
 		    {
 			elemsum += fabs(recini-rec)*w[igauss][0]*w[igauss][1]*detJ;
 			elemsum1 += fabs(recini)*w[igauss][0]*w[igauss][1]*detJ;
@@ -359,7 +359,7 @@ void errorNormL1(double ***iniphi, double ***phi, double *err, double *lerr, dou
 }
 
 
-void calc_vf(double ***phi, double **x, double **y)
+void calc_vf(double ***phi, double **x, double **y, double *inivf)
 {
     //------------------------------------------------------------------------//
     //Loop indexes
@@ -415,8 +415,10 @@ void calc_vf(double ***phi, double **x, double **y)
 		}
 		detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
 		//Interchange sign and normalize
-		recphi = -recphi/fabs(recphi);
-
+		if(recphi != 0.0)
+		{
+		    recphi = -recphi/fabs(recphi);
+		}
 		vf += w[igauss][0]*w[igauss][1]*max(0.0,recphi)*detJ;
 	    }
 	}
@@ -424,9 +426,13 @@ void calc_vf(double ***phi, double **x, double **y)
 
     MPI_Allreduce(&vf, &totalvf, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
+    if((*inivf) == 0.0)
+    {
+	(*inivf) = totalvf;
+    }
     if(myrank == master)
     {
-	printf("The internal volume is %.6e\n",totalvf);
+	printf("The internal volume is %.6e and error is %.6e\n",totalvf, fabs(totalvf - (*inivf)));
     }
     //------------------------------------------------------------------------//
     //Deallocators

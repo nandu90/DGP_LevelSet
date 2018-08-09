@@ -24,6 +24,7 @@ void level_setBC(double ***, int **);
 //------------------------------------------------------------------------//
 //Special Cases
 double zalesak(double, double);
+double zalesak2(double, double);
 void GaussianStep(double, double, double*);
 //------------------------------------------------------------------------//
 

@@ -20,10 +20,10 @@ double zalesak(double x, double y)
     int k;
     
     double a,b,c,d;
-    a=(0.5-0.03)*1.0;
-    b=(0.5+0.03)*1.0;
-    c=(0.75-0.15)*1.0;
-    d=(0.75+0.15-0.06)*1.0;
+    a=0.475;
+    b=0.525;
+    c=0.6;
+    d=0.85;
     if(x-a == 0.0 || x-b == 0.0 || y-c == 0.0 || y-d == 0.0)
     {
 	phi =0.0;
@@ -128,6 +128,29 @@ double zalesak(double x, double y)
     return phi;
 }
 
+double zalesak2(double x, double y)
+{
+    double r = sqrt(pow(x-0.5,2.0) + pow(y-0.75,2.0)) - 0.15;
+
+    double phi;
+    
+    if(r >= 0.0)
+    {
+	phi = 1.0;
+    }
+    else
+    {
+	phi = 3.0;
+    }
+
+    //Add the notch
+    if(x >= 0.475 && x <= 0.525 && y >= 0.6 && y <= 0.85)
+    {
+	phi = 1.0;
+    }
+    
+    return phi;
+}
 
 void GaussianStep(double x, double y, double *ls)
 {
@@ -363,7 +386,8 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		}
 		else if(case_tog == 3)
 		{
-		    ls[k] = zalesak(xs[k][0], xs[k][1]);
+		    //ls[k] = zalesak(xs[k][0], xs[k][1]);
+		    ls[k] = zalesak2(xs[k][0], xs[k][1]);
 		}
 		else if(case_tog == 5)
 		{
