@@ -21,10 +21,10 @@ int main(int argc, char **argv)
     //INput Section
     int maxiter = 1000;
     int print_gap = 10;
-    case_tog = 2;        //1-Sine; 2-Gaussian
+    case_tog = 1;        //1-Sine; 2-Gaussian
 
-    polyorder = 2;
-    xelem = 50;
+    polyorder = 3;
+    xelem = 100;
     deltat = 0.001;
 
     if(case_tog == 1)
@@ -37,6 +37,8 @@ int main(int argc, char **argv)
 	xlen = 1.0;
 	xb_in = 0.5;
     }
+
+    limiter = 0;
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//

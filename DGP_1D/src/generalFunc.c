@@ -10,6 +10,29 @@ Created: 2018-07-24
 #include "functions.h"
 #include "polylib.h"
 
+double minmod(double a, double b, double c)
+{
+    double result;
+    
+    if(a*b > 0.0 && b*c > 0.0)
+    {
+	if(a == 0.0)
+	{
+	    result = 0.0;
+	}
+	else
+	{
+	    result = (a/fabs(a))*min(fabs(a),min(fabs(b),fabs(c)));
+	}
+    }
+    else
+    {
+	result = 0.0;
+    }
+
+    return result;
+}
+
 double max(double a, double b)
 {
   if(a > b)

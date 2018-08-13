@@ -50,6 +50,8 @@ struct elemsclr
 
 double *zeta;
 double *weights;
+
+int limiter;
 //------------------------------------------------------------------------//
 
 #endif

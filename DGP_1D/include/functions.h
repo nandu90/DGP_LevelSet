@@ -60,4 +60,10 @@ void errorNormL1(double **, double **, double *, double *, double *);
 
 void errorNormL2(double **, double **, double *, double *, double *);
 
+double minmod(double, double, double);
+
+void cockburn(double **);
+
+void momentLimiter(double **);
+
 #endif
