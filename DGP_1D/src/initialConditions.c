@@ -55,10 +55,11 @@ void initializeVel(struct elemsclr elem, double *x)
 	    {
 		us[igauss] = 2.0*PI;
 	    }
-	    else if(case_tog == 2)
+	    else if(case_tog == 2 || case_tog == 3)
 	    {
 		us[igauss] = 1.0;
 	    }
+	    
 	}
 
 	solveSystem(vand, us, elem.u[ielem]);
@@ -123,6 +124,21 @@ void initializeLS(struct elemsclr elem, double *x)
 	    else if(case_tog == 2)
 	    {
 		phis[igauss] = exp(-200.0*pow(xs[igauss]-xb_in,2.0));
+	    }
+	    else if(case_tog == 3)
+	    {
+		if(xs[igauss] <= 0.6)
+		{
+		    phis[igauss] = exp(-200.0*pow(xs[igauss]-xb_in,2.0));
+		}
+		else if(xs[igauss] >= 0.6 && xs[igauss] <= 0.8)
+		{
+		    phis[igauss] = 1.0;
+		}
+		else
+		{
+		    phis[igauss] = 0.0;
+		}
 	    }
 	}
 

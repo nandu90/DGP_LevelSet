@@ -54,6 +54,19 @@ void Runge_Kutta(struct elemsclr elem, double *x, double deltat, double **rhs)
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
+    //Implement Limiter
+    if(limiter == 1)
+    {
+	cockburn(elem.phi);
+    }
+    else if(limiter == 2)
+    {
+	momentLimiter(elem.phi);
+    }
+    //------------------------------------------------------------------------//
+
+
+    //------------------------------------------------------------------------//
     //1st increment
     getRHS(elem, x, rhs);
     eulerIncrement(k1, elem.mass, rhs, deltat);
