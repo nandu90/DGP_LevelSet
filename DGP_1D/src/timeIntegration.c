@@ -39,7 +39,18 @@ void Runge_Kutta(struct elemsclr elem, double *x, double deltat, double **rhs)
     allocator2(&k2, xelem, ncoeff);
     allocator2(&k3, xelem, ncoeff);
     allocator2(&k4, xelem, ncoeff);
-    
+
+    //------------------------------------------------------------------------//
+    //Implement Limiter
+    if(limiter == 1)
+    {
+	cockburn(elem.phi);
+    }
+    else if(limiter == 2)
+    {
+	momentLimiter(elem.phi);
+    }
+    //------------------------------------------------------------------------//
     //------------------------------------------------------------------------//
     //Store the primary value in a temp array
     double **tempphi;
@@ -53,17 +64,7 @@ void Runge_Kutta(struct elemsclr elem, double *x, double deltat, double **rhs)
     }
     //------------------------------------------------------------------------//
 
-    //------------------------------------------------------------------------//
-    //Implement Limiter
-    if(limiter == 1)
-    {
-	cockburn(elem.phi);
-    }
-    else if(limiter == 2)
-    {
-	momentLimiter(elem.phi);
-    }
-    //------------------------------------------------------------------------//
+    
 
 
     //------------------------------------------------------------------------//
