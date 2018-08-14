@@ -40,17 +40,7 @@ void Runge_Kutta(struct elemsclr elem, double *x, double deltat, double **rhs)
     allocator2(&k3, xelem, ncoeff);
     allocator2(&k4, xelem, ncoeff);
 
-    //------------------------------------------------------------------------//
-    //Implement Limiter
-    if(limiter == 1)
-    {
-	cockburn(elem.phi);
-    }
-    else if(limiter == 2)
-    {
-	momentLimiter(elem.phi);
-    }
-    //------------------------------------------------------------------------//
+    
     //------------------------------------------------------------------------//
     //Store the primary value in a temp array
     double **tempphi;
@@ -78,6 +68,15 @@ void Runge_Kutta(struct elemsclr elem, double *x, double deltat, double **rhs)
 	    elem.phi[ielem][icoeff] = tempphi[ielem][icoeff] + 0.5*k1[ielem][icoeff];
 	}
     }
+    //Implement Limiter
+    if(limiter == 1)
+    {
+	cockburn(elem.phi);
+    }
+    else if(limiter == 2)
+    {
+	momentLimiter(elem.phi);
+    }
     //Apply BC
     level_setBC(elem.phi);
     //------------------------------------------------------------------------//
@@ -93,7 +92,15 @@ void Runge_Kutta(struct elemsclr elem, double *x, double deltat, double **rhs)
 	    elem.phi[ielem][icoeff] = tempphi[ielem][icoeff] + 0.5*k2[ielem][icoeff];
 	}
     }
-
+    //Implement Limiter
+    if(limiter == 1)
+    {
+	cockburn(elem.phi);
+    }
+    else if(limiter == 2)
+    {
+	momentLimiter(elem.phi);
+    }
     //Apply BC
     level_setBC(elem.phi);
     //------------------------------------------------------------------------//
@@ -109,7 +116,15 @@ void Runge_Kutta(struct elemsclr elem, double *x, double deltat, double **rhs)
 	    elem.phi[ielem][icoeff] = tempphi[ielem][icoeff] + k3[ielem][icoeff];
 	}
     }
-
+    //Implement Limiter
+    if(limiter == 1)
+    {
+	cockburn(elem.phi);
+    }
+    else if(limiter == 2)
+    {
+	momentLimiter(elem.phi);
+    }
     //Apply BC
     level_setBC(elem.phi);
     //------------------------------------------------------------------------//
@@ -129,7 +144,15 @@ void Runge_Kutta(struct elemsclr elem, double *x, double deltat, double **rhs)
 	    elem.phi[ielem][icoeff] = tempphi[ielem][icoeff] + (1.0/6.0)*(k1[ielem][icoeff] + 2.0*k2[ielem][icoeff] + 2.0*k3[ielem][icoeff] + k4[ielem][icoeff]);
 	}
     }
-
+    //Implement Limiter
+    if(limiter == 1)
+    {
+	cockburn(elem.phi);
+    }
+    else if(limiter == 2)
+    {
+	momentLimiter(elem.phi);
+    }
     //Apply BC
     level_setBC(elem.phi);
     //------------------------------------------------------------------------//

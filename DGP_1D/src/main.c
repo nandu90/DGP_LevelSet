@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     int print_gap = 10;
     case_tog = 3;        //1-Sine; 2-Gaussian
 
-    polyorder = 3;
+    polyorder = 2;
     xelem = 200;
     deltat = 0.0005;
 

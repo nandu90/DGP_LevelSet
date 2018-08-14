@@ -79,22 +79,12 @@ void momentLimiter(double **phi)
     double *basis;
     allocator1(&basis, ncoeff);
 
-    int k;
+    //int k;
     double a, b, c;
     double alpha;
 
     double tempphi;
 
-    double **newphi;
-    allocator2(&newphi, xelem, ncoeff);
-
-    for(ielem=0; ielem<xelem; ielem++)
-    {
-	for(icoeff=0; icoeff<ncoeff; icoeff++)
-	{
-	    newphi[ielem][icoeff] = phi[ielem][icoeff];
-	}
-    }
     //------------------------------------------------------------------------//
 
        
@@ -103,41 +93,26 @@ void momentLimiter(double **phi)
 	//Limit from higher to lower
 	for(icoeff=ncoeff-1; icoeff>0; icoeff--)
 	{
-	    k = icoeff - 1;
+	    //k = icoeff - 1;
 	    //alpha =2.0*k+1.0;
 	    alpha = 1.0;
 	    a = phi[ielem][icoeff];
-	    b = phi[ielem+1][icoeff-1] - phi[ielem][icoeff-1];
-	    c = phi[ielem][icoeff-1] - phi[ielem-1][icoeff-1];
+	    b = alpha*(phi[ielem+1][icoeff-1] - phi[ielem][icoeff-1]);
+	    c = alpha*(phi[ielem][icoeff-1] - phi[ielem-1][icoeff-1]);
 
 	    tempphi = minmod(a, b, c);
-
-	    //printf("%.4e %.4e\n",a,tempphi);
-	    //printf("%.4e %.4e %.4e\n",a,b,c);
 	    
 	    if(fabs(tempphi - phi[ielem][icoeff]) < 1e-15)
 	    {
-		//printf("Exit for cell %d at %d derivative\n\n",ielem,icoeff);
 		break;
 	    }
 	    else
 	    {
-		newphi[ielem][icoeff] = tempphi;
+		phi[ielem][icoeff] = tempphi;
 	    }   
 	}
 	
     }
-    //exit(1);
-
-    for(ielem=0; ielem<xelem; ielem++)
-    {
-	for(icoeff=0; icoeff<ncoeff; icoeff++)
-	{
-	    phi[ielem][icoeff] = newphi[ielem][icoeff];
-	}
-    }
-
     
     deallocator1(&basis, ncoeff);
-    deallocator2(&newphi, xelem, ncoeff);
 }
