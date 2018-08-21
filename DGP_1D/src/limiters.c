@@ -61,7 +61,7 @@ void cockburn(double **phi)
 	c = phi[ielem+1][0] - phi[ielem][0];
 	sL = minmod(a, b, c);
 
-
+	
 
 	phi[ielem][1] = (sR + sL)*0.5;
 
@@ -90,6 +90,12 @@ void momentLimiter(double **phi)
        
     for(ielem = 1; ielem<xelem-1; ielem++)
     {
+	for(icoeff=0; icoeff<ncoeff; icoeff++)
+	{
+	    //printf("%.4e ",phi[ielem][icoeff]);
+	}
+	//printf("\n");
+	
 	//Limit from higher to lower
 	for(icoeff=ncoeff-1; icoeff>0; icoeff--)
 	{
@@ -101,6 +107,9 @@ void momentLimiter(double **phi)
 	    c = alpha*(phi[ielem][icoeff-1] - phi[ielem-1][icoeff-1]);
 
 	    tempphi = minmod(a, b, c);
+
+	    //printf("%.4e %.4e %.4e\n",a,b,c);
+	    //printf("%.4e\n",tempphi);
 	    
 	    if(fabs(tempphi - phi[ielem][icoeff]) < 1e-15)
 	    {
@@ -109,9 +118,11 @@ void momentLimiter(double **phi)
 	    else
 	    {
 		phi[ielem][icoeff] = tempphi;
-	    }   
+	    }
+
+	    
 	}
-	
+	//exit(1);
     }
     
     deallocator1(&basis, ncoeff);

@@ -12,6 +12,7 @@ Created: 2018-04-19
 #include "icbc.h"
 #include "commu.h"
 #include "memory.h"
+#include "DGPFunc.h"
 
 void euler(double ***scalar, double ****mass, double ***rhs, double deltat)
 {
@@ -73,7 +74,12 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	//Get the Right hand side
 	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
-	euler(elem.phi, elem.mass, rhs, deltat);	
+	euler(elem.phi, elem.mass, rhs, deltat);
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
     }
@@ -97,7 +103,12 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	//Get the Right hand side
 	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
-	euler(elem.phi, elem.mass, rhs, deltat);	
+	euler(elem.phi, elem.mass, rhs, deltat);
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
 
@@ -116,7 +127,11 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 		}
 	    }
 	}
-	
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
 	
@@ -142,14 +157,24 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	//Get the Right hand side
 	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
-	euler(elem.phi, elem.mass, rhs, deltat);	
+	euler(elem.phi, elem.mass, rhs, deltat);
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
 
 	//Get the Right hand side
 	getRHS(elem, x, y, rhs, area);
 	//Forward Euler
-	euler(elem.phi, elem.mass, rhs, deltat);	
+	euler(elem.phi, elem.mass, rhs, deltat);
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
 
@@ -163,7 +188,11 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 		}
 	    }
 	}
-
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
 
@@ -181,7 +210,11 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 		}
 	    }
 	}
-
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply boundary conditions
 	level_setBC(elem.phi, elem.iBC);
 	
@@ -211,6 +244,12 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	}
 	//------------------------------------------------------------------------//
 
+	/*for(icoeff =0; icoeff<ncoeff; icoeff++)
+	{
+	    printf("%.4e ",elem.phi[2][2][icoeff]);
+	}
+	printf("\n\n");*/
+	
 	//------------------------------------------------------------------------//
 	//1st increment
 	getRHS(elem, x, y, rhs, area);
@@ -225,10 +264,21 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 		}
 	    }
 	}
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply BC
 	level_setBC(elem.phi, elem.iBC);
 	//------------------------------------------------------------------------//
 
+	/*for(icoeff =0; icoeff<ncoeff; icoeff++)
+	{
+	    printf("%.4e ",elem.phi[2][2][icoeff]);
+	}
+	printf("\n\n");*/
+	
 	//------------------------------------------------------------------------//
 	//2nd increment
 	getRHS(elem, x, y, rhs, area);
@@ -243,10 +293,21 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 		}
 	    }
 	}
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply BC
 	level_setBC(elem.phi, elem.iBC);
 	//------------------------------------------------------------------------//
 
+	/*for(icoeff =0; icoeff<ncoeff; icoeff++)
+	{
+	    printf("%.4e ",elem.phi[2][2][icoeff]);
+	}
+	printf("\n\n");*/
+	
 	//------------------------------------------------------------------------//
 	//3rd Increment
 	getRHS(elem, x, y, rhs, area);
@@ -261,10 +322,21 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 		}
 	    }
 	}
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply BC
 	level_setBC(elem.phi, elem.iBC);
 	//------------------------------------------------------------------------//
 
+	/*for(icoeff =0; icoeff<ncoeff; icoeff++)
+	{
+	    printf("%.4e ",elem.phi[2][2][icoeff]);
+	}
+	printf("\n\n");*/
+	
 	//------------------------------------------------------------------------//
 	//4th Increment
 	getRHS(elem, x, y, rhs, area);
@@ -283,11 +355,22 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 		}
 	    }
 	}
+	//Apply slope limiter
+	if(limit == 1)
+	{
+	    momentLimiter(elem.phi);
+	}
 	//Apply BC
 	level_setBC(elem.phi, elem.iBC);
 	//------------------------------------------------------------------------//
 
-	    
+	/*for(icoeff =0; icoeff<ncoeff; icoeff++)
+	{
+	    printf("%.4e ",elem.phi[2][2][icoeff]);
+	}
+	printf("\n\n");*/
+
+	//exit(1);
 	deallocator3(&tempphi, xelem, yelem, ncoeff);
 	deallocator3(&k1, xelem, yelem, ncoeff);
 	deallocator3(&k2, xelem, yelem, ncoeff);

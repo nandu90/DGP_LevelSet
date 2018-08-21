@@ -4,6 +4,43 @@
 #include "memory.h"
 #include "polylib.h"
 
+double minmod(double *array, int size)
+{
+    double result;
+
+    int i;
+    //Check whether all components have same sign
+    int flag = 0;
+    for(i=0; i<size-1; i++)
+    {
+	if(array[i]*array[i+1] < 0.0)
+	{
+	    flag = 1;
+	    break; //Different sign detected
+	}
+    }
+
+    double mini = fabs(array[0]);
+    if(flag == 0)
+    {
+	for(i=1; i<size; i++)
+	{
+	    mini = min(mini, fabs(array[i]));
+	}
+	result = mini;
+	if(result != 0.0)
+	{
+	    result = array[0]*result/fabs(array[0]);
+	}
+    }
+    else
+    {
+	result = 0.0;
+    }
+
+    return result;
+}
+
 double remainder(double a, double b)
 {
     int i;

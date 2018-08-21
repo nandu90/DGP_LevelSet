@@ -21,4 +21,6 @@ void calc_vf(double ***, double **, double **, double *);
 void errorGaussian(double ***, double, double **, double **);
 
 double remainder(double, double);
+
+double minmod(double * , int);
 #endif

@@ -246,8 +246,8 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		}
 		else if(case_tog == 7)
 		{
-		    uxy = 0.0;
-		    vxy = 1.0;
+		    uxy = 1.0;
+		    vxy = 0.0;
 		}
 		else if(case_tog == 8)
 		{
@@ -378,7 +378,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		{		    	
 			term1 = 200.0*pow((xs[k][0] - xb_in),2.0);
 			term2 = 200.0*pow((xs[k][1] - yb_in),2.0);
-			ls[k] = exp(-(term1 + term2));
+			ls[k] = exp(-(term1));// + term2));
 		}
 		else if(case_tog == 2 || case_tog == 4)
 		{
@@ -391,10 +391,20 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		}
 		else if(case_tog == 5)
 		{
-		    
-		    term1 = 200.0*pow((xs[k][0] - xb_in),2.0);
-		    term2 = 200.0*pow((xs[k][1] - yb_in),2.0);
-		    ls[k] = exp(-(term1 + term2));
+		    if(xs[k][0] <= 0.6)
+		    {
+			term1 = 200.0*pow((xs[k][0] - 0.3),2.0);
+			term2 = 200.0*pow((xs[k][1] - yb_in),2.0);
+			ls[k] = exp(-(term1));// + term2));
+		    }
+		    else if(xs[k][0] >= 0.6 && xs[k][0] <= 0.8)
+		    {
+			ls[k] = 1.0;
+		    }
+		    else
+		    {
+			ls[k] = 0.0;
+		    }
 		    /*double xmin = 100.0;
 		    double xmax = 120.0;
 		    double ymin = 15.0;
@@ -416,7 +426,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		}
 		else if(case_tog == 7)
 		{
-		    ls[k] = sin(xs[k][1]);
+		    ls[k] = sin(xs[k][0]);
 		}
 		else if(case_tog == 8)
 		{
@@ -444,9 +454,9 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 	    //Solve the system to get the coefficients
 	    solveSystem(vand, ls, elem.phi[i][j], tgauss, ncoeff);
 	    //exit(1);
-	    /*//------------------------------------------------------------------------//
+	    //------------------------------------------------------------------------//
 	    //Reconstruct the solution - check
-	    if(i == 2 && j == 2)
+	    /*if(i == 2 && j == 2)
 	    {
 		printf("\nReconstructed soln at gauss pts is\n");
 		for(k=0; k<tgauss; k++)
@@ -456,15 +466,16 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		    for(l=0; l<pow(polyorder+1,2); l++)
 		    {
 			ls[k] += basis[l]*elem.phi[i][j][l];
+			printf("%.4e\n",elem.phi[i][j][l]);
 		    }
 		    
 		    printf("%.4f %.4f %.4f\n",zeta[k][0], zeta[k][1], ls[k]);
 		}
 		exit(1);
-	    }
+		}*/
 	    
 	    
-	    //------------------------------------------------------------------------//*/
+	    //------------------------------------------------------------------------//
 
 	}
     }

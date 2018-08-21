@@ -64,6 +64,11 @@ void control()
 		    word = strtok(NULL,delim);
 		    meshread= atoi(word);
 		}
+		if(strcmp(word,"Limiter") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    limit = atoi(word);
+		}
 		if(strcmp(word,"Bubble_radius") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -337,6 +342,8 @@ void control()
 
   MPI_Bcast(&x_bound,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&y_bound,1,MPI_INT,master,MPI_COMM_WORLD);
+
+  MPI_Bcast(&limit,1,MPI_INT,master,MPI_COMM_WORLD);
 
   MPI_Bcast(&advect_deltat,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   MPI_Bcast(&time_control,1,MPI_INT,master,MPI_COMM_WORLD);

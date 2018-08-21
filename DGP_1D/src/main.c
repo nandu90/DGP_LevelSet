@@ -19,13 +19,13 @@ int main(int argc, char **argv)
     
     //------------------------------------------------------------------------//
     //INput Section
-    int maxiter = 2000;
+    int maxiter = 1000;
     int print_gap = 10;
     case_tog = 3;        //1-Sine; 2-Gaussian
 
-    polyorder = 2;
-    xelem = 200;
-    deltat = 0.0005;
+    polyorder = 3;
+    xelem = 50;
+    deltat = 0.001;
 
     if(case_tog == 1)
     {
@@ -146,8 +146,11 @@ int main(int argc, char **argv)
     allocator2(&rhs, xelem, ncoeff);
 
     int print_count = 0;
+    output(elem, x,0);
+    
     for(iter=0; iter<maxiter; iter++)
     {
+	printf("Step %d\n",iter+1);
 	Runge_Kutta(elem, x, deltat, rhs);
 
 	//------------------------------------------------------------------------//

@@ -23,4 +23,8 @@ void GaussPoints1D(double *, double *, int, int);
 
 void GaussPoints2D(double **, double **, int, int);
 
+void momentLimiter(double ***);
+
+void limitCoeff(double ***, int, int, int, int, int);
+
 #endif

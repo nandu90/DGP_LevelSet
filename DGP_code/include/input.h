@@ -25,7 +25,7 @@ double ylen;
 int polyorder;
 int quadtype;
 int basistype;
-
+int limit;
 //------------------------------------------------------------------------//
 
 

@@ -1,21 +1,22 @@
 /******************Basis Functions*****************/
-Basis_Order 2
+Basis_Order 1
 
 /******************Grid related Inputs*******************//
 
 xlen 1.0
 ylen 0.5
-xelem 75
+xelem 50
 yelem 10
 Read_mesh 0
 
 /***************Gauss Quadrature********************/
-Gauss_Quadrature_Type Gauss-Lobatto-Legendre
-//Gauss_Quadrature_Type Gauss-Legendre
+//Gauss_Quadrature_Type Gauss-Lobatto-Legendre
+Gauss_Quadrature_Type Gauss-Legendre
 
 /**************Basis Type*********************/
-//Basis Legendre
-Basis Lagrange
+Basis Legendre
+//Basis Lagrange
+
 
 /***************Initial Conditions******************/
 Bubble_radius 10
@@ -32,6 +33,8 @@ y-boundary no-slip
 //y-boundary slip
 //y-boundary periodic
 
+/****************Limiter***************/
+Limiter 0
 
 /*****************Time Control*******************/
 //Time_control CFL-based
@@ -44,6 +47,9 @@ RK_Stages 4
 Start_step 0
 Max_Iterations 1000
 print_gap 100
+print_restart_gap 500
+
+Simulation_time 10000.0
 
 /***************Particular CASES***************/
 Case Gaussian_Wave
