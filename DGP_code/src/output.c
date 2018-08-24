@@ -163,10 +163,20 @@ void output_xml(struct elemsclr elem, int iter , double **x, double **y)
     {
 	for(i=2; i<xnode-2; i++)
 	{
+	    	    
 	    double phinode=0.25*(recphi[i][j][0] + recphi[i-1][j][1] + recphi[i-1][j-1][3] + recphi[i][j-1][2]);
+
+	    if(iter == 0 && case_tog == 3)
+	    {
+		if(phinode > 1.0)phinode = 1.0;
+
+		if(phinode < 0.0)phinode = 0.0;
+	    }
+	    
 	    fprintf(out,"%.6f\n",phinode);
 	}
     }
+
     
     fprintf(out,"</DataArray>\n");
     fprintf(out,"<DataArray NumberOfComponents=\"1\" format=\"ascii\" type =\"Float32\" Name=\"u\">\n");

@@ -21,16 +21,23 @@ double minmod(double *array, int size)
     }
 
     double mini = fabs(array[0]);
+    double a = array[0];
     if(flag == 0)
     {
 	for(i=1; i<size; i++)
 	{
 	    mini = min(mini, fabs(array[i]));
 	}
+	
 	result = mini;
-	if(result != 0.0)
+	
+	if(fabs(a) > 0.0)
 	{
-	    result = array[0]*result/fabs(array[0]);
+	    result = a*result/fabs(a);
+	}
+	else
+	{
+	    result = 0.0;
 	}
     }
     else

@@ -132,21 +132,28 @@ double zalesak2(double x, double y)
 {
     double r = sqrt(pow(x-0.5,2.0) + pow(y-0.75,2.0)) - 0.15;
 
-    double phi;
-    
+    double phi = 0.0;
+
     if(r >= 0.0)
     {
-	phi = 1.0;
+	phi = 0.0;
     }
     else
     {
-	phi = 3.0;
+	phi = 1.0;
     }
-
+    
     //Add the notch
     if(x >= 0.475 && x <= 0.525 && y >= 0.6 && y <= 0.85)
     {
-	phi = 1.0;
+	phi = 0.0;
+    }
+    
+    if(x >= 0.0 && x <= 1.0 && y >= 0.0 && y <= 0.5)
+    {
+	double term1 = 200.0*pow((x - 0.5),2.0);
+	double term2 = 200.0*pow((y - 0.25),2.0);
+	phi = exp(-(term1 + term2));
     }
     
     return phi;
@@ -394,10 +401,10 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		    if(xs[k][0] <= 0.6)
 		    {
 			term1 = 200.0*pow((xs[k][0] - 0.3),2.0);
-			term2 = 200.0*pow((xs[k][1] - yb_in),2.0);
-			ls[k] = exp(-(term1));// + term2));
+			term2 = 200.0*pow((xs[k][1] - 0.25),2.0);
+			ls[k] = exp(-(term1 + term2));
 		    }
-		    else if(xs[k][0] >= 0.6 && xs[k][0] <= 0.8)
+		    else if(xs[k][0] >= 0.6 && xs[k][0] <= 0.8 && xs[k][1] >= 0.15 && xs[k][1] <= 0.35)
 		    {
 			ls[k] = 1.0;
 		    }
