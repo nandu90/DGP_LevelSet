@@ -5,8 +5,8 @@ Basis_Order 2
 
 xlen 1.0
 ylen 1.0
-xelem 128
-yelem 128
+xelem 75
+yelem 75
 Read_mesh 0
 
 /***************Gauss Quadrature********************/
@@ -19,7 +19,7 @@ Basis Legendre
 
 
 /***************Initial Conditions******************/
-Bubble_radius 10
+Bubble_radius 0.15
 x_pos_of_bubble 0.5
 y_pos_of_bubble 0.25
 
@@ -45,7 +45,7 @@ RK_Stages 4
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 4000
+Max_Iterations 2000
 print_gap 100
 print_restart_gap 500
 
@@ -57,10 +57,8 @@ Simulation_time 10000.0
 //Case zalesak
 //Case bubble_break
 //Case Gaussian_Step
-//Case Circle_vortex
+Case Circle_vortex
 //Case SineWave
-Case Non_constant_vortex
-//Case Non_constant_vortex_reverse
 
 /*****************************************For INS*********************/
 /******************Multiphase Parameters*****************//

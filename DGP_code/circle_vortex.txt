@@ -1,12 +1,12 @@
 /******************Basis Functions*****************/
-Basis_Order 3
+Basis_Order 2
 
 /******************Grid related Inputs*******************//
 
-xlen 1
-ylen 1
-xelem 80
-yelem 80
+xlen 1.0
+ylen 1.0
+xelem 75
+yelem 75
 Read_mesh 0
 
 /***************Gauss Quadrature********************/
@@ -15,17 +15,19 @@ Gauss_Quadrature_Type Gauss-Legendre
 
 /**************Basis Type*********************/
 Basis Legendre
-//Basis Lagrange
+//Basis Lagrange - Will not work with Limiters
+
 
 /***************Initial Conditions******************/
-Bubble_radius 0.15
+Bubble_radius 10
 x_pos_of_bubble 0.5
-y_pos_of_bubble 0.75
+y_pos_of_bubble 0.25
 
-/****************Boundary Conditions*****************/
-x-boundary no-slip
+
+/****************Boundary Conditions**************/
+//x-boundary no-slip
 //x-boundary slip
-//x-boundary periodic
+x-boundary periodic
 
 y-boundary no-slip
 //y-boundary slip
@@ -38,16 +40,16 @@ Limiter 1
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.00025            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
+advect_deltat 0.0005            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
 RK_Stages 4
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 4000
+Max_Iterations 2000
 print_gap 100
 print_restart_gap 500
 
-Simulation_time 7.0
+Simulation_time 10000.0
 
 /***************Particular CASES***************/
 //Case Gaussian_Wave
@@ -56,9 +58,7 @@ Simulation_time 7.0
 //Case bubble_break
 //Case Gaussian_Step
 Case Circle_vortex
-//Case Non_constant_vortex
-
-Epsilon 2.0
+//Case SineWave
 
 /*****************************************For INS*********************/
 /******************Multiphase Parameters*****************//
@@ -66,12 +66,12 @@ Liquid_density 1000.0    //958.349
 Gas_density 500.0
 Liquid_viscosity 1.0    //281.742e-6
 Gas_viscosity 0.5
-
+Epsilon 1.2
 Surface_tension_coefficient 1.0
 
 /***************INS Solver Control*******************/
 Solve_flow 0
-Surface_tension 1
+Surface_tension 0
 
 /******Buoyancy Force Accelerations******/
 /**Give sign according to gravity direction**/

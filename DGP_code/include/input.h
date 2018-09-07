@@ -26,6 +26,7 @@ int polyorder;
 int quadtype;
 int basistype;
 int limit;
+int hardlim;
 //------------------------------------------------------------------------//
 
 

@@ -166,7 +166,7 @@ void output_xml(struct elemsclr elem, int iter , double **x, double **y)
 	    	    
 	    double phinode=0.25*(recphi[i][j][0] + recphi[i-1][j][1] + recphi[i-1][j-1][3] + recphi[i][j-1][2]);
 
-	    if(iter == 0 && case_tog == 3)
+	    if((iter == 0 && case_tog == 3) || (iter == 0 && case_tog == 8))
 	    {
 		if(phinode > 1.0)phinode = 1.0;
 

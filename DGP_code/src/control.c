@@ -69,6 +69,11 @@ void control()
 		    word = strtok(NULL,delim);
 		    limit = atoi(word);
 		}
+		if(strcmp(word,"Hard-Limiter") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    hardlim = atoi(word);
+		}
 		if(strcmp(word,"Bubble_radius") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -311,6 +316,10 @@ void control()
 		    else if(strcmp(word,"Non_constant_vortex\n") == 0)
 		    {
 			case_tog=8;
+		    }
+		    else if(strcmp(word,"Non_constant_vortex_reverse\n") == 0)
+		    {
+			case_tog=9;
 		    }
 		}
 		

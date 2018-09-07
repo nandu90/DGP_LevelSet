@@ -39,6 +39,11 @@ void momentLimiter(double ***phi)
 
     int flag;
 
+    double *basis;
+    allocator1(&basis, ncoeff);
+
+    double recphi;
+
     for(ielem=2; ielem<xelem-2; ielem++)
     {
 	for(jelem = 2; jelem<yelem-2; jelem++)
@@ -111,6 +116,7 @@ void momentLimiter(double ***phi)
 	    }
 	}
     }
+    deallocator1(&basis, ncoeff);
 }
 
 void limitCoeff(double ***phi, int i, int j, int m, int n, int current)
@@ -132,15 +138,15 @@ void limitCoeff(double ***phi, int i, int j, int m, int n, int current)
     a = phi[i][j][current];
     if(n != 0)
     {
-	//alphan = sqrt((2.0*n-1.0)/(2.0*n+1.0));
 	alphan = 1.0;
+	
 	b = alphan*(phi[i][j+1][current-z2jump] - phi[i][j][current-z2jump]);
 	c = alphan*(phi[i][j][current-z2jump] - phi[i][j-1][current-z2jump]);
     }
     if(m != 0)
     {
-	//alpham = sqrt((2.0*m-1.0)/(2.0*m+1.0));
 	alpham = 1.0;
+	
 	d = alpham*(phi[i+1][j][current-z1jump] - phi[i][j][current-z1jump]);
 	e = alpham*(phi[i][j][current-z1jump] - phi[i-1][j][current-z1jump]);
     }
