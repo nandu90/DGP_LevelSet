@@ -28,6 +28,82 @@ void naturalToCartesian(double *xs, double *x, int ielem)
     }
 }
 
+void weightdiff1D(double z, double *w, double *x, int ielem)
+{
+    //------------------------------------------------------------------------//
+    //First find the derivative of the original test function
+    double *inv, *jacobian;
+    allocator1(&inv, 1);
+    allocator1(&jacobian, 1);
+    double detJ;
+    detJ = mappingJacobianDeterminant(ielem, z, x, inv, jacobian);
+
+    double *bdiff;
+    allocator1(&bdiff, ncoeff);
+
+    basisdiff1D(z, bdiff);
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    double Peh = detJ*2.0*Pe;
+    double beta = 1.0/tanh(Peh) - 1.0/Peh;
+    //Now construct the modified weight function
+    //Get the original weight first
+    basisdiff1D(z, w);
+    //Now add perturbation to it
+    int icoeff;
+    for(icoeff=0; icoeff<ncoeff; icoeff++)
+    {
+	w[icoeff] += 0.0*beta*detJ;
+    }
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    deallocator1(&inv, 1);
+    deallocator1(&jacobian, 1);
+    deallocator1(&bdiff, ncoeff);
+    //------------------------------------------------------------------------//
+
+}
+
+void weight1D(double z, double *w, double *x, int ielem)
+{
+    //------------------------------------------------------------------------//
+    //First find the derivative of the original test function
+    double *inv, *jacobian;
+    allocator1(&inv, 1);
+    allocator1(&jacobian, 1);
+    double detJ;
+    detJ = mappingJacobianDeterminant(ielem, z, x, inv, jacobian);
+
+    double *bdiff;
+    allocator1(&bdiff, ncoeff);
+
+    basisdiff1D(z, bdiff);
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    double Peh = detJ*2.0*Pe;
+    double beta = 1.0/tanh(Peh) - 1.0/Peh;
+    //Now construct the modified weight function
+    //Get the original weight first
+    basis1D(z, w);
+    //Now add perturbation to it
+    int icoeff;
+    for(icoeff=0; icoeff<ncoeff; icoeff++)
+    {
+	w[icoeff] += beta*detJ*bdiff[icoeff]*inv[0];
+    }
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    deallocator1(&inv, 1);
+    deallocator1(&jacobian, 1);
+    deallocator1(&bdiff, ncoeff);
+    //------------------------------------------------------------------------//
+
+}
+
 void basisdiff1D(double z, double *b)
 {
     //double barray[4] = {0.0, 1.0, 3.0*z, 0.5*(15.0*z*z - 3.0)};

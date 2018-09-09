@@ -41,4 +41,8 @@ void stiffness(double **, double *);
 void convection(double **, double *);
 
 void forceVector(double *, double *);
+
+void weight1D(double, double *, double *, int);
+
+void weightdiff1D(double, double *, double *, int);
 #endif

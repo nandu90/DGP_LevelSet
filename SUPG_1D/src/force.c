@@ -46,7 +46,7 @@ void forceVector(double *F, double *x)
 	for(igauss=0; igauss<tgauss; igauss++)
 	{	    
 	    //Get the weight vector
-	    basis1D(zeta[igauss], w);
+	    weight1D(zeta[igauss], w, x, ielem);
 
 	    //Get the determinant
 	    detJ = mappingJacobianDeterminant(ielem, zeta[igauss], x, inv, jacobian);

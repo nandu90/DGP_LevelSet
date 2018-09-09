@@ -1,4 +1,5 @@
 /***************************************************************************
+Steady 1D Convection Diffusion Equation
 
 Author: nsaini
 Created: 2018-07-24
@@ -19,35 +20,13 @@ int main(int argc, char **argv)
     
     //------------------------------------------------------------------------//
     //INput Section
-    int maxiter = 1000;
-    int print_gap = 10;
-    case_tog = 4;        //1-Sine; 2-Gaussian
 
     polyorder = 1;
     xelem = 10;
-    deltat = 0.001;
 
-    if(case_tog == 1)
-    {
-	xlen = 2*PI;
-	xb_in = 75.0;
-    }
-    else if(case_tog == 2)
-    {
-	xlen = 1.0;
-	xb_in = 0.5;
-    }
-    else if(case_tog == 3)
-    {
-	xlen = 1.0;
-	xb_in = 0.3;
-    }
-    else if(case_tog == 4)
-    {
-	xlen = 1.0;
-    }
-
-    double Pe = 100.0;
+    xlen = 1.0;
+    Pe = 100.0;
+    
     double f = 0.0;
     
     double u = 1.0;

@@ -56,7 +56,7 @@ void convection(double **C, double *x)
 	    basisdiff1D(zeta[igauss], bdiff);
 	    
 	    //Get the weight vector
-	    basis1D(zeta[igauss], w);
+	    weight1D(zeta[igauss], w, x, ielem);
 
 	    //Get the determinant
 	    detJ = mappingJacobianDeterminant(ielem, zeta[igauss], x, inv, jacobian);

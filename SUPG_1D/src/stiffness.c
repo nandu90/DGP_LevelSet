@@ -56,7 +56,7 @@ void stiffness(double **S, double *x)
 	    basisdiff1D(zeta[igauss], bdiff);
 	    
 	    //Get the weight vector
-	    basisdiff1D(zeta[igauss], wdiff);
+	    weightdiff1D(zeta[igauss], wdiff, x, ielem);
 
 	    //Get the determinant
 	    detJ = mappingJacobianDeterminant(ielem, zeta[igauss], x, inv, jacobian);
