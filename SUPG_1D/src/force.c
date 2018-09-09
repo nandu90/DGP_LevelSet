@@ -1,7 +1,7 @@
 /***************************************************************************
 
 Author: nsaini
-Created: 2018-07-24
+Created: 2018-09-06
 
 ***************************************************************************/
 
@@ -10,37 +10,26 @@ Created: 2018-07-24
 #include "functions.h"
 #include "polylib.h"
 
-
-void massmatrix(double **M, double *x)
+void forceVector(double *F, double *x)
 {
     //------------------------------------------------------------------------//
-    //Temporary variables
-    int ielem;
-    int igauss;
-    int icoeff;
-    int icoeff1;
-    //---------------------------------s---------------------------------------//
+    int ielem, icoeff, igauss;
+    //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Define temp array to store element contibutions
-    double ***mass;
-    allocator3(&mass, xelem, ncoeff, ncoeff);
-    //------------------------------------------------------------------------//
-    
-    //------------------------------------------------------------------------//
-    //Define temp array for basis
-    double *b;
-    allocator1(&b, ncoeff);
+    double **force;
+    allocator2(&force, xelem, ncoeff);
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //Define temp array for weight functions
+    //Define array to store differential of weight functions
     double *w;
     allocator1(&w, ncoeff);
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //other temporary variables
+    //Other temporary variables
     double *inv, *jacobian;
     allocator1(&inv, 1);
     allocator1(&jacobian, 1);
@@ -48,14 +37,14 @@ void massmatrix(double **M, double *x)
     double detJ;
     //------------------------------------------------------------------------//
 
+    
+    //------------------------------------------------------------------------//
+    //Loop over the elements
     for(ielem=0; ielem<xelem; ielem++)
     {
-	//Loop over the Gauss quadrature points
+	//Loop over the Gauss Quadrature points
 	for(igauss=0; igauss<tgauss; igauss++)
-	{
-	    //Get the basis vector
-	    basis1D(zeta[igauss], b);
-
+	{	    
 	    //Get the weight vector
 	    basis1D(zeta[igauss], w);
 
@@ -65,37 +54,29 @@ void massmatrix(double **M, double *x)
 	    //Loop over the weight vector
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
 	    {
-		//Loop over the basis vector
-		for(icoeff1=0; icoeff1<ncoeff; icoeff1++)
-		{
-		    mass[ielem][icoeff][icoeff1] += b[icoeff]*w[icoeff1]*weights[igauss]*detJ;
-		}
+		force[ielem][icoeff] += weights[igauss]*w[icoeff]*detJ;
 	    }
 	}
     }
+    //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //Assemble the global stiffness matrix
+    //Assemble the global Force vector
     for(ielem=0; ielem<xelem; ielem++)
     {
 	//Define mapping to global matrix
-	int row[2] = {ielem, ielem+1};
 	int col[2] = {ielem, ielem+1};
 
 	for(icoeff=0; icoeff<ncoeff; icoeff++)
 	{
-	    for(icoeff1=0; icoeff1<ncoeff; icoeff1++)
-	    {
-		M[row[icoeff]][col[icoeff1]] += mass[ielem][icoeff][icoeff1];
-	    }
+	    F[col[icoeff]] += force[ielem][icoeff];
 	}
     }
     //------------------------------------------------------------------------//
-    
+
     //------------------------------------------------------------------------//
     //Deallocators
-    deallocator3(&mass, xelem, ncoeff, ncoeff);
-    deallocator1(&b, ncoeff);
+    deallocator2(&force, xelem, ncoeff);
     deallocator1(&w, ncoeff);
     deallocator1(&inv, 1);
     deallocator1(&jacobian, 1);

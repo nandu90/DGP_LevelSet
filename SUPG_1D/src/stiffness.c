@@ -7,8 +7,10 @@ Created: 2018-09-06
 
 #include "common.h"
 #include "memory.h"
+#include "functions.h"
+#include "polylib.h"
 
-void stiffness(double **S, double **phi, double *x)
+void stiffness(double **S, double *x)
 {
     //------------------------------------------------------------------------//
     int ielem, icoeff, igauss;
@@ -68,7 +70,13 @@ void stiffness(double **S, double **phi, double *x)
 		    stiff[ielem][icoeff][icoeff1] += weights[igauss]*wdiff[icoeff]*bdiff[icoeff1]*inv[0]*inv[0]*detJ;
 		}
 	    }
+	    /*printf("%.4f %.4f\n",wdiff[0],wdiff[1]);
+	    printf("%.4f %.4f\n",bdiff[0],bdiff[1]);
+	    printf("%.4f %.4f\n",inv[0],jacobian[0]);
+	    printf("%.4f\n",detJ);
+	    printf("\n");*/
 	}
+	//exit(1);
     }
     //------------------------------------------------------------------------//
 
@@ -84,11 +92,32 @@ void stiffness(double **S, double **phi, double *x)
 	{
 	    for(icoeff1=0; icoeff1<ncoeff; icoeff1++)
 	    {
-		S[row[icoeff]][col[icoeff1] += stiff[ielem][icoeff][icoeff1];
+		S[row[icoeff]][col[icoeff1]] += stiff[ielem][icoeff][icoeff1];
 	    }
 	}
     }
     //------------------------------------------------------------------------//
 
+    //------------------------------------------------------------------------//
+    /*int inode, inode2;
+    for(inode=0; inode<xnode; inode++)
+    {
+	for(inode2=0; inode2<xnode; inode2++)
+	{
+	    printf("%.4f ",S[inode][inode2]);
+	}
+	printf("\n");
+	}*/
+    //------------------------------------------------------------------------//
+
+    
+    //------------------------------------------------------------------------//
+    //Deallocators
+    deallocator3(&stiff, xelem, ncoeff, ncoeff);
+    deallocator1(&bdiff, ncoeff);
+    deallocator1(&wdiff, ncoeff);
+    deallocator1(&inv, 1);
+    deallocator1(&jacobian, 1);
+    //------------------------------------------------------------------------//
 
 }

@@ -32,6 +32,7 @@ Created: 2018-07-24
 //Input Variable
 int polyorder;
 int xelem;
+int xnode;
 double deltat;
 double xlen;
 
@@ -41,17 +42,16 @@ int case_tog;
 
 double xb_in;
 
-struct elemsclr
+/*struct elemsclr
 {
     double **u;
     double **phi;
     double ***mass;
-};
+    };*/
 
 double *zeta;
 double *weights;
 
-int limiter;
 //------------------------------------------------------------------------//
 
 #endif

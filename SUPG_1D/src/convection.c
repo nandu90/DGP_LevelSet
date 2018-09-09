@@ -1,7 +1,7 @@
 /***************************************************************************
 
 Author: nsaini
-Created: 2018-07-24
+Created: 2018-09-06
 
 ***************************************************************************/
 
@@ -10,37 +10,33 @@ Created: 2018-07-24
 #include "functions.h"
 #include "polylib.h"
 
-
-void massmatrix(double **M, double *x)
+void convection(double **C, double *x)
 {
     //------------------------------------------------------------------------//
-    //Temporary variables
-    int ielem;
-    int igauss;
-    int icoeff;
+    int ielem, icoeff, igauss;
     int icoeff1;
-    //---------------------------------s---------------------------------------//
+    //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Define temp array to store element contibutions
-    double ***mass;
-    allocator3(&mass, xelem, ncoeff, ncoeff);
-    //------------------------------------------------------------------------//
-    
-    //------------------------------------------------------------------------//
-    //Define temp array for basis
-    double *b;
-    allocator1(&b, ncoeff);
+    double ***conv;
+    allocator3(&conv, xelem, ncoeff, ncoeff);
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //Define temp array for weight functions
+    //Define array to store differential of basis functions
+    double *bdiff;
+    allocator1(&bdiff, ncoeff);
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Define array to store weight functions
     double *w;
     allocator1(&w, ncoeff);
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //other temporary variables
+    //Other temporary variables
     double *inv, *jacobian;
     allocator1(&inv, 1);
     allocator1(&jacobian, 1);
@@ -48,14 +44,17 @@ void massmatrix(double **M, double *x)
     double detJ;
     //------------------------------------------------------------------------//
 
+    
+    //------------------------------------------------------------------------//
+    //Loop over the elements
     for(ielem=0; ielem<xelem; ielem++)
     {
-	//Loop over the Gauss quadrature points
+	//Loop over the Gauss Quadrature points
 	for(igauss=0; igauss<tgauss; igauss++)
 	{
 	    //Get the basis vector
-	    basis1D(zeta[igauss], b);
-
+	    basisdiff1D(zeta[igauss], bdiff);
+	    
 	    //Get the weight vector
 	    basis1D(zeta[igauss], w);
 
@@ -68,14 +67,15 @@ void massmatrix(double **M, double *x)
 		//Loop over the basis vector
 		for(icoeff1=0; icoeff1<ncoeff; icoeff1++)
 		{
-		    mass[ielem][icoeff][icoeff1] += b[icoeff]*w[icoeff1]*weights[igauss]*detJ;
+		    conv[ielem][icoeff][icoeff1] += weights[igauss]*w[icoeff]*bdiff[icoeff1]*inv[0]*detJ;
 		}
 	    }
 	}
     }
+    //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //Assemble the global stiffness matrix
+    //Assemble the global Convection matrix
     for(ielem=0; ielem<xelem; ielem++)
     {
 	//Define mapping to global matrix
@@ -86,19 +86,21 @@ void massmatrix(double **M, double *x)
 	{
 	    for(icoeff1=0; icoeff1<ncoeff; icoeff1++)
 	    {
-		M[row[icoeff]][col[icoeff1]] += mass[ielem][icoeff][icoeff1];
+		C[row[icoeff]][col[icoeff1]] += conv[ielem][icoeff][icoeff1];
 	    }
 	}
     }
     //------------------------------------------------------------------------//
-    
+
+
     //------------------------------------------------------------------------//
     //Deallocators
-    deallocator3(&mass, xelem, ncoeff, ncoeff);
-    deallocator1(&b, ncoeff);
+    deallocator3(&conv, xelem, ncoeff, ncoeff);
+    deallocator1(&bdiff, ncoeff);
     deallocator1(&w, ncoeff);
     deallocator1(&inv, 1);
     deallocator1(&jacobian, 1);
     //------------------------------------------------------------------------//
+
 
 }

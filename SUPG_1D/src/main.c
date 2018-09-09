@@ -21,10 +21,10 @@ int main(int argc, char **argv)
     //INput Section
     int maxiter = 1000;
     int print_gap = 10;
-    case_tog = 3;        //1-Sine; 2-Gaussian
+    case_tog = 4;        //1-Sine; 2-Gaussian
 
-    polyorder = 3;
-    xelem = 50;
+    polyorder = 1;
+    xelem = 10;
     deltat = 0.001;
 
     if(case_tog == 1)
@@ -42,16 +42,29 @@ int main(int argc, char **argv)
 	xlen = 1.0;
 	xb_in = 0.3;
     }
+    else if(case_tog == 4)
+    {
+	xlen = 1.0;
+    }
 
-    limiter = 2;
+    double Pe = 100.0;
+    double f = 0.0;
+    
+    double u = 1.0;
+    double deltax = xlen/((double)xelem);
+    double k = deltax*u/Pe;
+
+    double leftbc = 0.0;
+    double rightbc = 1.0;
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Temporary Variables
     int ielem;
-    int iter;
-    int icoeff;
+    //int iter;
+    //int icoeff;
     int igauss;
+    int inode;
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
@@ -61,21 +74,19 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //COnstruct grid
-    double deltax = xlen/((double)xelem);
-    xelem += 2;
+    //COnstruct grid    
+    //xelem += 2;
+    xnode = xelem + 1;
     double *x;
     allocator1(&x,xelem+1);
 
-    for(ielem = 1; ielem < xelem; ielem++)
+    for(inode = 0; inode < xnode; inode++)
     {
-	x[ielem] = (ielem-1)*deltax;
+	x[inode] = (inode)*deltax;
     }
     //Construct ghost cells
-    x[0] = x[1] - deltax;
-    x[xelem] = x[xelem-1] + deltax;
-
-    
+    //x[0] = x[1] - deltax;
+    //x[xelem] = x[xelem-1] + deltax;   
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
@@ -83,7 +94,7 @@ int main(int argc, char **argv)
     allocator1(&zeta, tgauss);
     allocator1(&weights, tgauss);
 
-    zwgll(zeta, weights, tgauss);
+    zwgl(zeta, weights, tgauss);
 
     printf("The Gauss points and weights are:\n");
     for(igauss=0; igauss<tgauss; igauss++)
@@ -94,82 +105,112 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //Contruct elemental variables      
-    struct elemsclr elem;
-    allocator2(&elem.u, xelem, ncoeff);
-    allocator2(&elem.phi, xelem, ncoeff);
-    allocator3(&elem.mass, xelem, ncoeff, ncoeff);
+    //Contruct nodal variables      
+    double *phi;
+    allocator1(&phi, xnode);
+
+    //Allocate Global Matrices
+    double **M, **C, **S, *F;
+    allocator2(&M, xnode, xnode);
+    allocator2(&C, xnode, xnode);
+    allocator2(&S, xnode, xnode);
+    allocator1(&F, xnode);
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Initialize Coefficients
-    initialize(elem, x);
+    //Initialize to 0
+    //initialize(phi, x);
 
-    double **iniphi;
-    allocator2(&iniphi, xelem, ncoeff);
-    for(ielem=0; ielem<xelem; ielem++)
+    double *iniphi;
+    allocator1(&iniphi, xnode);
+    for(inode=0; inode<xnode; inode++)
     {
-	for(icoeff=0; icoeff<ncoeff; icoeff++)
-	{
-	    iniphi[ielem][icoeff] = elem.phi[ielem][icoeff];
-	}
+	iniphi[inode] = phi[inode];
     }
-    //------------------------------------------------------------------------//
-
-    //------------------------------------------------------------------------//
-    //Get the Gauss quadrature points and weights
-    deallocator1(&zeta, tgauss);
-    deallocator1(&weights, tgauss);
-    
-    tgauss = polyorder+10;
-    allocator1(&zeta, tgauss);
-    allocator1(&weights, tgauss);
-
-    zwgll(zeta, weights, tgauss);
-
-    printf("The Gauss points and weights are:\n");
-    for(igauss=0; igauss<tgauss; igauss++)
-    {
-	printf("%.8e %.8e\n",zeta[igauss],weights[igauss]);
-    }
-    printf("\n");
     //------------------------------------------------------------------------//
     
     //------------------------------------------------------------------------//
     //Get the mass Matrix
-    massmatrix(elem.mass, x);
+    massmatrix(M, x);
+
+    //Get the Convection Matrix
+    convection(C, x);
+
+    //Get the Stiffness Matrix
+    stiffness(S, x);
+
+    //Get the force vector
+    forceVector(F, x);
     //------------------------------------------------------------------------//
    
     //------------------------------------------------------------------------//
-    //Time loop
-    double **rhs;
-    allocator2(&rhs, xelem, ncoeff);
+    output(phi, x,0);
+    //Steady state solution
+    int inode2;
 
-    int print_count = 0;
-    output(elem, x,0);
     
-    for(iter=0; iter<maxiter; iter++)
+    
+    double **A;
+    allocator2(&A, xnode, xnode);
+    for(inode=0; inode<xnode; inode++)
     {
-	printf("Step %d\n",iter+1);
-	Runge_Kutta(elem, x, deltat, rhs);
+	for(inode2=0; inode2<xnode; inode2++)
+	{
+	    A[inode][inode2] += (1.0/Pe)*S[inode][inode2] + C[inode][inode2];
+	}
+	F[inode] *= f;
+    }
+    //------------------------------------------------------------------------//
+    //Apply BC
+    //left
+    A[0][0] = 1.0;
+    for(inode=1; inode<xnode; inode++)
+    {
+	A[0][inode] = 0.0;
+    }
+    F[0] = leftbc;
 
-	//------------------------------------------------------------------------//
-	//Print out the paraview output
-	print_count++;
-        if(print_count == 1)
-        {
-           output(elem, x,iter);
-        }
-        if(print_count == print_gap)
-        {
-            print_count = 0;
-        }
-	//------------------------------------------------------------------------//
+    //right
+    A[xnode-1][xnode-1] = 1.0;
+    for(inode=0; inode<xnode-1; inode++)
+    {
+	A[xnode-1][inode] = 0.0;
+    }
+    F[xnode-1] = rightbc;
+    
+    //------------------------------------------------------------------------//
+
+    for(inode=0; inode<xnode; inode++)
+    {
+	for(inode2=0; inode2<xnode; inode2++)
+	{
+	    printf("%.4f ",A[inode][inode2]);
+	}
+	printf("\n");
     }
 
-    output(elem, x,iter);
+    for(inode=0; inode<xnode; inode++)
+    {
+	printf("%.4f\n",F[inode]);
+    }
+
+    solveSystem(A, F, phi, xnode, xnode);
+    
+    printf("Result:\n");
+    for(inode=0; inode<xnode; inode++)
+    {
+	printf("%d %.4f\n",inode+1,phi[inode]);
+    }
+    //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
+    //Print output
+    output(phi, x,1);
+    //------------------------------------------------------------------------//
+
+
+    /*//------------------------------------------------------------------------//
     //Calculate Error norms
     double err1, lerr1;
     errorNormL1(iniphi, elem.phi, &err1, &lerr1, x);
@@ -179,18 +220,18 @@ int main(int argc, char **argv)
     
     printf("The L1 norm of error is %.4e and the Log of norm is %.4e\n", err1, lerr1);
     printf("The L2 norm of error is %.4e and the Log of norm is %.4e\n", err2, lerr2);
-    
-    
-    //------------------------------------------------------------------------//
+    //------------------------------------------------------------------------//*/
 
     //------------------------------------------------------------------------//
     //Deallocators
-    deallocator1(&x, xelem);
-    deallocator2(&elem.u, xelem, ncoeff);
-    deallocator2(&elem.phi, xelem, ncoeff);
-    deallocator3(&elem.mass, xelem, ncoeff, ncoeff);
-    deallocator2(&rhs, xelem, ncoeff);
-    deallocator2(&iniphi, xelem, ncoeff);
+    deallocator1(&x, xnode);
+    deallocator1(&phi, xnode);
+    deallocator2(&M, xnode, xnode);
+    deallocator2(&C, xnode, xnode);
+    deallocator2(&S, xnode, xnode);
+    deallocator1(&F, xnode);
+    deallocator1(&iniphi, xnode);
+    deallocator2(&A, xnode, xnode);
     //------------------------------------------------------------------------//
 
 }

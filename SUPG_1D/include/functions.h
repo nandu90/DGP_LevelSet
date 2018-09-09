@@ -16,23 +16,15 @@ void basis1D(double, double *);
 
 double mappingJacobianDeterminant(int, double, double *, double *, double *);
 
-void massmatrix(double ***, double *);
+void massmatrix(double **, double *);
 
-void solveSystem(double **, double *, double *);
-
-void level_setBC(double **);
-
-void initialize(struct elemsclr, double *);
-
-void initializeVel(struct elemsclr, double *);
-
-void initializeLS(struct elemsclr, double *);
+void solveSystem(double **, double *, double *, int, int);
 
 void naturalToCartesian(double *, double *, int);
 
 void dgesv_ (int *, int *, double *, int *, int *, double *, int *, int *);
 
-void output(struct elemsclr, double *, int);
+void output(double *, double *, int);
 
 double max(double, double);
 
@@ -42,28 +34,11 @@ char* getexepath();
 
 char* concat(char [], char []);
 
-void domainIntegral(double *, struct elemsclr, double **);
-
-void getRHS(struct elemsclr, double *, double **);
-
-void Runge_Kutta(struct elemsclr, double *, double, double **);
-
-void eulerIncrement(double **, double ***, double **, double);
-
-void fluxes(double *, double *, struct elemsclr);
-
-double upwind(double, double, double, double);
-
-void boundaryIntegral(double **, double *, double *);
-
-void errorNormL1(double **, double **, double *, double *, double *);
-
-void errorNormL2(double **, double **, double *, double *, double *);
-
 double minmod(double, double, double);
 
-void cockburn(double **);
+void stiffness(double **, double *);
 
-void momentLimiter(double **);
+void convection(double **, double *);
 
+void forceVector(double *, double *);
 #endif
