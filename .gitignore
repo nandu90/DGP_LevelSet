@@ -13,4 +13,4 @@
 */plots/*
 *.dat
 **/testCases/
->>>>>>> legendreSine
+*.o
