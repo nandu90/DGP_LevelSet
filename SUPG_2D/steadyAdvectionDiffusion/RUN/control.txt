@@ -1,0 +1,29 @@
+/******************Basis Functions*****************/
+Basis_Order 1
+
+/******************Grid related Inputs*******************//
+
+xlen 1.0
+ylen 1.0
+xelem 4
+yelem 4
+Read_mesh 0
+
+
+/****************Boundary Conditions**************/
+//x-boundary no-slip
+//x-boundary slip
+x-boundary periodic
+
+y-boundary no-slip
+//y-boundary slip
+//y-boundary periodic
+
+
+
+
+
+
+
+
+

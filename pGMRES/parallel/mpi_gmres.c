@@ -97,11 +97,11 @@ int main(int argc, char *argv[])
 	  
   // reading the rhs vector from the input file
   double *b = (double *)calloc(  nrowsI , sizeof(double) );
-  //for ( i = 0 ; i < nrowsI; i++ ) b[i] = 1.0; //Taken as 1.0 - just for funsies
+  for ( i = 0 ; i < nrowsI; i++ ) b[i] = 1.0; //Taken as 1.0 - just for funsies
 
   //------------------------------------------------------------------------//
   //This is supposed to read the RHS of Ax=B system
-  read_rhs(argv[2], p, my_rank , nrows, nrowsI , b);     
+  //read_rhs(argv[2], p, my_rank , nrows, nrowsI , b);     
   //print_matrix_double("b", b, nrowsI , 1);
   //------------------------------------------------------------------------//
 
@@ -167,7 +167,8 @@ int main(int argc, char *argv[])
 
   //restarting vars
   int rst = 0, mm = atoi(argv[5]), total_itr = 1;
-     
+
+  
   //do restarting
   for( rst = 0; rst < mm; rst++)
     {
@@ -364,6 +365,7 @@ int main(int argc, char *argv[])
       
     } //end of restarting loop
 
+  
   t_end = MPI_Wtime(); //put a time mark!
 
   printf("Entire program run time including reading the input files and clean-up is : %f seconds.\n", (t_end - t_start) );
