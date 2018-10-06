@@ -5,8 +5,8 @@ Basis_Order 1
 
 xlen 1.0
 ylen 1.0
-xelem 4
-yelem 4
+xelem 8
+yelem 6
 Read_mesh 0
 
 

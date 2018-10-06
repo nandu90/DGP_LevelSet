@@ -11,6 +11,10 @@ Created: 2018-03-04
 
 void assignGlobalDof(struct dofdata *dof)
 {
+    if(myrank == 0)
+    {
+	printf("In assignGlobalDof\n");
+    }
     //------------------------------------------------------------------------//
     //Temporary Varibles
     int idof;
@@ -19,51 +23,75 @@ void assignGlobalDof(struct dofdata *dof)
     iallocator1(&procdof, nprocs);
     MPI_Request request;
     MPI_Status status;
+    int index;
+    int increment;
+    int rows = ynode-4; //Number of rows of dofs
+    int cols = xnode-4;
+    int split;
+    int ne1, ne2;
+    int exclude1, exclude2;
+    int recvproc;
+    int tag;
+    int *recvbuf;
+    int *sendbuf;
+    int count;
+    int lim;
+    int inc;
+    int start;
+    int sendsize;
+    int recvsize;
+    int i;
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Assign numbers to interior dofs
-    int index=0;
+    index=0;
     for(idof=0; idof<tdof; idof++)
     {
 	if(dof[idof].BC == 0)
 	{
 	    dof[idof].gindex = index++;
+	    dof[idof].controlproc = myrank;
 	}
     }
-    //Now assign numbers to boundary dofs
+    //Now assign numbers to exclusive boundary dofs
     for(idof=0; idof<tdof; idof++)
     {
-	if(dof[idof].BC == 2)
+	if(dof[idof].BC == 1)
 	{
 	    dof[idof].gindex = index++;
+	    dof[idof].controlproc = myrank;
 	}
     }
+    
     //------------------------------------------------------------------------//
 
-    //------------------------------------------------------------------------//
-    //Pass around the info for starting index
-    MPI_Allgather(&index, 1, MPI_INT, procdof, nprocs, MPI_INT, MPI_COMM_WORLD);
-    int increment;
     if(myrank == 0)
     {
-	increment = 0;
+	printf("Total procs=%d\n",nprocs);
     }
-    else
+    //------------------------------------------------------------------------//
+    //Pass around the info for starting index
+    MPI_Allgather(&index, 1, MPI_INT, procdof, 1, MPI_INT, MPI_COMM_WORLD);
+    increment = 0;    
+    for(iproc=0; iproc<myrank; iproc++)
     {
-	for(iproc=0; iproc<myrank; iproc++)
-	{
-	    increment += procdof[iproc];
-	}
+	increment += procdof[iproc];
     }
+    
     //Increment starting index on all but master proc
     for(idof=0; idof<tdof; idof++)
     {
-	if(dof[idof].BC ==0 || dof[idof].BC == 2)
+	if(dof[idof].BC ==0 || dof[idof].BC == 1)
 	{
-	    dof[idof].gindex += procdof[iproc];
+	    dof[idof].gindex += increment;
+	    index = dof[idof].gindex + 1;
 	}
     }
+
+    //Bcast the last index from last processor to everyone
+    MPI_Bcast(&index, 1, MPI_INT, nprocs-1, MPI_COMM_WORLD);
+    
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
@@ -76,54 +104,35 @@ void assignGlobalDof(struct dofdata *dof)
       :- Pass info on who is the master processor for the nodes to the higher ranked proc
       :- Assign node numbers starting from 1
       :- Later, when master proc is decided for all shared nodes, raise the assigned node value       */
-    int rows = ynode-4; //Number of rows of dofs
-    int cols = xnode-4;
-    int split;
-    int ne1, ne2;
-    int exclude1, exclude2;
-    int recvproc;
-    int tag;
-    //First let the interior boundaries be communicated
+    
+    //------------------------------------------------------------------------//
+    //Assign control processor to the shared nodes
     for(i=0; i<4; i++)
     {
-	ne2 = i+1;
-	ne1 = i-1;
-	if(ne2 > 3)
-	{
-	    ne2 -= 4;
-	}
-	if(ne1 < 0)
-	{
-	    ne1 += 4;
-	}
 	
 	if(i==0)recvproc = 2;
 	if(i==1)recvproc = 3;
 	if(i==2)recvproc = 0;
 	if(i==3)recvproc = 1;
 
-	if(bhailog[recvproc] >= 0 && bhailog[recvproc] > bhailog[i])
+	if(bhailog[recvproc] >= 0 && myrank > bhailog[recvproc])
 	{
 	    tag = bhailog[recvproc];
 	    if(recvproc == 0 || recvproc == 2)
 	    {
-		size = rows;
+		recvsize = rows;
 	    }
 	    else
 	    {
-		size = cols;
+		recvsize = cols;
 	    }
-	    int *recvbuf;
-	    allocator1(&recvbuf, size);
 	    
-	    MPI_Recv(recvbuf, size, MPI_INT, bhailog[recvproc],tag,MPI_COMM_WORLD, &status);
+	    iallocator1(&recvbuf, recvsize);
+	    
+	    MPI_Recv(recvbuf, recvsize, MPI_INT, bhailog[recvproc],tag,MPI_COMM_WORLD, &status);
 
-	    //Now just assign the proc info to the dofs
-	    int count = 1;
-	    int lim;
-	    int inc;
-	    int start;
-	    
+
+	    //Now just assign the proc info to the dofs    
 	    if(recvproc == 0) //Right face
 	    {
 		start = cols-1;
@@ -149,34 +158,62 @@ void assignGlobalDof(struct dofdata *dof)
 		inc = 1;
 	    }
 
-	    count=1;
+	    count=0;
 	    for(idof=start; idof<=lim; idof += inc)
 	    {
-		dof[idof].controlproc = recvbuf[count];
+		dof[idof].controlproc = recvbuf[count++];
 	    }
+	    ideallocator1(&recvbuf, recvsize);
+	}
+
+	ne2 = i+1;
+	ne1 = i-1;
+	if(ne2 > 3)
+	{
+	    ne2 -= 4;
+	}
+	if(ne1 < 0)
+	{
+	    ne1 += 4;
 	}
 	
-	if(bhailog[i] >= 0 && bhailog[i] < bhailog[recvproc])
+	if(bhailog[i] >= 0 && myrank < bhailog[i])
 	{
 	    exclude1 = 0;
 	    exclude2 = 0;
-	    split = rows/2;
+	    if(i == 0 || i==2)
+	    {
+		split = rows/2;
+	    }
+	    else
+	    {
+		split =  cols/2;
+	    }
 	    if(bhailog[ne1] != -1)
 	    {
-		exclude1 = 1;
+		if(i == 0 || i==3)
+		{
+		    exclude1 = 1;
+		}
+		else
+		{
+		    exclude2 = 1;
+		}
 	    }
 	    if(bhailog[ne2] != -1)
 	    {
-		exclude2 = 1;
+		if(i==0 || i==3)
+		{
+		    exclude2 = 1;
+		}
+		else
+		{
+		    exclude1 = 1;
+		}
 	    }   
 
 	   
-	    //Now assign ID's to the nodes you have decided to keep on this proc
-	    int count = 1;
-	    int lim;
-	    int inc;
-	    int start;
-	    
+	    //Now assign ID's to the nodes you have decided to keep on this proc	    
 	    if(i == 0) //Right face
 	    {
 		start = cols-1;
@@ -202,7 +239,7 @@ void assignGlobalDof(struct dofdata *dof)
 		inc = 1;
 	    }
 	    
-	    count =1;
+	    count = 1;
 	    for(idof=start; idof<=lim; idof += inc)
 	    {
 		if(idof == start && exclude1 != 1)
@@ -215,7 +252,7 @@ void assignGlobalDof(struct dofdata *dof)
 		}
 		else if(idof != start && idof != lim)
 		{
-		    if(count <= split1)
+		    if(count <= split)
 		    {
 			dof[idof].controlproc = bhailog[i];
 		    }
@@ -231,60 +268,73 @@ void assignGlobalDof(struct dofdata *dof)
 		count++;
 	    }
 
-	    int *sendbuf;
 	    if(i == 0 || i == 2)
 	    {
-		allocator1(&sendbuf, rows);
-		size = rows;
+		sendsize = rows;
 	    }
 	    else
 	    {
-		allocator1(&sendbuf, cols);
-		size = cols;
+		sendsize = cols;
 	    }
 
-	    int index = 0;
+	    iallocator1(&sendbuf, sendsize);
+	    count=0;
 	    for(idof=start; idof<=lim; idof += inc)
 	    {
-		sendbuf[index++] = dof[idof].controlproc;
+		sendbuf[count++] = dof[idof].controlproc;
 	    }
-
+	    
 	    tag = myrank;
-	    MPI_Isend(sendbuf, size, MPI_INT, bhailog[recvproc], tag, MPI_COMM_WORLD, &request);
+	    MPI_Isend(sendbuf, sendsize, MPI_INT, bhailog[i], tag, MPI_COMM_WORLD, &request);    
 	    MPI_Wait(&request, &status);
+	    ideallocator1(&sendbuf, sendsize);
 	}
 	
     }
+    //------------------------------------------------------------------------//
 
+        
     MPI_Barrier(MPI_COMM_WORLD);
     
     //Now assign global ID's to all shared nodes
     count = 0;
     for(idof =0; idof < tdof; idof++)
     {
-	if(dof[idof].controlproc == myrank)
+	if(dof[idof].controlproc == myrank && (dof[idof].BC == 2 || dof[idof].BC == 3))
 	{
 	    count++;
 	}
     }
-    if(myrank != 0)
+    
+    MPI_Allgather(&count, 1, MPI_INT, procdof, 1, MPI_INT, MPI_COMM_WORLD);
+
+    increment = 0;
+    for(iproc=0; iproc<myrank; iproc++)
     {
-	MPI_Recv(&count, 1, MPI_INT, myrank-1,myrank-1,MPI_COMM_WORLD, &status) 
-    }
-    if(myrank != nprocs-1)
-    {
-	MPI_Send(&start, 1, MPI_INT, myrank+1, myrank, MPI_COMM_WORLD);
+	increment += procdof[iproc];
     }
 
-    count=0;
+    index = index + increment;
     for(idof=0; idof < tdof; idof++)
     {
-	if(dof[idof].controlproc == myrank)
+	if(dof[idof].controlproc == myrank && (dof[idof].BC == 2 || dof[idof].BC == 3))
 	{
-	    dof[idof].gindex = start + count;
-	    count++;
+	    dof[idof].gindex = index++;
 	}
     }
+    
+    if(myrank == 7)
+    {
+	for(idof=0; idof<tdof; idof++)
+	{
+	    printf("%d %d %d %d\n",idof, dof[idof].BC, dof[idof].controlproc, dof[idof].gindex);
+	}
+    }
+    if(myrank == 7)
+    {
+	exit(1);
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
@@ -292,14 +342,21 @@ void assignGlobalDof(struct dofdata *dof)
     
     //------------------------------------------------------------------------//
 
+    ideallocator1(&procdof, nprocs);
     
 }
 
 void markSharedDof(struct dofdata *dof)
 {
+    if(myrank == 0)
+    {
+	printf("In markSharedDof\n");
+    }
+    
     //------------------------------------------------------------------------//
     //Temporary variables
     int idof;
+    int i;
     //------------------------------------------------------------------------//
 
     int rows = ynode-4; //Number of rows of dofs
@@ -313,36 +370,50 @@ void markSharedDof(struct dofdata *dof)
 	    {
 		for(idof=cols-1; idof<tdof; idof+=cols)
 		{
-		    dof[idof].BC = 1;
+		    dof[idof].BC += 2;
 		}
 	    }
 	    else if(i==1) //Upper face
 	    {
 		for(idof=cols*(rows-1); idof<tdof; idof++)
 		{
-		    dof[idof].BC = 1;
+		    dof[idof].BC += 2;
 		}
 	    }
 	    else if(i==2) //left face
 	    {
 		for(idof=0; idof<tdof; idof+=cols)
 		{
-		    dof[idof].BC = 1;
+		    dof[idof].BC += 2;
 		}
 	    }
 	    else
 	    {
 		for(idof=0; idof<cols; idof++) //bottom face
 		{
-		    dof[idof].BC = 1;
+		    dof[idof].BC += 2;
 		}
 	    }
 	}
     }
+
+    if(myrank == 0)
+    {
+	for(idof=0; idof<tdof; idof++)
+	{
+	    printf("%d %d\n",idof,dof[idof].BC);
+	}
+    }
+    
+    
 }
 
 void markBoundaryDof(struct dofdata *dof)
 {
+    if(myrank == 0)
+    {
+	printf("In markBoundaryDof\n");
+    }
     /*Convention: 
       if BC = 0 ==> interior dof
       if BC = 1 ==> shared dof
@@ -352,6 +423,7 @@ void markBoundaryDof(struct dofdata *dof)
     //------------------------------------------------------------------------//
     //Temporary variables
     int idof;
+    int i;
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
@@ -378,7 +450,7 @@ void markBoundaryDof(struct dofdata *dof)
     int u_bhai = myrank + procm;
     int d_bhai = myrank - procm;
 
-    int rows = ynode-4; //Number of rows of dofs
+    //int rows = ynode-4; //Number of rows of dofs
     int cols = xnode-4;
     
     //Now take care of dofs of boundary processors
@@ -390,7 +462,7 @@ void markBoundaryDof(struct dofdata *dof)
 	{
 	    for(idof=0; idof<cols; idof++)
 	    {
-		dof[idof].BC = 2;
+		dof[idof].BC = 1;
 	    }
 	}
 	else //If BC is periodic
@@ -408,7 +480,7 @@ void markBoundaryDof(struct dofdata *dof)
 	{
 	  for(idof=tdof-cols; idof<tdof; idof++)
 	    {
-		dof[idof].BC = 2;
+		dof[idof].BC = 1;
 	    }
 	}
       else
@@ -426,7 +498,7 @@ void markBoundaryDof(struct dofdata *dof)
 	{
 	    for(idof=0; idof<tdof-cols+1; idof+=cols)
 	    {
-		dof[idof].BC = 2;
+		dof[idof].BC = 1;
 	    }
 	}
 	else
@@ -444,7 +516,7 @@ void markBoundaryDof(struct dofdata *dof)
 	{
 	  for(idof=cols-1; idof<tdof; idof+=cols)
 	    {
-		dof[idof].BC = 2;
+		dof[idof].BC = 1;
 	    }
 	}
       else
@@ -470,8 +542,19 @@ void markBoundaryDof(struct dofdata *dof)
 	    bhailog[i] = -1;  //If no neighbour mark that placeholder as -1
 	}
     }
+    if(myrank == 0)
+    {
+	printf("%d %d %d %d\n",bhailog[0], bhailog[1], bhailog[2], bhailog[3]);
+    }
     //------------------------------------------------------------------------//
 
+    if(myrank == 0)
+    {
+	for(idof=0; idof<tdof; idof++)
+	{
+	    printf("%d %d\n",idof,dof[idof].BC);
+	}
+    }
 }
 
 void gridgen(double **x, double **y, struct elemdata **edata, struct dofdata *dof)
@@ -502,7 +585,7 @@ void gridgen(double **x, double **y, struct elemdata **edata, struct dofdata *do
     //Initialize element array
     elemallocator(&edata, xelem, yelem);
     //Initialize DOF array
-    int tdof = (xnode-4)*(ynode-4);  //Number of dofs on this processor
+    tdof = (xnode-4)*(ynode-4);  //Number of dofs on this processor
     dofallocator(&dof, tdof);
     //------------------------------------------------------------------------//
 
@@ -510,7 +593,8 @@ void gridgen(double **x, double **y, struct elemdata **edata, struct dofdata *do
     
     //------------------------------------------------------------------------//
     //Assign local dofs to elements
-    int row = (ynode-4);
+    //int row = (ynode-4);
+    int col = xnode - 4;
     
     int ielem, jelem;
     for(ielem=2; ielem<xelem-2; ielem++)
@@ -519,56 +603,31 @@ void gridgen(double **x, double **y, struct elemdata **edata, struct dofdata *do
 	{
 	    edata[ielem][jelem].edofn = 4;
 	    iallocator1(&(edata[ielem][jelem].edofs),edata[ielem][jelem].edofn);
-	    i = (ielem-2)*row + jelem-2;
+	    i = (ielem-2) + (jelem-2)*col;
 	    
 	    edata[ielem][jelem].edofs[0] = i;
 	    edata[ielem][jelem].edofs[1] = i+1;
-	    edata[ielem][jelem].edofs[2] = i+row;
-	    edata[ielem][jelem].edofs[3] = i+row+1;
-	    for(j=0;j<4; j++)
+	    edata[ielem][jelem].edofs[2] = i+col;
+	    edata[ielem][jelem].edofs[3] = i+col+1;
+	    /*for(j=0;j<4; j++)
 	    {
-		printf("%d ",edata[ielem][jelem].edofs[j]);
+		if(myrank == master)printf("%d ",edata[ielem][jelem].edofs[j]);
 	    }
-	    printf("\n");
+	    if(myrank == master)printf("\n");*/
 	    
 	}
-	printf("\n");
+	//if(myrank == master)printf("\n");
     }    
     //------------------------------------------------------------------------//
-
-    //------------------------------------------------------------------------//
-    //Create a map between local and global dofs
-    //Get the dof count on each processor
-    int *procdof;
-    iallocator1(&procdof, nprocs);
-    MPI_Allgather(&tdof, 1, MPI_INT, procdof, nprocs, MPI_INT, MPI_COMM_WORLD);
-    //Find the start index for dof for this proc
-    int istart = 0;
-    if(myrank == 0)
-    {
-	istart = 0;
-    }
-    else
-    {
-	for(i=0; i<myrank; i++)
-	{
-	    istart += procdof[i]; 
-	}
-    }
-    //Assign global dofs to all dofs on this proc
-    for(i=0; i<tdof; i++)
-    {
-	dof[i].gindex = i + istart;
-    }
-    //------------------------------------------------------------------------//
-
     
     
+    markBoundaryDof(dof);
 
-    //meshOperations(x, y, area, vol, xc, yc);
+    markSharedDof(dof);
+
+    assignGlobalDof(dof);
+
     
-
-    //printf("X and y limits in %d with m x n = %d %d are: %.5f %.5f %.5f %.5f\n",myrank+1,xelem-2, yelem-2,x[0][0], x[xnode-1][0], y[0][0],y[0][ynode-1]);
 }
 
 /*void gridread(double **x, double **y, double ****area, double **vol, double **xc, double **yc)

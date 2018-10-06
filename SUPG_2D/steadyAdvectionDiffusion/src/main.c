@@ -108,7 +108,7 @@ int main(int argc, char **argv)
     //Read grid
     if(meshread == 0)
     {
-	gridgen(x,y,edata);
+	gridgen(x, y, edata, dof);
     }
     /*else
     {
