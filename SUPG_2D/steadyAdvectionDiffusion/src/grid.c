@@ -323,23 +323,122 @@ void assignGlobalDof(struct dofdata *dof)
 	}
     }
     
-    if(myrank == 7)
+    /*if(myrank == 7)
     {
 	for(idof=0; idof<tdof; idof++)
 	{
 	    printf("%d %d %d %d\n",idof, dof[idof].BC, dof[idof].controlproc, dof[idof].gindex);
 	}
-    }
-    if(myrank == 7)
-    {
-	exit(1);
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
+	}*/
+    
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
+    //Broadcast the next global index
+    MPI_Bcast(&index, 1, MPI_INT, nprocs-1, MPI_COMM_WORLD);
     //Finally assign global IDs to nodes shared by more than 2 proc
+    //Again let the lower ranked processor do the work
+    int nshare=0;
+    int fdof;
+    for(i=0; i<4; i++)
+    {
+        if(i==0)
+	{
+	    fdof = cols-1;
+	}
+	else if(i==1)
+	{
+	    fdof = tdof-1;
+	}
+	else if(i==2)
+	{
+	    fdof = cols*(rows-1);
+	}
+	else
+	{
+	    fdof = 0;
+	}
+
+	if(dof[fdof].controlproc == -1)
+	{
+	    nshare++;
+	}
+    }
+    //Send the receive size to master proc
+    MPI_Allgather(&nshare, 1, MPI_INT, procdof, 1, MPI_INT, MPI_COMM_WORLD);
+    int *sendshare;
+    iallocator1(&sendshare, nshare);
+    nshare=0;
+    for(i=0; i<4; i++)
+    {
+        if(i==0)
+	{
+	    fdof = cols-1;
+	}
+	else if(i==1)
+	{
+	    fdof = tdof-1;
+	}
+	else if(i==2)
+	{
+	    fdof = cols*(rows-1);
+	}
+	else
+	{
+	    fdof = 0;
+	}
+
+	if(dof[fdof].controlproc == -1)
+	{
+	    sendshare[nshare++] = bhailog[i];
+	}
+    }
+
+    int *recvshare;
+    int *displs;
+    iallocator1(&displs, nprocs);
+    count = 0;
+    {
+	for(iproc=0; iproc<nprocs; iproc++)
+	{
+	    if(iproc == 0)
+	    {
+		displs[iproc] = 0;
+	    }
+	    else
+	    {
+		displs[iproc] = count; 
+	    }
+	    count += procdof[iproc];
+	}
+    }
+    iallocator1(&recvshare, count);
     
+    MPI_Allgatherv(sendshare, nshare, MPI_INT, recvshare, procdof, displs, MPI_INT, MPI_COMM_WORLD);
+
+    
+    if(myrank == master)
+    {
+	int flag[nprocs];
+	int mini;
+	for(iproc=0; iproc<nprocs; iproc++)
+	{
+	    flag[iproc] = 0;
+	}
+	for(iproc=0; iproc<nprocs; iproc++)
+	{
+	    if(flag[iproc] == 0)
+	    {
+		mini = iproc;
+		
+	    }
+	}
+	for(i=0; i<count; i++)
+	{
+	    printf("%d\n",recvshare[i]);
+	}
+	exit(1);
+    }
     //------------------------------------------------------------------------//
 
     ideallocator1(&procdof, nprocs);
