@@ -11,10 +11,6 @@ Created: 2018-03-04
 
 void assignGlobalDof(struct dofdata *dof)
 {
-    if(myrank == 0)
-    {
-	printf("In assignGlobalDof\n");
-    }
     //------------------------------------------------------------------------//
     //Temporary Varibles
     int idof;
@@ -43,6 +39,11 @@ void assignGlobalDof(struct dofdata *dof)
     int i;
     //------------------------------------------------------------------------//
 
+    /*if(myrank == 0)
+    {
+	printf("In assignGlobalDof\n");
+	}*/
+    
     //------------------------------------------------------------------------//
     //Initialize dofs to -1
     for(idof=0; idof<tdof; idof++)
@@ -75,10 +76,10 @@ void assignGlobalDof(struct dofdata *dof)
     
     //------------------------------------------------------------------------//
 
-    if(myrank == 0)
+    /*if(myrank == 0)
     {
 	printf("Total procs=%d\n",nprocs);
-    }
+	}*/
     //------------------------------------------------------------------------//
     //Pass around the info for starting index
     MPI_Allgather(&index, 1, MPI_INT, procdof, 1, MPI_INT, MPI_COMM_WORLD);
@@ -399,26 +400,23 @@ void assignGlobalDof(struct dofdata *dof)
     }
     //------------------------------------------------------------------------//
 
-    if(myrank == 7)
+    /*if(myrank == 7)
     {
 	for(idof=0; idof<tdof; idof++)
 	{
 	    printf("%d %d %d %d\n",idof, dof[idof].BC, dof[idof].controlproc, dof[idof].gindex);
 	}
-    }
+	}*/
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    exit(1);
+    //MPI_Barrier(MPI_COMM_WORLD);
+    //exit(1);
     ideallocator1(&procdof, nprocs);
     
 }
 
 void markSharedDof(struct dofdata *dof)
 {
-    if(myrank == 0)
-    {
-	printf("In markSharedDof\n");
-    }
+    
     
     //------------------------------------------------------------------------//
     //Temporary variables
@@ -426,6 +424,11 @@ void markSharedDof(struct dofdata *dof)
     int i;
     //------------------------------------------------------------------------//
 
+    /*if(myrank == 0)
+    {
+	printf("In markSharedDof\n");
+	}*/
+    
     int rows = ynode-4; //Number of rows of dofs
     int cols = xnode-4;
     
@@ -464,28 +467,30 @@ void markSharedDof(struct dofdata *dof)
 	}
     }
 
-    if(myrank == 0)
+    /*if(myrank == 0)
     {
 	for(idof=0; idof<tdof; idof++)
 	{
 	    printf("%d %d\n",idof,dof[idof].BC);
 	}
-    }
+	}*/
     
     
 }
 
 void markBoundaryDof(struct dofdata *dof)
 {
-    if(myrank == 0)
-    {
-	printf("In markBoundaryDof\n");
-    }
+    
     /*Convention: 
       if BC = 0 ==> interior dof
       if BC = 1 ==> shared dof
       if BC = 2 ==> boundary dof
     */
+
+    /*if(myrank == 0)
+    {
+	printf("In markBoundaryDof\n");
+	}*/
     
     //------------------------------------------------------------------------//
     //Temporary variables
@@ -609,7 +614,7 @@ void markBoundaryDof(struct dofdata *dof)
 	    bhailog[i] = -1;  //If no neighbour mark that placeholder as -1
 	}
     }
-    if(myrank == 0)
+    /*if(myrank == 0)
     {
 	printf("%d %d %d %d\n",bhailog[0], bhailog[1], bhailog[2], bhailog[3]);
     }
@@ -621,7 +626,7 @@ void markBoundaryDof(struct dofdata *dof)
 	{
 	    printf("%d %d\n",idof,dof[idof].BC);
 	}
-    }
+	}*/
 }
 
 void gridgen(double **x, double **y, struct elemdata **edata, struct dofdata *dof)
@@ -648,15 +653,6 @@ void gridgen(double **x, double **y, struct elemdata **edata, struct dofdata *do
     }
     //------------------------------------------------------------------------//
 
-    //------------------------------------------------------------------------//
-    //Initialize element array
-    elemallocator(&edata, xelem, yelem);
-    //Initialize DOF array
-    tdof = (xnode-4)*(ynode-4);  //Number of dofs on this processor
-    dofallocator(&dof, tdof);
-    //------------------------------------------------------------------------//
-
-    
     
     //------------------------------------------------------------------------//
     //Assign local dofs to elements

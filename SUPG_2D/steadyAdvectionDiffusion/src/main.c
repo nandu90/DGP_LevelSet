@@ -62,13 +62,15 @@ int main(int argc, char **argv)
 	dirpath = concat(getexepath(), "/laststep/");
 	mkdir(dirpath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	free(dirpath);
-    }
-
-    
-
-    
+    }    
     //------------------------------------------------------------------------//
-  
+
+    //------------------------------------------------------------------------//
+    //Temporary variables
+    int ielem, jelem;
+    //------------------------------------------------------------------------//
+
+    
     //------------------------------------------------------------------------//
     //Read control file
     //All processors may read the control file
@@ -95,12 +97,21 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
-    //Initialize element array
+    //Initialize element arrays
     struct elemdata **edata = NULL;
+    elemallocator(&edata, xelem, yelem);
+    
     //Initialize dof array
     struct dofdata *dof = NULL;
+    tdof = (xnode-4)*(ynode-4);  //Number of dofs on this processor
+    dofallocator(&dof, tdof);
     
     supgcoeff = (int)pow(supgorder+1,2.0);
+
+    struct elemsclr elem;
+    allocator3(&elem.u,xelem,yelem,supgcoeff);
+    allocator3(&elem.v,xelem,yelem,supgcoeff);
+    allocator3(&elem.phi,xelem,yelem,supgcoeff);
     //------------------------------------------------------------------------//
 
 
@@ -116,11 +127,8 @@ int main(int argc, char **argv)
 	}*/
     //------------------------------------------------------------------------//
 
-    printf("herhe\n");
-    exit(1);
-
+    
     /*
-      
     //------------------------------------------------------------------------//
     //Initialize element data
     struct elemsclr elem;
@@ -137,9 +145,7 @@ int main(int argc, char **argv)
     genibc(elem.iBC);
     sendptr = (double **) malloc(4 * sizeof(double *));
     recvptr = (double **) malloc(4 * sizeof(double *));
-    setupcommu();
-
-    
+    setupcommu();    
     //------------------------------------------------------------------------//
 
     
@@ -149,45 +155,44 @@ int main(int argc, char **argv)
     
     
     initialize(elem, x, y);
+    //------------------------------------------------------------------------//
+    */
+
     
     //------------------------------------------------------------------------//
-    //deallocate all arrays - in the reverse order they were allocated
-    
+    //Deallocate all arrays - in the reverse order they were allocated    
     //Element
-    deallocator3(&elem.u,xelem,yelem,ncoeff);
-    deallocator3(&elem.v,xelem,yelem,ncoeff);
-    deallocator3(&elem.phi,xelem,yelem,ncoeff);
-    deallocator4(&elem.mass,xelem,yelem,ncoeff,ncoeff);//Should this be ncoeff?- Yes it should be
-    ideallocator2(&elem.iBC,xelem,yelem);
+    deallocator3(&elem.u,xelem,yelem,supgcoeff);
+    deallocator3(&elem.v,xelem,yelem,supgcoeff);
+    deallocator3(&elem.phi,xelem,yelem,supgcoeff);
+    //deallocator4(&elem.mass,xelem,yelem,ncoeff,ncoeff);
+    //ideallocator2(&elem.iBC,xelem,yelem);
 
-    deallocator2(&elem.p,xelem,yelem);
-    deallocator2(&elem.rho,xelem,yelem);
-    deallocator2(&elem.mu,xelem,yelem);
-    deallocator2(&elem.phi2,xelem,yelem);
+    for(ielem=2; ielem<xelem-2; ielem++)
+    {
+	for(jelem=2; jelem<yelem-2; jelem++)
+	{
+	    ideallocator1(&(edata[ielem][jelem].edofs),edata[ielem][jelem].edofn);
+	}
+    }
+    elemdeallocator(&edata, xelem, yelem);
 
+    //Dofs
+    dofdeallocator(&dof, tdof);
+    
     //Mesh
     deallocator2(&x,xnode,ynode);
-    deallocator2(&y,xnode,ynode);U
-
-    //Use the following if required
-    deallocator2(&xc,xelem,yelem);
-    deallocator2(&yc,xelem,yelem);
-    deallocator2(&vol,xelem,yelem);
-    deallocator4(&area,xelem,yelem,2,2);
+    deallocator2(&y,xnode,ynode);
 
     //IO array
     ideallocator2(&io_info,nprocs,4);
 
     //Communication Arrays
-    destroycommu();
-    free(sendptr);
-    free(recvptr);
-
-   
+    //destroycommu();
+    //free(sendptr);
+    //free(recvptr);   
     //------------------------------------------------------------------------//
 
-    
-    */
     
     
     

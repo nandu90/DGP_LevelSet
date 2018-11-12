@@ -40,5 +40,5 @@ void elemallocator(struct elemdata ***, int , int);
 void elemdeallocator(struct elemdata ***, int , int);
 
 void dofallocator(struct dofdata **, int);
-void dofdeallocator1(struct dofdata **, int);
+void dofdeallocator(struct dofdata **, int);
 #endif

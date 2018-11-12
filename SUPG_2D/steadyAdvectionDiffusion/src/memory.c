@@ -195,7 +195,7 @@ void dofallocator(struct dofdata **p, int x)
     *p = (struct dofdata *)malloc(x * sizeof(struct dofdata));
 }
 
-void dofdeallocator1(struct dofdata **p, int x)
+void dofdeallocator(struct dofdata **p, int x)
 {
   free(*p);
 }

@@ -105,8 +105,6 @@ struct elemsclr
     double ***u;
     double ***v;
     double ***phi;
-    double ****mass;
-    int **iBC;
 };
 
 struct nodesclr
