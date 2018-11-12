@@ -44,6 +44,15 @@ void assignGlobalDof(struct dofdata *dof)
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
+    //Initialize dofs to -1
+    for(idof=0; idof<tdof; idof++)
+    {
+	dof[idof].gindex = -1;
+    }
+    //------------------------------------------------------------------------//
+
+    
+    //------------------------------------------------------------------------//
     //Assign numbers to interior dofs
     index=0;
     for(idof=0; idof<tdof; idof++)
@@ -296,7 +305,7 @@ void assignGlobalDof(struct dofdata *dof)
         
     MPI_Barrier(MPI_COMM_WORLD);
     
-    //Now assign global ID's to all shared nodes
+    //Update the global Id's on each proc, so that they are unique
     count = 0;
     for(idof =0; idof < tdof; idof++)
     {
@@ -323,124 +332,83 @@ void assignGlobalDof(struct dofdata *dof)
 	}
     }
     
-    /*if(myrank == 7)
-    {
-	for(idof=0; idof<tdof; idof++)
-	{
-	    printf("%d %d %d %d\n",idof, dof[idof].BC, dof[idof].controlproc, dof[idof].gindex);
-	}
-	}*/
-    
+        
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     //Broadcast the next global index
     MPI_Bcast(&index, 1, MPI_INT, nprocs-1, MPI_COMM_WORLD);
     //Finally assign global IDs to nodes shared by more than 2 proc
-    //Again let the lower ranked processor do the work
-    int nshare=0;
-    int fdof;
+    //Assign the master processor
+    //Convention: diagonally southwest partition is the master
+    //Loop over the corner nodes
     for(i=0; i<4; i++)
     {
-        if(i==0)
+	ne2 = i;
+	ne1 = i-1; //Processors that share this node
+	if(i == 0)
 	{
-	    fdof = cols-1;
-	}
-	else if(i==1)
-	{
-	    fdof = tdof-1;
-	}
-	else if(i==2)
-	{
-	    fdof = cols*(rows-1);
-	}
-	else
-	{
-	    fdof = 0;
+	    ne1 = 3;
 	}
 
-	if(dof[fdof].controlproc == -1)
+	if(bhailog[ne1] != -1 && bhailog[ne2] != -1) //Then shared node
 	{
-	    nshare++;
-	}
-    }
-    //Send the receive size to master proc
-    MPI_Allgather(&nshare, 1, MPI_INT, procdof, 1, MPI_INT, MPI_COMM_WORLD);
-    int *sendshare;
-    iallocator1(&sendshare, nshare);
-    nshare=0;
-    for(i=0; i<4; i++)
-    {
-        if(i==0)
-	{
-	    fdof = cols-1;
-	}
-	else if(i==1)
-	{
-	    fdof = tdof-1;
-	}
-	else if(i==2)
-	{
-	    fdof = cols*(rows-1);
-	}
-	else
-	{
-	    fdof = 0;
-	}
-
-	if(dof[fdof].controlproc == -1)
-	{
-	    sendshare[nshare++] = bhailog[i];
-	}
-    }
-
-    int *recvshare;
-    int *displs;
-    iallocator1(&displs, nprocs);
-    count = 0;
-    {
-	for(iproc=0; iproc<nprocs; iproc++)
-	{
-	    if(iproc == 0)
+	    if(i == 0)
 	    {
-		displs[iproc] = 0;
+		idof = cols-1;
+		dof[idof].controlproc = bhailog[ne1];
+	    }
+	    else if(i == 1)
+	    {
+		idof = tdof-1;
+		dof[idof].controlproc = myrank;
+	    }
+	    else if(i == 2)
+	    {
+		idof = cols*(rows - 1);
+		dof[idof].controlproc = bhailog[ne2];
 	    }
 	    else
 	    {
-		displs[iproc] = count; 
+		idof = 0;		
+		if(procm-1 < 0)
+		{
+		    dof[idof].controlproc = (procm*procn)-1;
+		}
+		else
+		{
+		    dof[idof].controlproc = procm - 1;
+		}
 	    }
-	    count += procdof[iproc];
 	}
     }
-    iallocator1(&recvshare, count);
-    
-    MPI_Allgatherv(sendshare, nshare, MPI_INT, recvshare, procdof, displs, MPI_INT, MPI_COMM_WORLD);
-
-    
-    if(myrank == master)
+    //Now assign global id to all shared nodes on each processor
+    for(iproc=0; iproc<nprocs; iproc++)
     {
-	int flag[nprocs];
-	int mini;
-	for(iproc=0; iproc<nprocs; iproc++)
+	if(iproc == myrank)
 	{
-	    flag[iproc] = 0;
-	}
-	for(iproc=0; iproc<nprocs; iproc++)
-	{
-	    if(flag[iproc] == 0)
+	    for(idof=0; idof<tdof; idof++)
 	    {
-		mini = iproc;
-		
+		if(dof[idof].BC == 4 && dof[idof].controlproc == myrank)
+		{
+		    dof[idof].gindex = index++;
+		}
 	    }
 	}
-	for(i=0; i<count; i++)
-	{
-	    printf("%d\n",recvshare[i]);
-	}
-	exit(1);
+	MPI_Bcast(&index, 1, MPI_INT, iproc, MPI_COMM_WORLD);
     }
     //------------------------------------------------------------------------//
 
+    if(myrank == 7)
+    {
+	for(idof=0; idof<tdof; idof++)
+	{
+	    printf("%d %d %d %d\n",idof, dof[idof].BC, dof[idof].controlproc, dof[idof].gindex);
+	}
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    exit(1);
     ideallocator1(&procdof, nprocs);
     
 }

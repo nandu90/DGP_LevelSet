@@ -100,7 +100,7 @@ int main(int argc, char **argv)
     //Initialize dof array
     struct dofdata *dof = NULL;
     
-    
+    supgcoeff = (int)pow(supgorder+1,2.0);
     //------------------------------------------------------------------------//
 
 

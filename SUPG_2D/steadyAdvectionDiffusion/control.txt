@@ -9,6 +9,13 @@ xelem 8
 yelem 6
 Read_mesh 0
 
+/***************SUPG Related Inputs****************/
+SUPG_Order 1
+
+/***************Gauss Quadrature********************/
+//Gauss_Quadrature_Type Gauss-Lobatto-Legendre
+Gauss_Quadrature_Type Gauss-Legendre
+
 
 /****************Boundary Conditions**************/
 //x-boundary no-slip
@@ -19,9 +26,11 @@ y-boundary no-slip
 //y-boundary slip
 //y-boundary periodic
 
+/****************Properties*******************/
+Viscosity 1e-2
 
-
-
+/**************Body Forces*******************/
+g 1.0
 
 
 

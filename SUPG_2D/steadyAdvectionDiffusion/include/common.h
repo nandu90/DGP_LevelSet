@@ -119,7 +119,7 @@ struct nodesclr
 
 //------------------------------------------------------------------------//
 //DGP related Variables
-int ncoeff;       //Number of coefficients in the solution expansion
+//int ncoeff;       //Number of coefficients in the solution expansion
                   //The above is equal to the number of basis functions
 //------------------------------------------------------------------------//
 
@@ -127,6 +127,7 @@ int ncoeff;       //Number of coefficients in the solution expansion
 //SUPG related Variables
 int tdof;
 int Tdof;
+int supgcoeff;
 
 struct dofdata
 {
@@ -142,6 +143,7 @@ struct elemdata
     int *edofs;
 };
 //------------------------------------------------------------------------//
+
 
 #endif /* COMMON_H */
 
