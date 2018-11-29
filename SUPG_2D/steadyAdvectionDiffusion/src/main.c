@@ -26,6 +26,7 @@ Make an integer array which stores the global mapping for each node
 #include "memory.h"
 #include "mesh.h"
 #include "fileIO.h"
+#include "supgSolver.h"
 
 int main(int argc, char **argv)
 {
@@ -68,6 +69,7 @@ int main(int argc, char **argv)
     //------------------------------------------------------------------------//
     //Temporary variables
     int ielem, jelem;
+    int icoeff;
     //------------------------------------------------------------------------//
 
     
@@ -136,11 +138,49 @@ int main(int argc, char **argv)
     ncoeff = (int)pow(polyorder+1,2.0); //Number of coefficients = number of basis
     
     
-    //------------------------------------------------------------------------//
-
-   
+    //------------------------------------------------------------------------//*/
 
     //------------------------------------------------------------------------//
+    //Initialize temporary element matrices
+    double ***elemK;
+    double ***elemC;
+    double ***elemF;
+    allocator3(&elemK, xelem, yelem, supgcoeff);
+    allocator3(&elemC, xelem, yelem, supgcoeff);
+    allocator3(&elemF, xelem, yelem, supgcoeff);
+
+    double ***elemA;
+    allocator3(&elemA, xelem, yelem, supgcoeff);
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Solver
+    //Get the element Stiffness matrix
+    stiffness(elemK, elem.phi, x, y);
+
+    //Get the element Convection matrix
+    convection(elemC, elem.phi, elem, x, y);
+
+    //Get the element force vector
+    forceVector(elemF, x, y);
+
+    //Obtain the elemental coefficient matrix
+    for(ielem=2; ielem<xelem-2; ielem++)
+    {
+	for(jelem=2; jelem<yelem-2; jelem++)
+	{
+	    for(icoeff=0; icoeff<supgcoeff; icoeff++)
+	    {
+		elemA[ielem][jelem][icoeff] = elemK[ielem][jelem][icoeff] + elemC[ielem][jelem][icoeff];
+	    }
+	}
+    }
+
+    
+    //------------------------------------------------------------------------//
+
+
+    /*//------------------------------------------------------------------------//
     //Set up Communicator arrays
     genibc(elem.iBC);
     sendptr = (double **) malloc(4 * sizeof(double *));
@@ -177,6 +217,12 @@ int main(int argc, char **argv)
     }
     elemdeallocator(&edata, xelem, yelem);
 
+    deallocator3(&elemK, xelem, yelem, supgcoeff);
+    deallocator3(&elemC, xelem, yelem, supgcoeff);
+    deallocator3(&elemF, xelem, yelem, supgcoeff);
+    deallocator3(&elemA, xelem, yelem, supgcoeff);
+    
+    
     //Dofs
     dofdeallocator(&dof, tdof);
     

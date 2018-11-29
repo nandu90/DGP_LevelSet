@@ -132,6 +132,7 @@ struct dofdata
     int gindex;
     int BC;
     int controlproc;
+    int *slaveproc;
 };
 
 

@@ -172,6 +172,11 @@ void assignGlobalDof(struct dofdata *dof)
 	    for(idof=start; idof<=lim; idof += inc)
 	    {
 		dof[idof].controlproc = recvbuf[count++];
+		if(dof[idof].controlproc == myrank)
+		{
+		    iallocator1(&(dof[idof].slaveproc),1);
+		    dof[idof].slaveproc[0] = bhailog[recvproc];
+		}
 	    }
 	    ideallocator1(&recvbuf, recvsize);
 	}
@@ -259,6 +264,9 @@ void assignGlobalDof(struct dofdata *dof)
 		else if(idof == lim && exclude2 !=1)
 		{
 		    dof[idof].controlproc = myrank;
+		    iallocator1(&(dof[idof].slaveproc),1);
+		    dof[idof].slaveproc[0] = bhailog[i];
+		    
 		}
 		else if(idof != start && idof != lim)
 		{
@@ -269,6 +277,8 @@ void assignGlobalDof(struct dofdata *dof)
 		    else
 		    {
 			dof[idof].controlproc = myrank;
+			iallocator1(&(dof[idof].slaveproc),1);
+			dof[idof].slaveproc[0] = bhailog[i];
 		    }
 		}
 		else
@@ -363,6 +373,21 @@ void assignGlobalDof(struct dofdata *dof)
 	    {
 		idof = tdof-1;
 		dof[idof].controlproc = myrank;
+		iallocator1(&(dof[idof].slaveproc),3);
+		dof[idof].slaveproc[0] = bhailog[ne1];
+		dof[idof].slaveproc[1] = bhailog[ne2];
+		if((myrank+1)%procm == 0) //right face proc
+		{
+		    dof[idof].slaveproc[2] = myrank + 1;
+		}
+		else if(myrank == nprocs-1)
+		{
+		    dof[idof].slaveproc[2] = 0;
+		}
+		else
+		{
+		    dof[idof].slaveproc[2] = myrank + procm + 1;
+		}
 	    }
 	    else if(i == 2)
 	    {
