@@ -28,8 +28,11 @@ void gridgen(double **x, double **y, double ****area, double **vol, double **xc,
     }
 
     meshOperations(x, y, area, vol, xc, yc);
-    
 
+    if(shiftorigin == 1)
+    {
+	meshShift(x,y,xc,yc);
+    }
     //printf("X and y limits in %d with m x n = %d %d are: %.5f %.5f %.5f %.5f\n",myrank+1,xelem-2, yelem-2,x[0][0], x[xnode-1][0], y[0][0],y[0][ynode-1]);
 }
 
@@ -249,5 +252,33 @@ void meshOperations(double **x, double **y, double ****area, double **vol, doubl
             xc[i][j]=0.25*(x[i][j]+x[i+1][j]+x[i+1][j+1]+x[i][j+1]);
             yc[i][j]=0.25*(y[i][j]+y[i+1][j]+y[i+1][j+1]+y[i][j+1]);
         }
+    }
+}
+
+
+
+void meshShift(double **x, double **y, double **xc, double **yc)
+{
+    double xshift = xlen/2.0;
+    double yshift = ylen/2.0;
+
+    int i,j;
+    
+    for(i=0; i<xnode; i++)
+    {
+	for(j=0; j<ynode; j++)
+	{
+	    x[i][j] -= xshift;
+	    y[i][j] -= yshift;
+	}
+    }
+
+    for(i=0; i<xelem; i++)
+    {
+	for(j=0; j<yelem; j++)
+	{
+	    xc[i][j] -= xshift;
+	    yc[i][j] -= yshift;
+	}
     }
 }

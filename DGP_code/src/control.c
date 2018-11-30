@@ -59,6 +59,11 @@ void control()
 		    word = strtok(NULL,delim);
 		    gyelem = atoi(word);
 		}
+		if(strcmp(word,"Origin_at_0") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    shiftorigin = atoi(word);
+		}
 		if(strcmp(word,"Read_mesh") == 0)
 		{
 		    word = strtok(NULL,delim);
@@ -321,6 +326,10 @@ void control()
 		    {
 			case_tog=9;
 		    }
+		    else if(strcmp(word,"MMS\n") == 0)
+		    {
+			case_tog=10;
+		    }
 		}
 		
 		word = strtok(NULL,delim);
@@ -337,6 +346,7 @@ void control()
   
   MPI_Bcast(&xlen,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
   MPI_Bcast(&ylen,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&shiftorigin,1,MPI_INT,master,MPI_COMM_WORLD);
   
   MPI_Bcast(&gxelem,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&gyelem,1,MPI_INT,master,MPI_COMM_WORLD);

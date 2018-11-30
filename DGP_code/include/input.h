@@ -17,6 +17,7 @@ int gyelem;
 
 double xlen;
 double ylen;
+int shiftorigin;
 //------------------------------------------------------------------------//
 
 

@@ -178,9 +178,7 @@ int main(int argc, char **argv)
 
     
     initialize(elem, x, y);
-
-    
-    
+        
     if(flow_solve == 1)
     {
 	

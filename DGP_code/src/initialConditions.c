@@ -267,7 +267,11 @@ void initializeVel(struct elemsclr elem, double **x, double **y)
 		    uxy = -sin(2.0*PI*xs[k][1])*pow(sin(PI*xs[k][0]),2.0);
 		    vxy = sin(2.0*PI*xs[k][0])*pow(sin(PI*xs[k][1]),2.0);
 		}
-	    
+		else if(case_tog == 10)
+		{
+		    uxy = sin(xs[k][0])*cos(xs[k][1]);
+		    vxy = -sin(xs[k][1])*cos(xs[k][0]);
+		}
 		//------------------------------------------------------------------------//
 		//Transform the velocity vector onto local coordinate
 		//Get the magnitude in xy coordinates
@@ -452,6 +456,10 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		    {
 			ls[k] = 0.0;
 		    }
+		}
+		else if(case_tog == 10)
+		{
+		    ls[k] = sqrt(pow(xs[k][0],2.0) + pow(xs[k][1],2.0)) - 1.0;
 		}
 		else
 		{

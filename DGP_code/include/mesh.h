@@ -9,5 +9,5 @@ void partition();
 void gridgen(double **, double **, double ****, double **, double **, double **);
 void gridread(double **, double **, double ****, double **, double **, double **);
 void meshOperations(double **, double **, double ****, double **, double **, double **);
-
+void meshShift(double **, double **, double **, double **);
 #endif 
