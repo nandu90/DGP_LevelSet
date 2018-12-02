@@ -52,6 +52,14 @@ void getRHS(struct elemsclr elem, double **x, double **y, double ***rhs, double 
     boundaryIntegral(rhs, rflux, tflux, x, y, area, zx, wx, tx, zy, wy, ty);
     //------------------------------------------------------------------------//
 
+    //------------------------------------------------------------------------//
+    //Get the Contribution from source integral for MMS case
+    if(case_tog == 10)
+    {
+	sourceIntegral(x,y,elem,rhs);
+    }
+    //------------------------------------------------------------------------//
+
 
     //------------------------------------------------------------------------//
     //Communciate the RHS info
