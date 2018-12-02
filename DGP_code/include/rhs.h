@@ -18,4 +18,8 @@ double upwind(double , double , double , double);
 
 void boundaryIntegral(double ***, double ***, double ***, double **, double **, double ****, double *, double *, int, double * , double *, int);
 
+
+void sourceIntegral(double **, double **, struct elemsclr, double ***);
+
+double sourceTerm(double, double);
 #endif

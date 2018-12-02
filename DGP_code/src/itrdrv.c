@@ -57,7 +57,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     //------------------------------------------------------------------------//
     //Preliminaries before time loop
     double deltat = 0.0;
-    double time = deltat*startstep;
+    simtime = deltat*startstep;
     if(time_control == 2)
     {
 	deltat = advect_deltat;
@@ -115,7 +115,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     }
     if(startstep != 0)
     {
-	prevfileread(elem, &time, x, y);
+	prevfileread(elem, &simtime, x, y);
     }
    
 
@@ -134,8 +134,8 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	
 	if(myrank == master)
 	{
-	    printf("Step: %d Time: %.4f\n",iter+1, time);
-	    fprintf(out,"Step: %d Time: %.4f\n",iter+1, time);
+	    printf("Step: %d Time: %.4f\n",iter+1, simtime);
+	    fprintf(out,"Step: %d Time: %.4f\n",iter+1, simtime);
 	}
 
 	if(flow_solve == 1)
@@ -161,8 +161,8 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	calc_vf(elem.phi, x, y, &inivf);
 	//------------------------------------------------------------------------//
 
-	time += deltat;
-	if(time >= totaltime)
+	simtime += deltat;
+	if(simtime >= totaltime)
 	{
 	    break;
 	}
@@ -182,7 +182,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
         }
 	if(print_restart_count == 1)
 	{
-	    filewrite(elem, time, iter+1);
+	    filewrite(elem, simtime, iter+1);
 	}
 	if(print_restart_count == print_restart_gap)
 	{
@@ -194,7 +194,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     //------------------------------------------------------------------------//
     //Write the last output file
     output_xml(elem, iter, x, y);
-    filewrite(elem, time, iter);
+    filewrite(elem, simtime, iter);
     //------------------------------------------------------------------------//
     
     //------------------------------------------------------------------------//

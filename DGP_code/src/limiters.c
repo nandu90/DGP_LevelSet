@@ -18,7 +18,7 @@ void momentLimiter(double ***phi)
     
     //------------------------------------------------------------------------//
     int ielem, jelem;
-    int icoeff;
+    //int icoeff;
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
@@ -42,7 +42,7 @@ void momentLimiter(double ***phi)
     double *basis;
     allocator1(&basis, ncoeff);
 
-    double recphi;
+    //double recphi;
 
     for(ielem=2; ielem<xelem-2; ielem++)
     {

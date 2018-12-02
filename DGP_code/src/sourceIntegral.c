@@ -11,6 +11,9 @@ Created: 2018-11-29
 #include "polylib.h"
 #include "DGPFunc.h"
 #include "rhs.h"
+#include "solvers.h"
+#include "generalFunc.h"
+
 
 void sourceIntegral(double **x, double **y, struct elemsclr elem, double ***rhs)
 {
@@ -18,15 +21,158 @@ void sourceIntegral(double **x, double **y, struct elemsclr elem, double ***rhs)
     //Loop Indexes
     int ielem, jelem;
     int igauss;
-    int icoeff;
+    int icoeff, icoeff1;
     //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Temporary variables
+    double *basis;
+    allocator1(&basis, ncoeff);
+
+    double *inv,  *jacobian;
+    allocator1(&inv, 4);
+    allocator1(&jacobian, 4);
+
+    double detJ;
+
+    double theta;
+    double arm;
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here 
+    int extra;
+    if(quadtype == 1)
+    {
+	extra = 1;
+    }
+    else
+    {
+	extra = 0;
+    }
+    double **zeta, **weights;
+    int tgauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&zeta, tgauss,2);
+    allocator2(&weights, tgauss,2);
     
+    GaussPoints2D(zeta, weights, quadtype, tgauss); 
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Allocate source vector - source w.r.t Cartesian Coordinates
+    double *cartSource;
+    allocator1(&cartSource, tgauss);
+
+    //Allocate the Vandermonde matrix
+    double **vand;
+    allocator2(&vand, tgauss, ncoeff);
+
+    //Loop over the quadrature points to fill the Vandermonde Matrix
+    for(igauss=0; igauss<tgauss; igauss++)
+    {
+	//Get the basis vector
+	basis2D(zeta[igauss][0], zeta[igauss][1], basis);
+	//Fill up row of the Vandermonde matrix
+	for(icoeff=0; icoeff<ncoeff; icoeff++)
+	{
+	    vand[igauss][icoeff] = basis[icoeff];
+	}
+    }
+
+    //Allocate coordinate matrix corresponding to zs - solution points
+    double **xs;
+    allocator2(&xs, tgauss, 2);
+
+    double *naturalSource;
+    allocator1(&naturalSource, ncoeff);
+
+    double *sourceContribution;
+    allocator1(&sourceContribution, ncoeff);
+
+    double recsource;
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Loop over the elements
+    for(ielem = 1; ielem<xelem-1; ielem++)
+    {
+	for(jelem = 1; jelem<yelem-1; jelem++)
+	{
+	    //Initialize contribution vector to 0
+	    for(icoeff=0; icoeff<ncoeff; icoeff++)
+	    {
+		sourceContribution[icoeff] = 0.0;
+	    }
+	    
+	    //Convert natural coordinates at quadrature points to Cartesian
+	    naturalToCartesian(xs, x, y, ielem, jelem, zeta, tgauss);
+
+	    //Get the source values at Cartesian Quadrature points
+	    for(igauss=0; igauss<tgauss; igauss++)
+	    {
+		theta = atan2(xs[igauss][1], xs[igauss][0]);
+		arm = sqrt(pow(xs[igauss][0],2.0) + pow(xs[igauss][1],2.0));
+		cartSource[igauss] = sourceTerm(theta, arm);
+	    }
+
+	    //Solve the system to get the source coefficents in natural coordinates
+	    solveSystem(vand, cartSource, naturalSource, tgauss, ncoeff);
+	    
+	    //Loop over the test functions
+	    for(icoeff=0; icoeff<ncoeff; icoeff++)
+	    {
+		//Loop over the Gauss Quadrature points
+		for(igauss =0; igauss<tgauss; igauss++)
+		{
+		    //Get the Test function value at this Quadrature point
+		    basis2D(zeta[igauss][0], zeta[igauss][1], basis);
+
+		    //Get the Determinant
+		    detJ = mappingJacobianDeterminant(ielem, jelem, zeta[igauss][0], zeta[igauss][1], x, y, inv, jacobian);
+
+		    //Reconstruct the source term at the Quadrature point
+		    recsource = 0.0;
+		    for(icoeff1 =0; icoeff1<ncoeff; icoeff1++)
+		    {
+			recsource += basis[icoeff1]*naturalSource[icoeff1];
+		    }
+		    
+		    //Add to the source contribution
+		    sourceContribution[icoeff] += weights[igauss][0]*weights[igauss][1]*basis[icoeff]*detJ*recsource;
+		}
+	    }
+
+	    //Finally add to the Residual Term
+	    for(icoeff=0; icoeff<ncoeff; icoeff++)
+	    {
+		rhs[ielem][jelem][icoeff] += sourceContribution[icoeff];
+	    }
+	}
+    }
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Deallocators
+    deallocator1(&basis, ncoeff);
+    deallocator1(&inv, 4);
+    deallocator1(&jacobian, 4);
+    deallocator2(&zeta, tgauss,2);
+    deallocator2(&weights, tgauss,2);
+    deallocator1(&cartSource, tgauss);
+    deallocator2(&vand, tgauss, ncoeff);
+    deallocator2(&xs, tgauss, 2);
+    deallocator1(&naturalSource, ncoeff);
+    deallocator1(&sourceContribution, ncoeff);
+    //------------------------------------------------------------------------//
+
 
 }
 
 
 double sourceTerm(double theta, double r)
 {
+    double t = simtime;
     double source;
 
     if(theta > PI/2 || theta < -PI/2) //2nd or 3rd quadrant
