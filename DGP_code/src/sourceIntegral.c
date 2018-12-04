@@ -13,6 +13,7 @@ Created: 2018-11-29
 #include "rhs.h"
 #include "solvers.h"
 #include "generalFunc.h"
+#include "float.h"
 
 double acos2(double value)
 {
@@ -45,7 +46,7 @@ double sqrt2(double value)
 	result = sqrt(value);
     }
 
-    if(result < 1e-25) result = 1e-25;
+    if(result < 1e-15) result = 1e-15;
     return result;
 }
 
@@ -250,9 +251,9 @@ void sourceIntegral(double **x, double **y, struct elemsclr elem, double ***rhs)
 
     //------------------------------------------------------------------------//
     //Loop over the elements
-    for(ielem = 1; ielem<xelem-1; ielem++)
+    for(ielem = 2; ielem<xelem-2; ielem++)
     {
-	for(jelem = 1; jelem<yelem-1; jelem++)
+	for(jelem = 2; jelem<yelem-2; jelem++)
 	{
 	    //Initialize contribution vector to 0
 	    for(icoeff=0; icoeff<ncoeff; icoeff++)
@@ -332,8 +333,14 @@ double sourceTerm(double xc, double yc)
     term1 = getterm1(xc,yc,t);
     term2 = getterm2(xc,yc,t);
     term3 = getterm3(xc,yc,t);
-	    
     double source = term1 + term2 + term3;
+
+    /*printf("%.6f\n",t);
+    printf("%.6f %.6f\n",xc,yc);
+    printf("%.6f %.6f %.6f\n",term1, term2, term3);
+    printf("%.6f\n",source);
+    
+    exit(1);*/
 
     return source;
 }
