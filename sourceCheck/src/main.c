@@ -176,8 +176,8 @@ int main(int argc, char **argv)
     double t = PI;
     double xlow = -6.0;
     double xhigh = 6.0;
-    double ylow = -1.5;
-    double yhigh = 1.5;
+    double ylow = -6.0;
+    double yhigh = 6.0;
 
     int xelem = 100;
     int yelem = 100;

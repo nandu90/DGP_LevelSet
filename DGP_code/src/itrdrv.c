@@ -45,7 +45,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	}
     }
 
-    if(myrank == master)
+    if(myrank == master && verbose == 1)
     {
 	printf("The initial internal volume is:\n");
     }
@@ -69,6 +69,10 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	if(case_tog == 7)
 	{
 	    deltat = 2.0*PI*advect_deltat;
+	}
+	if(case_tog == 10)
+	{
+	    deltat = (PI)*advect_deltat;
 	}
     }
     else
@@ -158,7 +162,10 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	//------------------------------------------------------------------------//
 
 	//------------------------------------------------------------------------//
-	calc_vf(elem.phi, x, y, &inivf);
+	if(verbose == 1)
+	{
+	    calc_vf(elem.phi, x, y, &inivf);
+	}
 	//------------------------------------------------------------------------//
 
 	simtime += deltat;
@@ -199,21 +206,24 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
     
     //------------------------------------------------------------------------//
     //Calculate Error Norms
-    if(case_tog == 3 || case_tog == 6 || case_tog == 1 || case_tog == 7 || case_tog == 5)
+    if(verbose == 1)
     {
-	double err1, lerr1;
-	errorNormL1(iniphi, elem.phi, &err1, &lerr1, x, y);
-	
-	double err2, lerr2;
-	errorNormL2(iniphi, elem.phi, &err2, &lerr2, x, y);
-	
-	if(myrank == master)
+	if(case_tog == 3 || case_tog == 6 || case_tog == 1 || case_tog == 7 || case_tog == 5)
 	{
-	    printf("The L1 norm of error is %.4e and the Log of norm is %.4e\n", err1, lerr1);
-	    printf("The L2 norm of error is %.4e and the Log of norm is %.4e\n", err2, lerr2);
-
-	    fprintf(out,"The L1 norm of error is %.4e and the Log of norm is %.4e\n", err1, lerr1);
-	    fprintf(out,"The L2 norm of error is %.4e and the Log of norm is %.4e\n", err2, lerr2);
+	    double err1, lerr1;
+	    errorNormL1(iniphi, elem.phi, &err1, &lerr1, x, y);
+	    
+	    double err2, lerr2;
+	    errorNormL2(iniphi, elem.phi, &err2, &lerr2, x, y);
+	    
+	    if(myrank == master)
+	    {
+		printf("The L1 norm of error is %.4e and the Log of norm is %.4e\n", err1, lerr1);
+		printf("The L2 norm of error is %.4e and the Log of norm is %.4e\n", err2, lerr2);
+		
+		fprintf(out,"The L1 norm of error is %.4e and the Log of norm is %.4e\n", err1, lerr1);
+		fprintf(out,"The L2 norm of error is %.4e and the Log of norm is %.4e\n", err2, lerr2);
+	    }
 	}
     }
     

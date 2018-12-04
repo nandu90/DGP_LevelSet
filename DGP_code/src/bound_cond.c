@@ -47,6 +47,18 @@ void level_setBC(double ***scalar, int **iBC)
 	    }
 	}
     }
+    else if(x_bound == 4)
+    {
+	for( j=0; j<yelem; j++)
+        {
+	    //Loop over the coefficients
+	    for(k=0; k<ncoeff; k++)
+	    {
+		if(iBC[1][j] == 2)scalar[0][j][k] = -scalar[1][j][k];
+		if(iBC[xelem-2][j] == 2)scalar[xelem-1][j][k] = -scalar[xelem-2][j][k];
+	    }
+	}
+    }
     
     //Top and bottom walls
     if(y_bound == 1 || y_bound == 2)
@@ -77,7 +89,18 @@ void level_setBC(double ***scalar, int **iBC)
 	    }
 	}
     }
-
+    else if(y_bound == 4)
+    {
+        for( i=0; i<xelem; i++)
+        {
+	    //Loop over quadrature points
+	    for(k=0; k<ncoeff; k++)
+	    {
+		if(iBC[i][1] == 2)scalar[i][0][k] = -scalar[i][1][k];
+		if(iBC[i][yelem-2] == 2)scalar[i][yelem-1][k] = -scalar[i][yelem-2][k];
+	    }
+	} 
+    }
     //Finally do the communication
     commu2(scalar);
 }

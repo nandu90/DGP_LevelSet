@@ -3,10 +3,10 @@ Basis_Order 1
 
 /******************Grid related Inputs*******************//
 
-xlen 6.0
-ylen 2.4
-xelem 50
-yelem 50
+xlen 12.0
+ylen 12.0
+xelem 100
+yelem 100
 Origin_at_0 1
 Read_mesh 0
 
@@ -26,13 +26,15 @@ y_pos_of_bubble 0.25
 
 
 /****************Boundary Conditions**************/
-//x-boundary no-slip
+x-boundary no-slip
 //x-boundary slip
-x-boundary periodic
+//x-boundary periodic
+//x-boundary mirror
 
 y-boundary no-slip
 //y-boundary slip
 //y-boundary periodic
+//y-boundary mirror
 
 /****************Limiter***************/
 Limiter 0
@@ -41,16 +43,17 @@ Limiter 0
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 0.0005            150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
+advect_deltat 0.00005           150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
 RK_Stages 4
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 4000
-print_gap 100
+Max_Iterations 2000
+print_gap 10
 print_restart_gap 500
 
 Simulation_time 10000.0
+Verbosity_level 0           0: Will not calculate and print VF and Errors
 
 /***************Particular CASES***************/
 //Case Gaussian_Wave

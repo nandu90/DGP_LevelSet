@@ -231,6 +231,10 @@ void control()
 		    {
 			x_bound=3;
 		    }
+		    else if(strcmp(word,"mirror\n") == 0)
+		    {
+			x_bound=4;
+		    }
 		}
 		
 		if(strcmp(word,"y-boundary") == 0)
@@ -247,6 +251,10 @@ void control()
 		    else if(strcmp(word,"periodic\n") == 0)
 		    {
 			y_bound=3;
+		    }
+		     else if(strcmp(word,"mirror\n") == 0)
+		    {
+			y_bound=4;
 		    }
 		}
 		
@@ -286,7 +294,12 @@ void control()
 		{
 		    word = strtok(NULL,delim);
 		    totaltime = atof(word);
-		}
+		}		
+		if(strcmp(word,"Verbosity_level") == 0)
+		{
+		    word = strtok(NULL,delim);
+		    verbose = atoi(word);
+		}   
 		if(strcmp(word,"Case") == 0)
 		{
 		    word = strtok(NULL, delim);
@@ -371,6 +384,7 @@ void control()
   MPI_Bcast(&startstep,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&itermax,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&totaltime,1,MPI_DOUBLE,master,MPI_COMM_WORLD);
+  MPI_Bcast(&verbose,1,MPI_INT,master,MPI_COMM_WORLD);
 
   MPI_Bcast(&print_gap,1,MPI_INT,master,MPI_COMM_WORLD);
   MPI_Bcast(&print_restart_gap,1,MPI_INT,master,MPI_COMM_WORLD);

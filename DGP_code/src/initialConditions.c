@@ -12,6 +12,7 @@ Created: 2018-03-04
 #include "memory.h"
 #include "solvers.h"
 #include "commu.h"
+#include "rhs.h"
 
 double zalesak(double x, double y)
 {
@@ -350,7 +351,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
     allocator2(&vand, tgauss, ncoeff);
 
     //Loop over the quadrature points to fill the Vandermonde Matrix
-    printf("vandermonde matrix\n");
+    //printf("vandermonde matrix\n");
     for(k=0; k<tgauss; k++)
     {
 	//Get the basis vector
@@ -459,7 +460,7 @@ void initializeLS(struct elemsclr elem, double **x, double **y)
 		}
 		else if(case_tog == 10)
 		{
-		    ls[k] = sqrt(pow(xs[k][0],2.0) + pow(xs[k][1],2.0)) - 1.0;
+		    ls[k] = getphi(xs[k][0], xs[k][1],0.0);
 		}
 		else
 		{
