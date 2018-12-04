@@ -3,11 +3,11 @@ Basis_Order 1
 
 /******************Grid related Inputs*******************//
 
-xlen 6.0
-ylen 6.0
-xelem 100
-yelem 100
-Origin_at_0 0
+xlen 12.0
+ylen 3.0
+xelem 200
+yelem 50
+Origin_at_0 1
 Read_mesh 0
 
 /***************Gauss Quadrature********************/
@@ -43,12 +43,12 @@ Limiter 0
 //Time_control CFL-based
 max_CFL 0.01
 Time_control constant_time
-advect_deltat 5e-6           150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
+advect_deltat 5.0e-3           150X50: 0.05;  75X25: 0.1; 300X100: 0.0125  
 RK_Stages 4
 
 /***************Simulation Control**************/
 Start_step 0
-Max_Iterations 2000
+Max_Iterations 200
 print_gap 10
 print_restart_gap 500
 

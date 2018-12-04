@@ -150,7 +150,12 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	//------------------------------------------------------------------------//
 	//Level-Set advection
 	Runge_Kutta(elem, x, y,deltat,rhs, area);
-	
+
+	if(case_tog == 10)
+	{
+	    //Reset LS field in far away regions
+	    resetLS(elem.phi, x, y);
+	}
 	//------------------------------------------------------------------------//
 
 	//------------------------------------------------------------------------//
@@ -162,7 +167,7 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 	//------------------------------------------------------------------------//
 
 	//------------------------------------------------------------------------//
-	if(verbose == 1)
+	if(verbose == 1 && case_tog != 10)
 	{
 	    calc_vf(elem.phi, x, y, &inivf);
 	}
@@ -223,6 +228,15 @@ void itrdrv(struct elemsclr elem ,double **x, double **y, double **xc, double **
 		
 		fprintf(out,"The L1 norm of error is %.4e and the Log of norm is %.4e\n", err1, lerr1);
 		fprintf(out,"The L2 norm of error is %.4e and the Log of norm is %.4e\n", err2, lerr2);
+	    }
+	}
+	if(case_tog == 10)
+	{
+	    double L1norm, L2norm;
+	    errorMMS(elem.phi, x, y, &L1norm, &L2norm);
+	    if(myrank == master)
+	    {
+		fprintf(vfout,"%d %.6e %.6e %.6e\n",iter,simtime,L1norm,L2norm);
 	    }
 	}
     }

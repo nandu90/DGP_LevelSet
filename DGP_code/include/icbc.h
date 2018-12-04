@@ -17,7 +17,7 @@ void initializeLS(struct elemsclr, double **, double **);
 
 //------------------------------------------------------------------------//
 //Boundary Conditions
-void level_setBC(double ***, int **);
+void level_setBC(double ***, int **, double **, double **);
 //------------------------------------------------------------------------//
 
 

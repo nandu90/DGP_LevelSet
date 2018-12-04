@@ -81,7 +81,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply boundary conditions
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
     }
 
     else if(RKstages == 2)
@@ -110,7 +110,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply boundary conditions
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 
 	//Get the Right hand side
 	getRHS(elem, x, y, rhs, area);
@@ -133,7 +133,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply boundary conditions
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 	
 	deallocator3(&temp, xelem, yelem, ncoeff);
     }
@@ -164,7 +164,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply boundary conditions
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 
 	//Get the Right hand side
 	getRHS(elem, x, y, rhs, area);
@@ -176,7 +176,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply boundary conditions
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 
 	for(ielem=1; ielem<xelem-1; ielem++)
 	{
@@ -194,7 +194,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply boundary conditions
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 
 	//Get the Right hand side
 	getRHS(elem, x, y, rhs, area);
@@ -216,7 +216,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply boundary conditions
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 	
 	deallocator3(&temp, xelem, yelem, ncoeff);
     }
@@ -270,7 +270,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply BC
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 	//------------------------------------------------------------------------//
 
 	/*for(icoeff =0; icoeff<ncoeff; icoeff++)
@@ -299,7 +299,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply BC
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 	//------------------------------------------------------------------------//
 
 	/*for(icoeff =0; icoeff<ncoeff; icoeff++)
@@ -328,7 +328,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply BC
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 	//------------------------------------------------------------------------//
 
 	/*for(icoeff =0; icoeff<ncoeff; icoeff++)
@@ -361,7 +361,7 @@ void Runge_Kutta(struct elemsclr elem, double **x, double **y, double deltat, do
 	    momentLimiter(elem.phi);
 	}
 	//Apply BC
-	level_setBC(elem.phi, elem.iBC);
+	level_setBC(elem.phi, elem.iBC, x, y);
 	//------------------------------------------------------------------------//
 
 	/*for(icoeff =0; icoeff<ncoeff; icoeff++)

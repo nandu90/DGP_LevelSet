@@ -29,5 +29,6 @@ double getterm3(double, double, double);
 double getphi(double, double, double);
 double acos2(double);
 double sqrt2(double);
+void resetLS(double ***, double **, double **);
 
 #endif

@@ -335,12 +335,114 @@ double sourceTerm(double xc, double yc)
     term3 = getterm3(xc,yc,t);
     double source = term1 + term2 + term3;
 
-    /*printf("%.6f\n",t);
-    printf("%.6f %.6f\n",xc,yc);
-    printf("%.6f %.6f %.6f\n",term1, term2, term3);
-    printf("%.6f\n",source);
+    /*printf("Time: %.6f\n",t);
+    printf("xc yc: %.6f %.6f\n",xc,yc);
+    printf("term1 term2 term3: %.6f %.6f %.6f\n",term1, term2, term3);
+    printf("source: %.6f\n\n",source);*/
     
-    exit(1);*/
+    if(fabs(xc) >= 1.0+(t*2.0/PI))
+    {
+	source = 0.0;
+    }
 
     return source;
+}
+
+
+void resetLS(double ***phi, double **x, double **y)
+{
+    //------------------------------------------------------------------------//
+    //
+    int ielem, jelem;
+    int igauss;
+    int icoeff;
+    //------------------------------------------------------------------------//
+
+    double *basis;
+    allocator1(&basis, ncoeff);
+
+    
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here 
+    int extra;
+    if(quadtype == 1)
+    {
+	extra = 1;
+    }
+    else
+    {
+	extra = 0;
+    }
+    double **zeta, **weights;
+    int tgauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&zeta, tgauss,2);
+    allocator2(&weights, tgauss,2);
+    
+    GaussPoints2D(zeta, weights, quadtype, tgauss); 
+    //------------------------------------------------------------------------//
+
+    //Allocate the Vandermonde matrix
+    double **vand;
+    allocator2(&vand, tgauss, ncoeff);
+
+    //Loop over the quadrature points to fill the Vandermonde Matrix
+    for(igauss=0; igauss<tgauss; igauss++)
+    {
+	//Get the basis vector
+	basis2D(zeta[igauss][0], zeta[igauss][1], basis);
+	//Fill up row of the Vandermonde matrix
+	for(icoeff=0; icoeff<ncoeff; icoeff++)
+	{
+	    vand[igauss][icoeff] = basis[icoeff];
+	}
+    }
+
+    //Allocate coordinate matrix corresponding to zs - solution points
+    double **xs;
+    allocator2(&xs, tgauss, 2);
+
+    double *cartphi;
+    allocator1(&cartphi, tgauss);
+
+
+    double xmax;
+    //------------------------------------------------------------------------//
+    for(ielem = 2; ielem<xelem-2; ielem++)
+    {
+	for(jelem = 2; jelem<yelem-2; jelem++)
+	{
+   
+	    //Convert natural coordinates at quadrature points to Cartesian
+	    naturalToCartesian(xs, x, y, ielem, jelem, zeta, tgauss);
+	    
+	    xmax = 0.0;
+	    for(igauss=0; igauss<tgauss; igauss++)
+	    {
+		xmax = max(xmax, fabs(xs[igauss][0]));
+	    }
+
+	    if(xmax >= 1.0+(simtime*2.0/PI))
+	    {
+		//Get the phi values at Cartesian Quadrature points
+		for(igauss=0; igauss<tgauss; igauss++)
+		{
+		    cartphi[igauss] = getphi(xs[igauss][0], xs[igauss][1],simtime);
+		}
+		//Solve the system to get the source coefficents in natural coordinates
+		solveSystem(vand, cartphi, phi[ielem][jelem], tgauss, ncoeff);
+	    }
+	}
+    }
+
+    //------------------------------------------------------------------------//
+    //Deallocators
+    deallocator2(&zeta, tgauss,2);
+    deallocator2(&weights, tgauss,2);
+    deallocator2(&vand, tgauss, ncoeff);
+    deallocator2(&xs, tgauss, 2);
+    deallocator1(&cartphi, tgauss);
+    deallocator1(&basis, ncoeff);
+    //------------------------------------------------------------------------//
+
 }

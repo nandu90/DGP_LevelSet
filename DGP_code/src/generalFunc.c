@@ -3,6 +3,7 @@
 #include "DGPFunc.h"
 #include "memory.h"
 #include "polylib.h"
+#include "rhs.h"
 
 double minmod(double *array, int size)
 {
@@ -600,3 +601,137 @@ void calc_vf(double ***phi, double **x, double **y, double *inivf)
     
     //if(myrank == master) exit(1);
     }*/
+
+
+void errorMMS(double ***phi, double **x, double **y, double *L1norm, double *L2norm)
+{
+    //------------------------------------------------------------------------//
+    //Temp
+    int ielem, jelem, icoeff;
+    int igauss;
+
+    double *basis;
+    allocator1(&basis, ncoeff);
+    
+    double *inv,  *jacobian;
+    allocator1(&inv, 4);
+    allocator1(&jacobian, 4);
+
+    double detJ;
+    double xmax,ymax;
+    double recphi;
+    double exact;
+    //------------------------------------------------------------------------//
+
+   
+    
+    //------------------------------------------------------------------------//
+    //Define quad points and weights here independent of what is in the rest of the code
+   
+    int extra = 1;
+    
+    double **z, **w;
+    int ngauss = pow(polyorder + 1 + extra, 2);
+
+    allocator2(&z, ngauss,2);
+    allocator2(&w, ngauss,2);
+    
+    GaussPoints2D(z, w, quadtype, ngauss);
+
+    double **xs;
+    allocator2(&xs, ngauss, 2);
+    
+    //------------------------------------------------------------------------//
+
+    double elemsum1;
+    double elemsum2;
+    double totalerr1 = 0.0;
+    double totalerr2 = 0.0;
+    double err1, err2;
+    
+    //------------------------------------------------------------------------//
+    //Loop over elements
+    for(ielem=2; ielem<xelem-2; ielem++)
+    {
+	for(jelem=2; jelem<yelem-2; jelem++)
+	{
+	    //INitialize
+	    elemsum1 = 0.0;
+	    elemsum2 = 0.0;
+	    
+	    //Get cartesian coordinates of Quad points
+	    naturalToCartesian(xs, x, y, ielem, jelem, z, ngauss);
+
+	    //Decide whether to calculate error in cell
+	    xmax = 0.0;
+	    ymax = 0.0;
+	    for(igauss=0; igauss<ngauss; igauss++)
+	    {
+		xmax = max(xmax, fabs(xs[igauss][0]));
+		ymax = max(ymax, fabs(xs[igauss][1]));
+	    }
+
+	    if(xmax < 1.0+(simtime*2.0/PI) && ymax < 1.0)
+	    {
+		//Loop over the Gauss quad points
+		for(igauss=0; igauss<ngauss; igauss++)
+		{
+		    //Get the exact soln at this Gauss point
+		    exact = getphi(xs[igauss][0],xs[igauss][1],simtime);
+
+		    //Get the basis at this point
+		    basis2D(z[igauss][0], z[igauss][1], basis);
+
+		    //Get the Jacobian
+		    detJ = mappingJacobianDeterminant(ielem, jelem, z[igauss][0], z[igauss][1], x, y, inv, jacobian);
+		    
+		    //REconstruct the soln at this gauss point
+		    recphi = 0.0;
+		    for(icoeff=0; icoeff<ncoeff; icoeff++)
+		    {
+			recphi += basis[icoeff]*phi[ielem][jelem][icoeff];
+		    }
+
+		    err1 = fabs(recphi - exact);
+		    err2 = pow(recphi-exact, 2.0);
+
+		    elemsum1 += w[igauss][0]*w[igauss][1]*detJ*err1;
+		    elemsum2 += w[igauss][0]*w[igauss][1]*detJ*err2;
+		}
+	    }
+
+	    //Add contribution to total error
+	    totalerr1 += elemsum1;
+	    totalerr2 += elemsum2;
+	}
+    }
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //Collect error from all procs
+    double l1sum, l2sum;
+    MPI_Allreduce(&totalerr1, &l1sum, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&totalerr2, &l2sum, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+    l2sum = sqrt(l2sum);	
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //return error norms
+    (*L1norm) = l1sum;
+    (*L2norm) = l2sum;
+    //------------------------------------------------------------------------//
+
+
+    //------------------------------------------------------------------------//
+    //Deallocators
+    deallocator1(&basis, ncoeff);
+    deallocator1(&inv, 4);
+    deallocator1(&jacobian, 4);
+    deallocator2(&z, ngauss,2);
+    deallocator2(&w, ngauss,2);
+    deallocator2(&xs, ngauss, 2);
+    //------------------------------------------------------------------------//
+
+
+}

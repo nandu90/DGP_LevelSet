@@ -23,4 +23,6 @@ void errorGaussian(double ***, double, double **, double **);
 double remainder(double, double);
 
 double minmod(double * , int);
+
+void errorMMS(double ***, double **, double **, double *, double *);
 #endif

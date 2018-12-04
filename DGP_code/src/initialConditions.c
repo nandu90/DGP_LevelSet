@@ -534,7 +534,7 @@ void initialize(struct elemsclr elem, double **x, double **y)
     //Initialize LevelSet field
     initializeLS(elem, x, y);
     //Apply BC
-    level_setBC(elem.phi, elem.iBC);
+    level_setBC(elem.phi, elem.iBC, x, y);
     //Communicate
     commu2(elem.phi);
     //------------------------------------------------------------------------//
